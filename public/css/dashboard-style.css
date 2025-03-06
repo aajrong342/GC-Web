@@ -3,6 +3,8 @@ body {
     font-family: 'Segoe UI';
     margin: 0;
     padding: 0;
+    scrollbar-width: thin;
+    scrollbar-color: #2C3927;
 }
 
 /* ------ Header Styles ------ */
@@ -107,18 +109,22 @@ main {
 .tb-container {
     border: 2px solid #aaa;
     border-radius: 8px;
-    width: fit-content;
+    /* width: 100%; */
     margin: 10px;
+    overflow-x: auto;
 }
 
 table {
     border-collapse: collapse;
     font-size: 14px;
+    overflow: auto;
+    width: 100%;
 }
 
 table td {
     padding: 0px 20px;
     border: none;
+    min-width: max-content;
 }
 
 .tb-header td {

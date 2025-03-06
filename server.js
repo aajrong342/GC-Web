@@ -47,7 +47,8 @@ app.get('/about', (req, res) => {
 app.get('/dashboard/users', async (req, res) => {
   const users = await getUsers()
   res.render('users', {
-    title: 'GC Dashboard | Users'
+    title: 'GC Dashboard | Users',
+    layout: 'dashboard'
   })
   //res.send(users)
 })
