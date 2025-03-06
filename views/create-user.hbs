@@ -1,0 +1,146 @@
+<!-- create-user.hbs -->
+<div class="admin-container">
+    <h2>Create New User</h2>
+    
+    <div class="form-container">
+        <form id="createUserForm">
+            <div class="form-group">
+                <label for="roleId">Role:</label>
+                <select id="roleId" name="roleId" required>
+                    <option value="">Select a role</option>
+                    <option value="1">GreenCycle - Administrator</option>
+                    <option value="2">GreenCycle - Staff</option>
+                    <option value="3">Greencycle - Data Cleaner</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="lastName">Last Name:</label>
+                <input type="text" id="lastName" name="lastName" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="firstName">First Name:</label>
+                <input type="text" id="firstName" name="firstName" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+                <div id="emailError" class="error-message hidden">
+                    For staff accounts, email must be the GreenCycle organization email address (@greencycleconsultancy.com)
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password:</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
+                <div id="passwordError" class="error-message hidden">
+                    Passwords do not match
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="contactNo">Contact Number:</label>
+                <input type="text" id="contactNo" name="contactNo" placeholder="+63 (XXX) XXX XXXX">
+            </div>
+            
+            <div class="form-buttons">
+                <button type="button" id="cancelButton" class="btn-cancel">Cancel</button>
+                <button type="submit" id="submitButton" class="btn-submit">Create User</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('createUserForm');
+    const emailInput = document.getElementById('email');
+    const emailError = document.getElementById('emailError');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const passwordError = document.getElementById('passwordError');
+    const cancelButton = document.getElementById('cancelButton');
+    
+    // Validate email for staff accounts
+    emailInput.addEventListener('blur', function() {
+        const email = emailInput.value;
+        if (email && !email.includes('@greencycleconsultancy.com')) {
+            emailError.classList.remove('hidden');
+        } else {
+            emailError.classList.add('hidden');
+        }
+    });
+    
+    // Validate password match
+    confirmPasswordInput.addEventListener('input', function() {
+        if (passwordInput.value !== confirmPasswordInput.value) {
+            passwordError.classList.remove('hidden');
+        } else {
+            passwordError.classList.add('hidden');
+        }
+    });
+    
+    // Handle form submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Email validation
+        const email = emailInput.value;
+        if (!email.includes('@greencycleconsultancy.com')) {
+            emailError.classList.remove('hidden');
+            return;
+        }
+        
+        // Password validation
+        if (passwordInput.value !== confirmPasswordInput.value) {
+            passwordError.classList.remove('hidden');
+            return;
+        }
+        
+        // Form data to send to server
+        const formData = {
+            roleId: document.getElementById('roleId').value,
+            lastName: document.getElementById('lastName').value,
+            firstName: document.getElementById('firstName').value,
+            email: email,
+            password: passwordInput.value,
+            contactNo: document.getElementById('contactNo').value
+        };
+        
+        // Send data to server (AJAX request)
+        fetch('/users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('Network response was not ok');
+        })
+        .then(data => {
+            alert('User created successfully!');
+            window.location.href = '/dashboard/users';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error creating user. Please try again.');
+        });
+    });
+    
+    // Handle cancel button
+    cancelButton.addEventListener('click', function() {
+        window.location.href = '/dashboard/users';
+    });
+});
+</script>

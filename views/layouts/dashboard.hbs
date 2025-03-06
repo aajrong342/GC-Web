@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" type="text/css" href="/css/dashboard-style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/admin-style.css" />
+    <script src="https://kit.fontawesome.com/2fcb76e57d.js" crossorigin="anonymous"></script>
+    
+    <title>{{ title }}</title>
+</head>
+<body>
+    <!-- Header: Contains user menu -->
+    <header>
+        <div class="header-logo-container">
+            (LOGO)
+            <div class="header-logo-text">
+                GreenCycle DASHBOARD
+            </div>
+        </div>
+        
+        <!-- User Menu -->
+        <div class="header-user">
+            <!-- Go back to main site -->
+            <button class="btn-back-site">
+                BACK TO MAIN SITE
+            </button>
+            
+            <!-- User Menu Button -->
+            <button class="user-menu-button">
+                <i class="fa-regular fa-circle-user header-user-icon"></i> LASTNAME, First Name&nbsp;&nbsp;&nbsp;<i class="fa-solid fa-caret-down nav-icon"></i>
+            </button>
+            <!-- Display user menu (profile, settings, log out) -->
+        </div>
+    </header>
+    
+    <!-- Navigation bar -->
+    <nav>
+        <div class="nav-btn-container">
+            <a href="/dashboard"><i class="fa-solid fa-chart-simple nav-icon"></i> Statistics</a>
+            <a href="/dashboard/users"><i class="fa-solid fa-users nav-icon"></i> Manage Users</a>
+            <a href="/dashboard/user-applications"><i class="fa-solid fa-clipboard-list nav-icon"></i> User Applications</a>
+            <a href="#"><i class="fa-solid fa-handshake nav-icon"></i> Manage Partners</a>
+        </div>
+    </nav>
+    
+    <main>
+        {{{ body }}}
+    </main>
+</body>
+</html>
