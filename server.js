@@ -36,12 +36,14 @@ app.get('/login', (req, res) => {
   })
 })
 
+// Define route to render Handlebars template
 app.get('/about', (req, res) => {
   res.render('about', {
-    title: 'About GreenCycle'
-  })
-})
-
+      title: 'GreenCycle - About',
+      companyName: 'GreenCycle Consultancy Agency',
+      year: new Date().getFullYear()
+  });
+});
 // User routes
 // Get all users
 app.get('/dashboard/users', async (req, res) => {
