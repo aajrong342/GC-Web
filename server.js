@@ -37,13 +37,6 @@ app.get('/login', (req, res) => {
   })
 })
 
-// TESTING
-app.get('/login-old', (req, res) => {
-  res.render('login-OLD', {
-    title: 'Login | GreenCycle'
-  })
-})
-
 app.get('/contact', (req, res) => {
   res.render('contact', {
     layout: 'public',
@@ -73,6 +66,15 @@ app.get('/dashboard/users', async (req, res) => {
   const users = await getUsers()
   res.render('users', {
     title: 'GC Dashboard | Users',
+    layout: 'dashboard'
+  })
+  //res.send(users)
+})
+
+app.get('/dashboard/roles', async (req, res) => {
+  //const users = await getUsers()
+  res.render('dashboard/roles', {
+    title: 'GC Dashboard | Roles',
     layout: 'dashboard'
   })
   //res.send(users)

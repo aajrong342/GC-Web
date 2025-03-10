@@ -1,10 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 
 body {
-    font-family: 'Segoe UI';
+    font-family: 'Open Sans';
     margin: 0;
     padding: 0;
     scrollbar-width: thin;
     scrollbar-color: #2C3927;
+}
+
+h2 {
+    color: #2C3927;
+    margin: 20px 0 0 0;
 }
 
 /* ------ Header Styles ------ */
@@ -55,7 +61,7 @@ header {
 /* back to main site button */
 .btn-back-site {
     padding: 5px 15px;
-    font-family: 'Segoe UI';
+    font-family: 'Open Sans';
     margin-right: 20px;
     border: none;
     border-radius: 5px;
@@ -64,6 +70,7 @@ header {
 }
 .btn-back-site:hover {
     cursor: pointer;
+    background-color: #1dc20e;
 }
 
 /* ------ Nav Styles ------ */
@@ -102,7 +109,7 @@ nav a:hover {
 
 /* ------ Main Container ------ */
 main {
-    margin-left: 200px; /* Same as the width of the sidebar */
+    margin: 10px 10px 10px 210px; /* Same as the width of the sidebar */
 }
 
 /* ------ Table Styles ------ */
@@ -110,7 +117,7 @@ main {
     border: 2px solid #aaa;
     border-radius: 8px;
     /* width: 100%; */
-    margin: 10px;
+    margin: 10px 0px;
     overflow-x: auto;
 }
 
@@ -122,7 +129,7 @@ table {
 }
 
 table td {
-    padding: 0px 20px;
+    padding: 10px 20px;
     border: none;
     min-width: max-content;
 }
@@ -133,7 +140,7 @@ table td {
 }
 .tb-header td:hover {
     cursor: pointer;
-    background-color: #eee;
+    /* background-color: #eee; */
 }
 
 /* User account action container */
@@ -160,7 +167,27 @@ table td {
 .edit {
     background-color: lightseagreen;
 }
+.edit:hover {
+    background-color: rgb(60, 219, 211);
+}
 
 .delete {
     background-color: red;
+}
+.delete:hover {
+    background-color: rgb(255, 59, 59);
+}
+
+/* ------ List of Users Button ------ */
+.btn-green {
+    padding: 5px 15px;
+    font-family: 'Open Sans';
+    border: none;
+    border-radius: 5px;
+    background-color: #18A50C;
+    color: white;
+}
+.btn-green:hover {
+    cursor: pointer;
+    background-color: #1dc20e;
 }
