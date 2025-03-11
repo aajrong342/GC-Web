@@ -4,6 +4,12 @@ import { engine } from 'express-handlebars'
 // Import database functions
 import { getUsers, getUser, createUser } from './database.js'
 
+// Philippine Standard Geographic Code
+import { PSGCResource } from 'psgc-areas'
+
+/* ---------------------------------------
+    EXPRESS
+--------------------------------------- */
 const app = express()
 
 // Use JSON for data format
@@ -78,6 +84,25 @@ app.get('/dashboard/roles', async (req, res) => {
     layout: 'dashboard'
   })
   //res.send(users)
+})
+
+// Main dashboard (for logged in users)
+app.get('/dashboard/main', async (req, res) => {
+  // Get all location names
+  //const locations = await PSGCResource.getAll()
+
+  // Render site
+  res.render('dashboard/waste-comp-main', {
+    title: 'GC Dashboard | Main',
+    layout: 'dashboard',
+    //locations
+  })
+})
+
+app.get('/locations', async (req, res) => {
+  // Get all location names
+  const locations = await PSGCResource.getAll()
+  res.send(locations)
 })
 
 // Get one user from ID
