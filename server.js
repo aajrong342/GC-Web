@@ -1,13 +1,24 @@
 import express from 'express'
 import { engine } from 'express-handlebars'
+
 // Import database functions
 import { getUsers, getUser, createUser } from './database.js'
+
+// Philippine Standard Geographic Code
+import { PSGCResource } from 'psgc-areas'
+
+/* ---------------------------------------
+    EXPRESS
+--------------------------------------- */
 const app = express()
+
 // Use JSON for data format
 app.use(express.json())
+
 // Use the public folder for assets
 app.use(express.static('public'))
 app.use('/pictures', express.static('pictures'));
+
 /* ---------------------------------------
     HANDLEBARS
 --------------------------------------- */
@@ -17,6 +28,7 @@ app.engine('hbs', engine({
 }))
 app.set('view engine', 'hbs')
 app.set('views', 'views') // set 'views' folder as HBS view directory
+
 /* ---------------------------------------
     ROUTES
 --------------------------------------- */
@@ -26,22 +38,26 @@ app.get('/', (req, res) => {
     title: 'Home | GreenCycle'
   })
 })
+
 app.get('/login', (req, res) => {
   res.render('login', {
     title: 'Login | GreenCycle'
   })
 })
+
 app.get('/register', (req, res) => {
   res.render('register', {
     title: 'Register | GreenCycle'
   })
 })
+
 app.get('/contact', (req, res) => {
   res.render('contact', {
     layout: 'public',
     title: 'Contact | GreenCycle'
   })
 })
+
 // Define route to render Handlebars template
 app.get('/about', (req, res) => {
   res.render('about', {
@@ -51,14 +67,16 @@ app.get('/about', (req, res) => {
     year: new Date().getFullYear()
   });
 });
+
 // Dashboard home page
 app.get('/dashboard', (req, res) => {
   // This would typically check for authentication
-  res.render('users', {
+  res.render('dashboard/waste-comp-main', {
     layout: 'dashboard',
-    title: 'GC Dashboard | Users'
+    title: 'GC Dashboard | Main Dashboard'
   })
 })
+
 // User routes
 // Get all users
 app.get('/dashboard/users', async (req, res) => {
@@ -69,6 +87,7 @@ app.get('/dashboard/users', async (req, res) => {
   })
   //res.send(users)
 })
+
 // Create user form page
 app.get('/dashboard/users/create', (req, res) => {
   res.render('create-user', {
@@ -76,6 +95,7 @@ app.get('/dashboard/users/create', (req, res) => {
     title: 'GC Dashboard | Create User'
   });
 });
+
 app.get('/dashboard/roles', async (req, res) => {
   //const users = await getUsers()
   res.render('dashboard/roles', {
@@ -84,6 +104,7 @@ app.get('/dashboard/roles', async (req, res) => {
   })
   //res.send(users)
 })
+
 // User applications page
 app.get('/dashboard/user-applications', (req, res) => {
   res.render('user-applications', { 
@@ -91,18 +112,28 @@ app.get('/dashboard/user-applications', (req, res) => {
     title: 'GC Dashboard | User Applications'
   });
 });
+
+// API: Get locations from json
+app.get('/locations', async (req, res) => {
+  // Get all location names
+  const locations = await PSGCResource.getAll()
+  res.send(locations)
+})
+
 // Get one user from ID
 app.get('/user/:id', async (req, res) => {
   const id = req.params.id
   const user = await getUser(id)
   res.send(user)
 })
+
 // Create user
 app.post('/users', async (req, res) => {
   const { roleId, lastName, firstName, email, password } = req.body
   const user = await createUser(roleId, lastName, firstName, email, password)
   res.send(user)
 })
+
 // Get one user from ID for editing
 app.get('/users/:id', async (req, res) => {
   const id = req.params.id;
@@ -113,6 +144,7 @@ app.get('/users/:id', async (req, res) => {
     res.status(404).json({ message: "User not found" });
   }
 });
+
 // Update user
 app.put('/users/:id', async (req, res) => {
   const id = req.params.id;
@@ -127,6 +159,7 @@ app.put('/users/:id', async (req, res) => {
     res.status(500).json({ message: "Error updating user" });
   }
 });
+
 // Delete user
 app.delete('/users/:id', async (req, res) => {
   const id = req.params.id;
@@ -140,6 +173,7 @@ app.delete('/users/:id', async (req, res) => {
     res.status(500).json({ message: "Error deleting user" });
   }
 });
+
 // User Application API endpoints
 // Get all applications
 app.get('/api/applications', (req, res) => {
@@ -182,6 +216,7 @@ app.get('/api/applications', (req, res) => {
   
   res.json(applications);
 });
+
 // Get single application
 app.get('/api/applications/:id', (req, res) => {
   const id = req.params.id;
@@ -232,6 +267,7 @@ app.get('/api/applications/:id', (req, res) => {
     res.status(404).json({ message: "Application not found" });
   }
 });
+
 // Update application status
 app.put('/api/applications/:id', (req, res) => {
   const id = req.params.id;
@@ -245,6 +281,7 @@ app.put('/api/applications/:id', (req, res) => {
     message: `Application ${id} status updated to ${status}` 
   });
 });
+
 /* ---------------------------------------
     APP LISTENER
 --------------------------------------- */
