@@ -31,6 +31,22 @@ select:disabled:hover {
     cursor: not-allowed;
 }
 
+/* style to make other dropdowns full width */
+.full-width {
+    width: 100%;
+}
+
+fieldset {
+    border: 2px solid #127009;
+    border-radius: 5px;
+    width: fit-content;
+}
+
+legend {
+    color: #127009;
+    font-weight: bold;
+}
+
 /* ------ Header Styles ------ */
 header {
     background-color: #2C3927;
@@ -214,4 +230,18 @@ table td {
 .btn-green:hover {
     cursor: pointer;
     background-color: #1dc20e;
+}
+
+.btn-form {
+    padding: 10px 20px;
+    font-family: 'Open Sans';
+    border: none;
+    border-radius: 5px;
+    background-color: #127009;
+    color: white;
+    font-size: 16px;
+}
+.btn-form:hover {
+    cursor: pointer;
+    background-color: #209915;
 }

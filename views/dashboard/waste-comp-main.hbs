@@ -1,26 +1,33 @@
 <form>
-    <p>
-        <label for="region">Select a region:</label><br>
-        <select name="regions" id="regions">
-            <!-- Populated by locations.js -->
-        </select>
-    </p>
+    <fieldset>
+        <legend>Select Location</legend>
+        <p>
+            <label for="region">Select a region:</label><br>
+            <select name="regions" id="regions">
+                <!-- Populated by locations.js -->
+            </select>
+        </p>
 
-    <p>
-        <label for="provinces">Select a province:</label><br>
-        <select name="provinces" id="provinces" disabled>
-            <option value=''>Select a province</option>
-            <!-- Populated by locations.js -->
-        </select>
-    </p>
+        <p>
+            <label for="provinces">Select a province:</label><br>
+            <select name="provinces" id="provinces" class="full-width" disabled>
+                <option value=''>Select a province</option>
+                <!-- Populated by locations.js -->
+            </select>
+        </p>
 
-    <p>
-        <label for="municipalities">Select a city/municipality:</label><br>
-        <select name="municipalities" id="municipalities" disabled>
-            <option value=''>Select a city/municipality</option>
-            <!-- Populated by locations.js -->
-        </select>
-    </p>
+        <p>
+            <label for="municipalities">Select a city/municipality:</label><br>
+            <select name="municipalities" id="municipalities" class="full-width" disabled>
+                <option value=''>Select a city/municipality</option>
+                <!-- Populated by locations.js -->
+            </select>
+        </p>
+
+        <button class="btn-form">
+            <i class="fa-solid fa-location-dot"></i> Select Location
+        </button>
+    </fieldset>
 </form>
 
 <script src="../js/locations.js"></script>
