@@ -121,52 +121,68 @@ main {
 /* Home Page Styles */
 .home-container {
     width: 100%;
-    display: flex;
-    flex-direction: column;
+    /* display: flex;
+    flex-direction: column; */
     align-items: center;
 }
 
 /* Banner */
 .banner {
-    margin-top: 80px; 
-    top: 10px; 
     width: 100%;
-    text-align: center;
-    background-color: #D1D6B8;
-    height: 100px; 
+    background-image: url('/pictures/trash-bin-nature.png');
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 350px; 
 }
 
-.banner img {
-    width: 100%; 
-    max-width: 1200px; 
-    height: 100px; 
-    display: block;
-    margin: 0 auto; 
-    object-fit: contain; 
+.banner-contents {
+    display: flex;
+    background-color: rgba(0,0,0,0.5);
+    height: 86%;
+    padding-top: 50px;
 }
 
-
+.banner-contents img {
+    height: 150px;
+    margin-left: auto;
+    margin-bottom: auto;
+    margin-top: 50px;
+    margin-right: 20px;
+}
 
 .banner button {
     margin-top: 15px;
-    background-color: #7fc96c;
+    background-color: #64b052;
     color: white;
-    padding: 10px 20px;
+    padding: 10px 10px;
     border: none;
     cursor: pointer;
     font-size: 16px;
     border-radius: 5px;
 }
 
+.banner-text {
+    color: white;
+    margin-right: auto;
+    width: 800px;
+}
+
 .banner button:hover {
-    background-color: #1e2511;
+    background-color: #7fc96c;
+}
+
+.banner button a {
+    text-decoration: none;
+    color: white;
 }
 
 /* Intro Section */
 .intro-section {
     background-color: #D1D6B8;
     padding: 30px;
-    margin: 20px;
+    margin: 20px auto;
     width: 80%;
     max-width: 900px;
     border-radius: 10px;
@@ -181,11 +197,10 @@ main {
 }
 
 .intro-section img {
-    width: 250px;
+    width: 400px;
     display: block;
     margin: 20px auto;
     border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .intro-section p {

@@ -2,14 +2,7 @@
 
 /* ------ Main Container Styles ------ */
 .admin-container {
-    padding: 20px;
     margin-bottom: 40px;
-}
-
-.admin-container h2 {
-    color: #2C3927;
-    margin-bottom: 20px;
-    font-weight: 600;
 }
 
 /* ------ Form Styles ------ */
