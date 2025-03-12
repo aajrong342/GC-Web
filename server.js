@@ -7,6 +7,9 @@ import { getUsers, getUser, createUser } from './database.js'
 // Philippine Standard Geographic Code
 import { PSGCResource } from 'psgc-areas'
 
+// Favicon
+import favicon from 'serve-favicon'
+
 /* ---------------------------------------
     EXPRESS
 --------------------------------------- */
@@ -14,6 +17,9 @@ const app = express()
 
 // Use JSON for data format
 app.use(express.json())
+
+// Set favicon
+app.use(favicon('./favicon.ico'))
 
 // Use the public folder for assets
 app.use(express.static('public'))
@@ -118,8 +124,17 @@ app.get('/dashboard/user-applications', (req, res) => {
   res.render('user-applications', { 
     layout: 'dashboard',
     title: 'GC Dashboard | User Applications'
-  });
-});
+  })
+})
+
+app.get('/dashboard/partners', async (req, res) => {
+  //const users = await getUsers()
+  res.render('dashboard/partners', {
+    layout: 'dashboard',
+    title: 'GC Dashboard | Partner Organizations'
+  })
+  //res.send(users)
+})
 
 // API: Get locations from json
 app.get('/locations', async (req, res) => {
