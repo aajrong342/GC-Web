@@ -67,7 +67,12 @@ app.get('/about', (req, res) => {
     year: new Date().getFullYear()
   });
 });
-
+app.get('/partners', (req, res) => {
+  res.render('partners', {
+    layout: 'public',
+    title: 'Partners | GreenCycle'
+  })
+})
 // Dashboard home page
 app.get('/dashboard', (req, res) => {
   // This would typically check for authentication
@@ -76,6 +81,7 @@ app.get('/dashboard', (req, res) => {
     title: 'GC Dashboard | Main Dashboard'
   })
 })
+
 
 // User routes
 // Get all users
