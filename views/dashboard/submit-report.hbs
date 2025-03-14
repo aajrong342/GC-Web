@@ -1,0 +1,94 @@
+<h2>Form Submission</h2>
+
+<form method="POST">
+    
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required><br><br>
+    
+    <label for="client">Client:</label>
+    <input type="text" id="client" name="client" required><br><br>
+    
+     <fieldset>
+        <legend>Select Location</legend>
+        <p>
+            <label for="region">Select a region:</label><br>
+            <select name="regions" id="regions">
+                <!-- Populated by locations.js -->
+            </select>
+        </p>
+
+        <p>
+            <label for="provinces">Select a province:</label><br>
+            <select name="provinces" id="provinces" class="full-width" disabled>
+                <option value=''>Select a province</option>
+                <!-- Populated by locations.js -->
+            </select>
+        </p>
+
+        <p>
+            <label for="municipalities">Select a city/municipality:</label><br>
+            <select name="municipalities" id="municipalities" class="full-width" disabled>
+                <option value=''>Select a city/municipality</option>
+                <!-- Populated by locations.js -->
+            </select>
+        </p>
+    </fieldset><br>
+    </select>
+    
+    <label for="barangay">Barangay (if applicable):</label>
+    <input type="text" id="barangay" name="barangay"><br><br>
+    
+    <label for="population">Population:</label>
+    <input type="number" id="population" name="population" required><br><br>
+    
+    <label for="waste_generation">Waste Generation:</label>
+    <input type="text" id="waste_generation" name="waste_generation" required><br><br>
+    
+    <label for="date_submitted">Date Submitted:</label>
+    <input type="date" id="date_submitted" name="date_submitted" required><br><br>
+    
+    <label for="year_collected">Year of Data Collected:</label>
+    <input type="number" id="year_collected" name="year_collected" required><br><br>
+    
+    <fieldset>
+        <legend>Waste Composition</legend>
+        <div id="waste-composition">
+            <script>
+                const categories = ["paper", "plastic", "metal", "kitchen_waste", "organic", "inorganic", "hazardous", "wood", "textiles", "rubber"];
+                document.addEventListener("DOMContentLoaded", function() {
+                    const container = document.getElementById("waste-composition");
+                    categories.forEach(category => {
+                        let categoryDiv = document.createElement("div");
+                        categoryDiv.className = "waste-category";
+                        categoryDiv.dataset.category = category;
+                        categoryDiv.innerHTML = `
+                            <label>${category.replace("_", " ").toUpperCase()}:</label>
+                            <div class="entries"></div>
+                            <button type="button" onclick="addEntry('${category}')">Add Entry</button>
+                        `;
+                        container.appendChild(categoryDiv);
+                    });
+                });
+
+                function addEntry(category) {
+                    let container = document.querySelector(`[data-category="${category}"] .entries`);
+                    let entryDiv = document.createElement('div');
+                    entryDiv.innerHTML = `
+                        <input type="text" name="${category}[][name]" placeholder="Waste Name" required>
+                        <input type="number" name="${category}[][weight]" placeholder="Weight (kg)" required>
+                        <button type="button" onclick="removeEntry(this)">Remove</button>
+                    `;
+                    container.appendChild(entryDiv);
+                }
+                
+                function removeEntry(button) {
+                    button.parentElement.remove();
+                }
+            </script>
+        </div>
+    </fieldset>
+    
+    <button type="submit">Submit</button>
+</form>
+
+<script src="../js/locations.js"></script>
