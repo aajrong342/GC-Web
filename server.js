@@ -1,8 +1,9 @@
 import express from 'express'
 import { engine } from 'express-handlebars'
+import Handlebars from 'handlebars'
 
 // Import database functions
-import { getUsers, getUser, createUser } from './database.js'
+import { getUsers, getUserByEmail, createUser } from './database.js'
 
 // Philippine Standard Geographic Code
 import { PSGCResource } from 'psgc-areas'
@@ -34,6 +35,13 @@ app.engine('hbs', engine({
 }))
 app.set('view engine', 'hbs')
 app.set('views', 'views') // set 'views' folder as HBS view directory
+
+/* ---------------------------------------
+    HANDLEBARS HELPERS
+--------------------------------------- */
+Handlebars.registerHelper('uppercase', function(str) {
+  return str.toUpperCase();
+});
 
 /* ---------------------------------------
     ROUTES
@@ -95,11 +103,13 @@ app.get('/dashboard', (req, res) => {
 // Get all users
 app.get('/dashboard/users', async (req, res) => {
   const users = await getUsers()
+  console.log(users)
+
   res.render('users', {
     layout: 'dashboard',
-    title: 'GC Dashboard | Users'
+    title: 'GC Dashboard | Users',
+    users
   })
-  //res.send(users)
 })
 
 // Create user form page
