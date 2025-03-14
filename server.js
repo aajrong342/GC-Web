@@ -1,8 +1,8 @@
 import express from 'express'
 import { engine } from 'express-handlebars'
-
+import Handlebars from 'handlebars'
 // Import database functions
-import { getUsers, getUser, createUser } from './database.js'
+import { getUsers, createUser } from './database.js'
 
 // Philippine Standard Geographic Code
 import { PSGCResource } from 'psgc-areas'
@@ -34,6 +34,14 @@ app.engine('hbs', engine({
 }))
 app.set('view engine', 'hbs')
 app.set('views', 'views') // set 'views' folder as HBS view directory
+
+/* ---------------------------------------
+    HANDLEBARS
+--------------------------------------- */
+
+Handlebars.registerHelper('uppercase', function(str) {
+  return str.toUpperCase();
+});
 
 /* ---------------------------------------
     ROUTES
@@ -123,10 +131,11 @@ app.get('/dashboard', (req, res) => {
 // User routes
 // Get all users
 app.get('/dashboard/users', async (req, res) => {
-  // const users = await getUsers()
-  res.render('users', {
+  const users = await getUsers()
+  res.render('dashboard/users', {
     layout: 'dashboard',
-    title: 'GC Dashboard | Users'
+    title: 'GC Dashboard | Users',
+    users
   })
   //res.send(users)
 })
@@ -163,6 +172,15 @@ app.get('/dashboard/partners', async (req, res) => {
     title: 'GC Dashboard | Partner Organizations'
   })
   //res.send(users)
+})
+
+app.get('/dashboard/submit-report', async (req, res) => {
+  //const users = await getUsers()
+  res.render('dashboard/submit-report', {
+    layout: 'dashboard',
+    title: 'GC Dashboard | Submit Your Report'
+  })
+
 })
 
 // API: Get locations from json
