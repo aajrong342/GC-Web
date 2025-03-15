@@ -159,7 +159,7 @@ app.get('/dashboard/roles', async (req, res) => {
 
 // User applications page
 app.get('/dashboard/user-applications', (req, res) => {
-  res.render('user-applications', { 
+  res.render('dashboard/user-applications', { 
     layout: 'dashboard',
     title: 'GC Dashboard | User Applications'
   })
