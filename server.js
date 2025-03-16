@@ -5,7 +5,8 @@ import Handlebars from 'handlebars'
 // Import database functions
 import {
   getUsers, getUserByEmail, createUser,
-  getPartners
+  getPartners,
+  getRolesOfSupertype
 } from './database.js'
 
 // Philippine Standard Geographic Code
@@ -136,9 +137,16 @@ app.get('/dashboard/users/create', (req, res) => {
 });
 
 app.get('/dashboard/roles', async (req, res) => {
+  const adminRoles = await getRolesOfSupertype(0)
+  const gcRoles = await getRolesOfSupertype(1)
+  const clientRoles = await getRolesOfSupertype(2)
+
   res.render('dashboard/roles', {
     layout: 'dashboard',
-    title: 'GC Dashboard | Roles'
+    title: 'GC Dashboard | Roles',
+    adminRoles,
+    gcRoles,
+    clientRoles
   })
 })
 

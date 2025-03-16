@@ -49,8 +49,24 @@ export async function createUser(roleId, lastName, firstName, email, password) {
 --------------------------------------- */
 // Get all users
 export async function getPartners() {
-    // Square brackets around variable = first item of that array
-    // In this case, first item of result is the table values
     const [result] = await sql.query(`SELECT * FROM partner_org`)
+    return result
+}
+
+/* ---------------------------------------
+    ROLES
+--------------------------------------- */
+// Get roles with supertype as parameter
+/*
+    0 - Admin
+    1 - GC Staff
+    2 - Client
+*/
+export async function getRolesOfSupertype(supertype) {
+    const [result] = await sql.query(`SELECT ur.*, COUNT(u.user_id) AS user_count
+FROM user_roles ur
+LEFT JOIN user u ON ur.role_id = u.role_id
+WHERE ur.supertype = ${supertype}
+GROUP BY ur.role_id`)
     return result
 }
