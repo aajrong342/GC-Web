@@ -1,4 +1,4 @@
-<h2>Default Roles</h2>
+<h2>Default Roles</h2> 
 Default roles cannot be modified.
 
 <div class="tb-container">
@@ -9,37 +9,43 @@ Default roles cannot be modified.
             <td>Number of Users</td>
             <td></td>
         </tr>
-
+        
         {{#each adminRoles}}
             <tr class="tb-gray-row">
                 <td>{{role_id}}</td>
                 <td>{{role_name}}</td>
                 <td>{{user_count}}</td>
-                <td></td>
+                <td>
+                    <button class="btn-green manage-users-btn" data-role-id="{{role_id}}" data-role-name="{{role_name}}">
+                        <i class="fa-solid fa-user"></i>&nbsp; Manage Users
+                    </button>
+                </td>
             </tr>
         {{/each}}
-
+        
         {{#each gcRoles}}
             <tr class="tb-gray-row">
                 <td>{{role_id}}</td>
                 <td>{{role_name}}</td>
                 <td>{{user_count}}</td>
                 <td>
-                    <button class="btn-green"><i class="fa-solid fa-user"></i>&nbsp; Manage Users</button>
+                    <button class="btn-green manage-users-btn" data-role-id="{{role_id}}" data-role-name="{{role_name}}">
+                        <i class="fa-solid fa-user"></i>&nbsp; Manage Users
+                    </button>
                 </td>
             </tr>
         {{/each}}
     </table>
 </div>
 
-<h2>Client Roles</h2>
+<h2>Client Roles</h2> 
 User roles assigned to clients.
 
 <div class="tb-container">
     <table>
         <tr class="tb-header">
             <td>
-                <button class="btn-green">+ Create New Role</button>
+                <button id="create-role-btn" class="btn-green">+ Create New Role</button>
             </td>
             <td>Role ID</td>
             <td>Role Name</td>
@@ -56,9 +62,96 @@ User roles assigned to clients.
                 <td>{{role_name}}</td>
                 <td>{{user_count}}</td>
                 <td>
-                    <button class="btn-green"><i class="fa-solid fa-user"></i>&nbsp; Manage Users</button>
+                    <button class="btn-green manage-users-btn" data-role-id="{{role_id}}" data-role-name="{{role_name}}">
+                        <i class="fa-solid fa-user"></i>&nbsp; Manage Users
+                    </button>
                 </td>
             </tr>
         {{/each}}
     </table>
 </div>
+
+<!-- User Management Modal -->
+<div id="user-management-modal" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2>Users in Role: <span id="modal-role-name"></span></h2>
+            <button class="close-btn">&times;</button>
+        </div>
+        
+        <div class="modal-search">
+            <input
+                type="text"
+                id="user-search"
+                placeholder="Search users..."
+            />
+        </div>
+        
+        <div class="modal-content">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>User ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table-body">
+                    <!-- This will be populated dynamically or from server-side data -->
+                    <tr class="user-row">
+                        <td>1</td>
+                        <td class="user-name">John Doe</td>
+                        <td class="user-email">john@example.com</td>
+                        <td>
+                            <button class="remove-btn">Remove from Role</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div id="no-users-message" class="no-users-message" style="display: none;">
+                No users are currently assigned to this role.
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="add-user-btn">Add User to Role</button>
+            <button class="close-modal-btn">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Create Role Modal -->
+<div id="create-role-modal" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2>Create New Client Role</h2>
+            <button class="close-btn">&times;</button>
+        </div>
+        
+        <div class="modal-content">
+            <form id="create-role-form">
+                <div class="form-group">
+                    <label for="role-name">Role Name:</label>
+                    <input
+                        type="text"
+                        id="role-name"
+                        placeholder="Enter role name"
+                    />
+                    <div id="role-name-error" class="error-message">
+                        Role name cannot be empty
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <div class="modal-footer">
+            <button type="submit" form="create-role-form" class="submit-btn">Submit</button>
+            <button class="cancel-btn">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="/css/modal.css">
+<script src="/js/roles-modal.js"></script>
