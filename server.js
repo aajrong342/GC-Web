@@ -4,7 +4,7 @@ import Handlebars from 'handlebars'
 
 // Import database functions
 import {
-  getUsers, getUserByEmail, createUser,
+  getUsers, getUserByEmail, createUser, getUserById,
   getPartners,
   getRolesOfSupertype
 } from './database.js'
@@ -44,8 +44,19 @@ app.set('views', 'views') // set 'views' folder as HBS view directory
     HANDLEBARS
 --------------------------------------- */
 
+// Render text to uppercase
 Handlebars.registerHelper('uppercase', function(str) {
   return str.toUpperCase();
+});
+
+// Check if value is null
+/* Ex: 
+    {{#check value null}}
+      {{this}}
+    {{/check}}
+*/
+Handlebars.registerHelper('check', function(value, comparator) {
+  return (value === comparator) ? '-' : value;
 });
 
 /* ---------------------------------------
@@ -54,7 +65,8 @@ Handlebars.registerHelper('uppercase', function(str) {
 app.get('/', (req, res) => {
   res.render('home', {
     layout: 'public',
-    title: 'Home | GreenCycle'
+    title: 'Home | GreenCycle',
+    current_home: true
   })
 })
 
@@ -73,7 +85,8 @@ app.get('/register', (req, res) => {
 app.get('/contact', (req, res) => {
   res.render('contact', {
     layout: 'public',
-    title: 'Contact | GreenCycle'
+    title: 'Contact | GreenCycle',
+    current_contact: true
   })
 })
 
@@ -82,7 +95,8 @@ app.get('/about', (req, res) => {
     layout: 'public',
     title: 'About | GreenCycle',
     companyName: 'GreenCycle Consultancy Agency',
-    year: new Date().getFullYear()
+    year: new Date().getFullYear(),
+    current_about: true
   });
 });
 
@@ -92,7 +106,8 @@ app.get('/partners', async (req, res) => {
   res.render('partners', {
       layout:'public',
       title: "GreenCycle - Partners",
-      partners
+      partners,
+      current_partners: true
   });
 });
 
@@ -104,7 +119,8 @@ app.get('/partners', async (req, res) => {
 app.get('/test-chart', (req, res) => {
   res.render('dashboard/test-chart', {
     layout: 'dashboard',
-    title: 'Test Dashboard'
+    title: 'Test Dashboard',
+    current_test: true
   })
 })
 
@@ -113,7 +129,8 @@ app.get('/dashboard', (req, res) => {
   // This would typically check for authentication
   res.render('dashboard/waste-comp-main', {
     layout: 'dashboard',
-    title: 'GC Dashboard | Main Dashboard'
+    title: 'GC Dashboard | Main Dashboard',
+    current_home: true
   })
 })
 
@@ -124,7 +141,20 @@ app.get('/dashboard/users', async (req, res) => {
   res.render('dashboard/users', {
     layout: 'dashboard',
     title: 'GC Dashboard | Users',
-    users
+    users,
+    current_users: true
+  })
+})
+
+// Get one user from ID (user profile)
+app.get('/dashboard/user/:id', async (req, res) => {
+  const id = req.params.id
+  const user = await getUserById(id)
+
+  res.render('dashboard/user-profile', {
+    layout: 'dashboard',
+    user,
+    title: `GC Dashboard | Profile`
   })
 })
 
@@ -132,7 +162,8 @@ app.get('/dashboard/users', async (req, res) => {
 app.get('/dashboard/users/create', (req, res) => {
   res.render('dashboard/create-user', {
     layout: 'dashboard',
-    title: 'GC Dashboard | Create User'
+    title: 'GC Dashboard | Create User',
+    current_users: true
   });
 });
 
@@ -146,7 +177,8 @@ app.get('/dashboard/roles', async (req, res) => {
     title: 'GC Dashboard | Roles',
     adminRoles,
     gcRoles,
-    clientRoles
+    clientRoles,
+    current_roles: true
   })
 })
 
@@ -154,7 +186,8 @@ app.get('/dashboard/roles', async (req, res) => {
 app.get('/dashboard/user-applications', (req, res) => {
   res.render('dashboard/user-applications', { 
     layout: 'dashboard',
-    title: 'GC Dashboard | User Applications'
+    title: 'GC Dashboard | User Applications',
+    current_userapp: true
   })
 })
 
@@ -163,14 +196,16 @@ app.get('/dashboard/partners', async (req, res) => {
   res.render('dashboard/partners', {
     layout: 'dashboard',
     title: 'GC Dashboard | Partner Organizations',
-    partners
+    partners,
+    current_partners: true
   })
 })
 
 app.get('/dashboard/submit-report', async (req, res) => {
   res.render('dashboard/submit-report', {
     layout: 'dashboard',
-    title: 'GC Dashboard | Submit Your Report'
+    title: 'GC Dashboard | Submit Your Report',
+    current_report: true
   })
 })
 
@@ -179,13 +214,6 @@ app.get('/locations', async (req, res) => {
   // Get all location names
   const locations = await PSGCResource.getAll()
   res.send(locations)
-})
-
-// Get one user from ID
-app.get('/user/:id', async (req, res) => {
-  const id = req.params.id
-  const user = await getUser(id)
-  res.send(user)
 })
 
 // Create user

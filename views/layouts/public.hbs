@@ -25,11 +25,11 @@
     
     <div class="taskbar">
         <ul>
-            <a href="/">HOME</a>
+            <a href="/" class="{{#if current_home}}current{{/if}}">HOME</a>
             <a href="/dashboard">DASHBOARD</a>
-            <a href="/about">ABOUT</a>
-            <a href="/partners">PARTNERS</a>
-            <a href="/contact">CONTACT</a>
+            <a href="/about" class="{{#if current_about}}current{{/if}}">ABOUT</a>
+            <a href="/partners" class="{{#if current_partners}}current{{/if}}">PARTNERS</a>
+            <a href="/contact" class="{{#if current_contact}}current{{/if}}">CONTACT</a>
         </ul>
     </div>
 

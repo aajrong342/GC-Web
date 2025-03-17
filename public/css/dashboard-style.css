@@ -146,9 +146,18 @@ nav a {
     display: block;
 }
 nav a:hover {
-    background-color: #7cc475;
-    color: white;
+    background-color: #ade3a8;
     cursor: pointer;
+}
+
+/* indicates that user is currently in that tab */
+.current {
+    background-color: #65b55d;
+    color: white;
+}
+.current:hover {
+    background-color: #65b55d !important;
+    cursor: default !important;
 }
 
 .nav-icon {
@@ -275,4 +284,14 @@ table td {
 select {
     padding: 5px;
     font-size: 16px;
+}
+
+/* ------ User Profile Table ------ */
+.user-profile td {
+    background-color: white !important;
+    height: 25px;
+}
+
+.user-profile .label {
+    font-weight: bold;
 }

@@ -32,6 +32,17 @@ export async function getUserByEmail(email) {
     return result[0] // important, to not return an array
 }
 
+// Get user by ID
+export async function getUserById(id) {
+    const [result] = await sql.query(`
+        SELECT u.*, r.role_name
+        FROM user u
+        JOIN user_roles r ON u.role_id = r.role_id
+        WHERE u.user_id=?
+    `, [id])
+    return result // important, to not return an array
+}
+
 // Create a new user entry
 export async function createUser(roleId, lastName, firstName, email, password) {
     const result = await sql.query(`
@@ -47,7 +58,8 @@ export async function createUser(roleId, lastName, firstName, email, password) {
 /* ---------------------------------------
     PARTNERS
 --------------------------------------- */
-// Get all users
+
+// Get all partners
 export async function getPartners() {
     const [result] = await sql.query(`SELECT * FROM partner_org`)
     return result
@@ -56,17 +68,32 @@ export async function getPartners() {
 /* ---------------------------------------
     ROLES
 --------------------------------------- */
+
 // Get roles with supertype as parameter
-/*
-    0 - Admin
-    1 - GC Staff
-    2 - Client
-*/
+// 0 - Admin, 1 - GC Staff, 2 - Client
 export async function getRolesOfSupertype(supertype) {
-    const [result] = await sql.query(`SELECT ur.*, COUNT(u.user_id) AS user_count
-FROM user_roles ur
-LEFT JOIN user u ON ur.role_id = u.role_id
-WHERE ur.supertype = ${supertype}
-GROUP BY ur.role_id`)
+    const [result] = await sql.query(`
+        SELECT ur.*, COUNT(u.user_id) AS user_count
+        FROM user_roles ur
+        LEFT JOIN user u ON ur.role_id = u.role_id
+        WHERE ur.supertype = ${supertype}
+        GROUP BY ur.role_id`)
     return result
+}
+
+/* ---------------------------------------
+    USER APPLICATIONS
+--------------------------------------- */
+export async function getApplications() {
+    const [result] = await sql.query(`SELECT * FROM user_applications`)
+    return result
+}
+
+// NOTE: Also serves as the function that *creates* a user
+export async function approveApplication(appId) {
+    // UPDATE user_applications SET status='Approved' WHERE application_id='${appId}'
+}
+
+export async function rejectApplication(appId) {
+    // UPDATE user_applications SET status='Rejected' WHERE application_id='${appId}'
 }

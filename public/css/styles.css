@@ -120,6 +120,11 @@ main {
     border-radius: 5px;
 }
 
+/* same as hover setting but for current page */
+.current {
+    background-color: #2f3816;
+    border-radius: 5px;
+}
 
 /* Content Layout */
 
@@ -245,6 +250,53 @@ main {
     height: 20px;
     vertical-align: middle;
     margin-right: 5px;
+}
+
+/* Social Media Icons */
+.social-buttons img {
+    width: 40px;
+    height: 40px;
+    margin: 5px;
+    transition: 0.3s ease-in-out;
+}
+
+.social-buttons img:hover {
+    opacity: 0.8;
+    transform: scale(1.3);
+}
+
+.social-buttons a {
+    text-decoration: none;
+}
+
+/* Phone Icon */
+.icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    transition: 0.3s ease-in-out;
+}
+
+.icon:hover {
+    opacity: 0.8;
+    transform: scale(1.3);
+}
+
+/* Footer Links */
+.footer-link {
+    color: white;
+    text-decoration: none;
+    transition: 0.3s ease-in-out;
+}
+
+.footer-link:hover {
+    color: black;
+    text-decoration: underline;
+}
+.footer-bottom {
+    margin-top: 20px;
+    border-top: 1px solid #ccc;
+    padding-top: 10px;
 }
 
 /* Forms and Inputs */
@@ -408,7 +460,7 @@ button:hover {
 
 .partners-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: 455px 455px 455px;
     gap: 20px;
     padding: 20px;
 }
@@ -420,6 +472,7 @@ button:hover {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     text-align: center;
     transition: transform 0.2s;
+    max-width: 500px;
 }
 
 .partner-card:hover {
@@ -427,7 +480,7 @@ button:hover {
 }
 
 .partner-logo {
-    max-width: 350px;
+    max-width: 200px;
     height: auto;
     margin-bottom: 15px;
 }
