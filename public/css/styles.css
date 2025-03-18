@@ -437,9 +437,10 @@ button:hover {
 
 .login-menu a {
     text-decoration: none;
-    color: #64b052;
+    color: #c8febc;
     margin-left: 5px;
     margin-right: 5px;
+    font-weight: bold;
 }
 
 .container {

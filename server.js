@@ -45,18 +45,39 @@ app.use('/pictures', express.static('pictures'));
 --------------------------------------- */
 // Set session
 app.use(session({
-  secret: 'sussus amogus',
-  resave: true,
+  secret: 'sussus-am0gus',
+  resave: false,
   saveUninitialized: false, // bc what if the user isn't logged in yet
   store
 }))
 
 app.use((req, res, next) => {
   if (req.session.authenticated) {
-    req.user = req.session.user;
+    req.user = req.session.user
   }
-  next();
-});
+  next()
+})
+
+app.use((req, res, next) => {
+  if (req.session && req.session.user) {
+    res.locals.user = req.session.user;
+  } else {
+      res.locals.user = null; // Avoid assigning an empty object
+  }
+  next()
+})
+
+// Session middleware
+// Check if session user exists (i.e., user is logged in)
+const requireAuth = (req, res, next) => {
+  if (!req.session || !req.session.user) {
+      return res.redirect('/login'); // Redirect to login if not authenticated
+  }
+  next(); // Proceed if authenticated
+}
+
+// Lock out dashboard AND its child routes for logged in users
+app.use('/dashboard', requireAuth)
 
 /* ---------------------------------------
     HANDLEBARS
@@ -108,6 +129,12 @@ Handlebars.registerHelper('textDate', function(date) {
     ROUTES (PUBLIC)
 --------------------------------------- */
 app.get('/', (req, res) => {
+  // testing
+  if(req.session.authenticated) {
+    console.log("User in res.locals:", res.locals.user)
+    console.log(req.user)
+  }
+
   res.render('home', {
     layout: 'public',
     title: 'Home | GreenCycle',
@@ -124,11 +151,10 @@ app.get('/login', (req, res) => {
 
 // Login success (called when user is ALREADY validated)
 app.post('/login', async (req, res) => {
-  const email = req.body.email;
-  const user = await getUserByEmail(email)
+  const user = req.body;
 
   // Mark user as authenticated
-  req.session.authenticated = true;
+  req.session.authenticated = true
 
   // Set session variables
   req.session.user = {
@@ -139,9 +165,14 @@ app.post('/login', async (req, res) => {
     email: user.email,
     contactNo: user.contact_no,
     orgId: user.partner_org_id
-  };
+  }
 
-  res.json({ success: true, message: "Login successful" })
+  req.session.save(err => {
+    if (err) {
+      console.error("Session save error:", err)
+    }
+    res.json({ success: true, message: "Login successful" });
+  })
 });
 
 app.post('/api/user', async (req, res) => {

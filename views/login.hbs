@@ -65,12 +65,14 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then((data) => {
+            const accountEntry = data
+
             // First, check if returned data has contents
-            if(data.length > 0) {
+            if(accountEntry.length > 0) {
 
                 // Email exists; now compare passwords
                 // Supposed to be encrypted, but for now, compare passwords in the database
-                if(formData.password === data[0].password) {
+                if(formData.password === accountEntry[0].password) {
 
                     // Passwords match; send request to API to set user session
                     fetch('/login', {
@@ -78,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify(formData)
+                        body: JSON.stringify(accountEntry[0])
                     })
                     .then(response => {
                         if (response.ok) {
@@ -88,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     })
                     .then(data => {
                         // Reset form
-                        form.reset();
+                        form.reset()
 
                         window.location.href = '/dashboard';
                     })
@@ -100,12 +102,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else { // Passwords do not match
                     // Reveal error on form and return
                     loginError.style.display = 'block';
+                    form.reset()
                     return;
                 }
 
             } else { // Email does not exist
                 // Reveal error on form and return
                 loginError.style.display = 'block';
+                form.reset()
                 return;
             }
         })

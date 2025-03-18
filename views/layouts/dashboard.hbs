@@ -31,11 +31,11 @@
             <div class="user-menu">
                 <!-- User Menu Button -->
                 <button class="user-menu-button">
-                    <i class="fa-regular fa-circle-user header-user-icon"></i> LASTNAME, First Name&nbsp;&nbsp;&nbsp;<i class="fa-solid fa-caret-down nav-icon"></i>
+                    <i class="fa-regular fa-circle-user header-user-icon"></i> {{uppercase user.lastname}}, {{user.firstname}}&nbsp;&nbsp;&nbsp;<i class="fa-solid fa-caret-down nav-icon"></i>
                 </button>
 
                 <div class="user-menu-content">
-                    <a href="#">
+                    <a href="/dashboard/user/{{user.id}}">
                         <i class="fa-solid fa-user"></i> Profile
                     </a>
                     <a href="#">
