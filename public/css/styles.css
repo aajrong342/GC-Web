@@ -65,12 +65,11 @@ main {
     background-color: #283619;
     color:white;
     display: flex;
-    padding: 5px 0; /* Adjust this for height */
     position: fixed;
     top: 0;
     left: 0;
     z-index: 10;
-    
+    align-items: center;
 }
 
 .header-logo {
@@ -80,12 +79,13 @@ main {
     background-color: white;
     padding: 5px;
     margin-left: 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 .header-logo-text {
     font-size: x-large;
     margin-left: 16px;
-    margin-top: 8px;
 }
 .taskbar {
     display: flex;
@@ -97,7 +97,7 @@ main {
     position: fixed;
     top: 60px; 
     left: 0;
-    z-index: 999;
+    z-index: 11;
 }
 
 .taskbar ul {
@@ -386,47 +386,6 @@ button:hover {
     background-color: #243015;
 }
 
-
-/* User icon styling */
-.user-menu {
-    position: absolute;
-    top: 10px;
-    right: 20px;
-}
-
-.user-icon {
-    font-size: 40px;
-    cursor: pointer;
-}
-
-/* Dropdown menu */
-.dropdown-content {
-    display: none;
-    position: absolute;
-    right: 0;
-    background-color: white;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
-    min-width: 120px;
-    border-radius: 5px;
-    overflow: hidden;
-    z-index: 10;
-}
-
-.dropdown-content a {
-    display: block;
-    padding: 10px;
-    text-decoration: none;
-    color: black;
-}
-
-.dropdown-content a:hover {
-    background-color: #f1f1f1;
-}
-
-.show {
-    display: block;
-}
-
 .login-menu {
     color: white;
     font-size: 18px;
@@ -551,3 +510,61 @@ button:hover {
     cursor: pointer;
     font-size: 18px;
   }
+
+/* user menu (for logged in user) */
+.user-menu {
+    position: relative;
+    display: inline-block;
+    height: 100%;
+    margin-left: auto;
+    margin-top: 0;
+    padding-top: 0;
+    z-index: 999 !important;
+}
+
+.user-menu-button {
+    font-family: 'Segoe UI';
+    font-size: 16px;
+    background-color: #283619;
+    border: none;
+    color: white;
+    height: 100%;
+    top: 0;
+    padding-bottom: 20px;
+    padding-left: 20px;
+    text-align: left;
+    min-width: 225px;
+    margin-left: auto;
+    border-radius: 0% !important;
+    margin-top: 0 !important;
+}
+.user-menu-button:hover {
+    cursor: pointer;
+}
+  
+.user-menu-content {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    width: 100%;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 9999 !important;
+}
+
+.user-menu-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.user-menu-content a:hover {background-color: #ddd;}
+
+.user-menu:hover .user-menu-content {display: block;}
+
+.user-menu:hover .user-menu-button {background-color: #3e8e41;}
+
+.user-menu-caret {
+    margin-left: 10px;
+    margin-right: 10px;
+}

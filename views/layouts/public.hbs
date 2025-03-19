@@ -15,9 +15,36 @@
                 GreenCycle
             </div>
 
-        <div class="login-menu">
-            <a href="/login">Login</a> | <a href="/register">Register</a>
-        </div>
+            {{#if user.email}}
+            <!-- If user is logged in, show user menu -->
+                <div class="user-menu">
+                    <!-- User Menu Button -->
+                    <button class="user-menu-button">
+                        <i class="fa-regular fa-circle-user header-user-icon"></i> {{uppercase user.lastname}}, {{user.firstname}}
+                        <span class="user-menu-caret"><i class="fa-solid fa-caret-down"></i></span>
+                    </button>
+
+                    <div class="user-menu-content">
+                        <a href="/dashboard/profile">
+                            <i class="fa-solid fa-user"></i> Profile
+                        </a>
+                        <a href="#">
+                            <i class="fa-solid fa-gear"></i> Settings
+                        </a>
+                        <a href="/">
+                            <i class="fa-solid fa-house"></i> Return to Main Site
+                        </a>
+                        <a href="#" id="logout">
+                            <i class="fa-solid fa-right-from-bracket"></i> Log Out
+                        </a>
+                    </div>
+                </div>
+            {{else}}
+                <!-- Else, show login and register links for unlogged user -->
+                <div class="login-menu">
+                    <a href="/login">Login</a> | <a href="/register">Register</a>
+                </div>
+            {{/if}}
     </header>
     
     <div class="taskbar">

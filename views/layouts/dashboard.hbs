@@ -27,11 +27,12 @@
         
         <!-- User Menu -->
         <div class="header-user">
-            <!-- Go back to main site -->            
+            <!-- Display user menu (profile, settings, log out) -->           
             <div class="user-menu">
                 <!-- User Menu Button -->
                 <button class="user-menu-button">
-                    <i class="fa-regular fa-circle-user header-user-icon"></i> {{uppercase user.lastname}}, {{user.firstname}}&nbsp;&nbsp;&nbsp;<i class="fa-solid fa-caret-down nav-icon"></i>
+                    <i class="fa-regular fa-circle-user header-user-icon"></i> {{uppercase user.lastname}}, {{user.firstname}}
+                    <span class="user-menu-caret"><i class="fa-solid fa-caret-down"></i></span>
                 </button>
 
                 <div class="user-menu-content">
@@ -49,8 +50,6 @@
                     </a>
                 </div>
             </div>
-
-            <!-- Display user menu (profile, settings, log out) -->
         </div>
     </header>
     

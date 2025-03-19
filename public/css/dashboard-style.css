@@ -99,8 +99,8 @@ header {
     height: 100%;
     padding-bottom: 5px;
     padding-left: 20px;
-    text-align: right;
-    min-width: 250px;
+    text-align: left;
+    min-width: 225px;
 }
 .user-menu-button:hover {
     cursor: pointer;
@@ -133,6 +133,11 @@ header {
 .user-menu:hover .user-menu-content {display: block;}
 
 .user-menu:hover .user-menu-button {background-color: #3e8e41;}
+
+.user-menu-caret {
+    margin-left: 10px;
+    margin-right: 10px;
+}
 
 /* back to main site button */
 .btn-back-site {
@@ -202,7 +207,7 @@ nav a:hover {
 }
 
 .nav-icon {
-    margin-right: 5px;
+    margin-right: 10px;
 }
 
 /* ------ Main Container ------ */

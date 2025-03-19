@@ -99,7 +99,7 @@ Handlebars.registerHelper('uppercase', function(str) {
   return str.toUpperCase()
 })
 
-// Check if value is null
+// Check if value is NOT null
 /* Ex: 
     {{#check value null}}
       {{this}}
