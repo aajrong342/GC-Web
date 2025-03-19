@@ -1,27 +1,28 @@
 <h2>Form Submission</h2>
 
-<form method="POST">
+<form id="waste-form" action="/submit-report" method="POST">
+
     <fieldset>
         <legend>Personal Information</legend>
     <label for="name">Name:</label>
-    <input type="text" id="name" name="name" required><br><br>
-    
-    <label for="client">Client:</label>
-    <input type="text" id="client" name="client" required><br><br>
+<input type="text" name="name" id="name" placeholder="Enter Name" required>
+  
+<label for="company_name">Company Name:</label>
+<input type="text" id="company_name" name="company_name" required><br><br>
     </fieldset><br>
     
      <fieldset>
         <legend>Select Location</legend>
         <p>
             <label for="region">Select a region:</label><br>
-            <select name="regions" id="regions">
+            <select name="region" id="regions">
                 <!-- Populated by locations.js -->
             </select>
         </p>
 
         <p>
             <label for="provinces">Select a province:</label><br>
-            <select name="provinces" id="provinces" class="full-width" disabled>
+            <select name="province" id="provinces" class="full-width" disabled>
                 <option value=''>Select a province</option>
                 <!-- Populated by locations.js -->
             </select>
@@ -29,7 +30,7 @@
 
         <p>
             <label for="municipalities">Select a city/municipality:</label><br>
-            <select name="municipalities" id="municipalities" class="full-width" disabled>
+            <select name="municipality" id="municipalities" class="full-width" disabled>
                 <option value=''>Select a city/municipality</option>
                 <!-- Populated by locations.js -->
             </select>
@@ -46,21 +47,27 @@
     <input type="number" id="population" name="population" required min="0"><br><br>
     
     <label for="waste_generation">Waste Generation per Capita (Kg/cap-day):</label>
-    <input type="number" id="waste_generation_per_capita" name="waste_generation_per_capita" min="0" step="0.001" required><br><br>
+    <input type="number" id="per_capita" name="per_capita" min="0" step="0.001" required><br><br>
 
     <label for="waste_generation">Annual Waste Generation (kg/year):</label>
-    <input type="number" id="annual_waste_generation" name="annual_waste_generation" min="0" step="0.001" required><br><br>
+    <input type="number" id="annual" name="annual" min="0" step="0.001" required><br><br>
 
     <label for="date_submitted">Date Submitted:</label>
     <input type="date" id="date_submitted" name="date_submitted" required><br><br>
     
     <label for="year_collected">Year of Data Collected:</label>
     <input type="number" id="year_collected" name="year_collected" required><br><br>
+
+    <label for="date_start">Data Collection Start Date:</label>
+    <input type="date" id="date_start" name="date_start" required><br><br>
+
+    <label for="date_end">Data Collection End Date:</label>
+    <input type="date" id="date_end" name="date_end" required><br><br>
     </fieldset><br>
 
     <fieldset>
-        <legend>Waste Composition</legend>
-            <div id="waste-composition">
+        <legend>Waste Composition</legend> 
+            <div id="wasteComposition" name="waste_composition">
                 <script src="/js/waste-composition.js"></script>
             </div>
     </fieldset>
@@ -69,3 +76,51 @@
 </form>
 
 <script src="../js/locations.js"></script>
+<script>
+document.getElementById("waste-form").addEventListener("submit", async function (event) {
+    event.preventDefault(); // Prevent default submission
+
+    if (!validateTotalPercentage()) {
+        alert("Error: Total waste composition must equal 100%.");
+        return;
+    }
+
+    const formData = new FormData(this);
+    const jsonObject = Object.fromEntries(formData.entries());
+
+    // Collect waste composition entries
+    let wasteComposition = [];
+    document.querySelectorAll(".waste-category").forEach(categoryDiv => {
+        const category = categoryDiv.dataset.category;
+        categoryDiv.querySelectorAll(".waste-entry").forEach(entry => {
+            wasteComposition.push({
+                material_id = materialMap[category]||null; 
+                origin_id: entry.querySelector('select[name$="[origin]"]').value,
+                subtype_remarks: entry.querySelector('input[name$="[name]"]').value,
+                waste_amount: parseFloat(entry.querySelector('input[name$="[weight]"]').value) || 0
+            });
+        });
+    });
+ 
+    jsonObject.wasteComposition = wasteComposition; // Attach waste composition data
+
+    try {
+        const response = await fetch("/submit-report", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(jsonObject)
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert("Report submitted successfully!");
+        } else {
+            alert(result.error || "Submission failed.");
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Something went wrong.");
+    }
+});
+
+</script>

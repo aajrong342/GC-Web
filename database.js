@@ -73,6 +73,115 @@ export async function lastLogin(userId) {
 }
 
 /* ---------------------------------------
+    FORM SUBMISSION
+--------------------------------------- */
+export async function submitForm(name, company_name, region, province, municipality, barangay, population, per_capita, annual, date_submitted, year_collected, date_start, date_end, wasteComposition) {
+    const materialMap = {
+        "paper": 1,
+        "glass": 2,
+        "metal": 3,
+        "plastics": 4,
+        "kitchen_waste": 5,
+        "hazardous_waste": 6,
+        "electronic_waste": 7,
+        "other_organic": 8,
+        "other_non_organic": 9
+    };
+    
+    const originMap = {
+        "Residential": 1,
+        "Commercial": 2,
+        "Institutional": 3,
+        "Industrial": 4,
+        "Health": 5,
+        "Agricultural and Livestock": 6
+    };
+
+    try {
+        // Insert into clients table
+        const [clientResult] = await sql.query(
+            `INSERT INTO clients (name, company_name) VALUES (?, ?)`, 
+            [name, company_name]
+        );
+        const client_id = clientResult.insertId;
+
+        // Insert into locations table
+        const [locationResult] = await sql.query(
+            `INSERT INTO locations (region, province, municipality, barangay) VALUES (?, ?, ?, ?)`, 
+            [region, province, municipality, barangay]
+        );
+        const location_id = locationResult.insertId;
+        const location_code = location_id; // Assuming location_code is the same as location_id
+
+        // Insert into waste_generation table
+        const [wasteGenResult] = await sql.query(
+            `INSERT INTO waste_generation (client_id, location_id, population, per_capita, annual, date_submitted, year_collected)
+            VALUES (?, ?, ?, ?, ?, ?, ?)`, 
+            [client_id, location_id, population, per_capita, annual, date_submitted, year_collected]
+        );
+
+        const collection_id = wasteGenResult.insertId;
+
+        // Ensure collection_id is valid
+        if (!collection_id) {
+            throw new Error("Failed to insert into waste_generation, collection_id is NULL.");
+        }
+
+        // Insert into data_collection_periods table
+        await sql.query(
+            `INSERT INTO data_collection_periods (location_code, date_start, date_end)
+            VALUES (?, ?, ?)`, 
+            [location_code, date_start, date_end]
+        );
+
+        // Insert into waste_composition table (only if wasteComposition is provided)
+       // Define mappings for materials and origins based on your tables
+
+// Insert into waste_composition table (only if wasteComposition is provided)
+if (wasteComposition && wasteComposition.length > 0) {
+    try {
+        await sql.beginTransaction();
+
+        for (const entry of wasteComposition) {
+            let {collection_id, material_id, origin_id, waste_amount, subtype_remarks } = entry;
+
+            
+            // Map to integer values
+            const materialInt = materialMap[material_id.toLowerCase()];
+            const originInt = originMap[origin_id]; // No changes needed
+
+            // Debugging: Log values to check if mapping works
+            console.log(`Mapping - Material: ${material_id} -> ${materialInt}, Origin: ${origin_id} -> ${originInt}`);
+
+            if (!materialInt || !originInt) {
+                throw new Error(`Invalid material (${material_id}) or origin (${origin_id}) provided.`);
+            }
+
+            await sql.query(
+                `INSERT INTO waste_composition (collection_id, material_id, origin_id, waste_amount, subtype_remarks)
+                 VALUES (?, ?, ?, ?, ?)`, 
+                [collection_id, materialInt, originInt, waste_amount, subtype_remarks || null]
+            );
+        }
+
+        await sql.commit();
+    } catch (error) {
+        await sql.rollback();
+        console.error("Error inserting waste composition:", error);
+        throw new Error("Failed to insert waste composition data.");
+    }
+}
+        return { success: true, message: "Form submitted successfully!" };
+
+    } catch (error) {
+        console.error("Database error:", error);
+        throw new Error("Error inserting data into the database.");
+    }
+}
+
+
+
+/* ---------------------------------------
     PARTNERS
 --------------------------------------- */
 
