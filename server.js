@@ -9,7 +9,6 @@ const store = new session.MemoryStore();
 
 // Import database functions
 import {
-  submitForm,
   getUsers, getUserByEmail, createUser, getUserById, getUsersOfRole,
   getPartners,
   getRolesOfSupertype, createClientRole,
@@ -369,44 +368,8 @@ app.get('/dashboard/submit-report', async (req, res) => {
     layout: 'dashboard',
     title: 'GC Dashboard | Submit Your Report',
     current_report: true
-  });
-});
-
-
-app.post("/submit-report", async (req, res) => {
-  try {
-      const { name, company_name, region, province, municipality, barangay, 
-          population, per_capita, annual, date_submitted, year_collected, 
-          date_start, date_end, wasteComposition } = req.body;
-
-      if (!Array.isArray(wasteComposition)) {
-          return res.status(400).json({ error: "Invalid wasteComposition format" });
-      }
-
-      const formattedWasteComposition = wasteComposition.map(entry => {
-          if (!entry.name || !entry.origin) {
-              console.error("Missing name or origin in:", entry);
-              return null;  // Skip this entry
-          }
-
-      }).filter(entry => entry !== null); // Remove any invalid entries
-
-      const result = await submitForm(
-          name, company_name, region, province, municipality, barangay, 
-          population, per_capita, annual, date_submitted, 
-          year_collected, date_start, date_end, formattedWasteComposition
-      );
-
-      res.status(200).json(result);
-  } catch (error) {
-      console.error("Error processing report:", error);
-      res.status(500).json({ error: "Failed to submit report" });
-  }
-});
-
-
-
-
+  })
+})
 
 // API: Get locations from json
 app.get('/locations', async (req, res) => {
@@ -461,7 +424,7 @@ app.delete('/users/:id', async (req, res) => {
     res.status(500).json({ message: "Error deleting user" });
   }
 });
- 
+
 // User Application API endpoints
 // Get all applications
 app.get('/api/applications', (req, res) => {
