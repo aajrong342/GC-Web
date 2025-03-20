@@ -341,3 +341,12 @@ select {
 .user-profile .label {
     font-weight: bold;
 }
+
+/* ------ Location Form ------ */
+#location-code {
+    font-size: 20px;
+}
+
+#location-name {
+    font-size: 20px;
+}

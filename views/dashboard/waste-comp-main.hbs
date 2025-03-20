@@ -1,3 +1,4 @@
+<!-- Location form -->
 <form>
     <fieldset>
         <legend>Select Location</legend>
@@ -22,6 +23,16 @@
                 <option value=''>Select a city/municipality</option>
                 <!-- Populated by locations.js -->
             </select>
+        </p>
+
+        <p>
+            <label for="location-code">Location code:</label><br>
+            <input type="text" id="location-code" name="locationcode" disabled>
+        </p>
+
+        <p>
+            <label for="location-name">Location name:</label><br>
+            <input type="text" id="location-name" name="locationname" disabled>
         </p>
 
         <button class="btn-form">

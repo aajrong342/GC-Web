@@ -2,6 +2,7 @@ let form = document.forms[0]
 let regionsDropdown = form.regions
 let provincesDropdown = form.provinces
 let municipalitiesDropdown = form.municipalities
+let locationCodeDisplay = form.locationcode
 
 // Variables changing with selection
 let jsonData
@@ -17,10 +18,11 @@ fetch('/locations')
 // Get all regions upon loading
 function getRegions(jsonData) {
     let output = ""
-    output += "<option value=''>Select a region</option>"
+    output += "<option value='' index=''>Select a region</option>"
 
     jsonData.forEach((region, regionIndex) => {
-        output += `<option value='${regionIndex}'>${region.name}</option>`
+        console.log(regionIndex)
+        output += `<option value='${region.code}' index='${regionIndex}'>${region.name}</option>`
     })
     regionsDropdown.innerHTML = output
 }
@@ -30,14 +32,14 @@ regionsDropdown.addEventListener('change', getProvinces)
 
 // Get provinces of a region (if not Metro Manila)
 function getProvinces() {
-    let regionIndex = regionsDropdown.value
+    let regionIndex = regionsDropdown.options[regionsDropdown.selectedIndex].getAttribute('index') // code I have to change
     let provinces
 
     let output = ""
-    output += "<option value=''>Select a province</option>"
+    output += "<option value='' index=''>Select a province</option>"
     
     // If no region is selected, disable this
-    if(regionIndex.trim() === "" || regionIndex == 0) {
+    if(regionIndex.trim() === "" || regionIndex == "") {
         provincesDropdown.disabled = true
         provincesDropdown.selectedIndex = 0
         return false
@@ -45,7 +47,7 @@ function getProvinces() {
         provinces = jsonData[regionIndex].provinces
 
         provinces.forEach((province, provinceIndex) => {
-            output += `<option value='${provinceIndex}'>${province.name}</option>`
+            output += `<option value='${province.code}' index='${provinceIndex}'>${province.name}</option>`
         })
         provincesDropdown.disabled = false
     }
@@ -60,14 +62,15 @@ regionsDropdown.addEventListener('change', getMunicipalities)
 // Get cities and municipalities of a province (if not Metro Manila)
 // Get cities (if Metro Manila)
 function getMunicipalities() {
-    let regionIndex = regionsDropdown.value
-    let provinceIndex = provincesDropdown.value
+    let regionIndex = regionsDropdown.options[regionsDropdown.selectedIndex].getAttribute('index')
+    let provinceIndex = provincesDropdown.options[provincesDropdown.selectedIndex].getAttribute('index')
     let cities
     let municipalities
 
     let output = ""
-    output += "<option value=''>Select a city/municipality</option>"
+    output += "<option value='' index=''>Select a city/municipality</option>"
 
+    // Region is NCR
     if(regionIndex == 0) {
         cities = jsonData[regionIndex].cities
         municipalities = jsonData[regionIndex].municipalities
@@ -102,3 +105,19 @@ function getMunicipalities() {
 
     municipalitiesDropdown.innerHTML = output
 }
+
+function updateLocation() {
+    const region = regionsDropdown.value;
+    const province = provincesDropdown.value;
+    const city = municipalitiesDropdown.value;
+
+    let setLocation = city || province || region || null;
+
+    // Output the result for debugging
+    locationCodeDisplay.value = setLocation
+}
+
+// Add event listeners to update `setLocation` when any dropdown changes
+regionsDropdown.addEventListener("change", updateLocation);
+provincesDropdown.addEventListener("change", updateLocation);
+municipalitiesDropdown.addEventListener("change", updateLocation);
