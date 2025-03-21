@@ -478,41 +478,51 @@ const wasteOriginMap = {
 app.post("/submit-report", async (req, res) => {
   try {
     console.log("Received payload:", req.body); // Debugging line
-      const { name, company_name, region, province, municipality, barangay, 
-          population, per_capita, annual, date_submitted, year_collected, 
-          date_start, date_end, location_id ,wasteComposition } = req.body;
-          
+    const { name, company_name, region, province, municipality, barangay, 
+        population, per_capita, annual, date_submitted, year_collected, 
+        date_start, date_end, location_id, wasteComposition } = req.body;
 
-      const formattedWasteComposition = wasteComposition.map((entry) => {
-          console.log(entry)
+    const formattedWasteComposition = wasteComposition.map((entry) => {
+        console.log(entry);
 
-          if (!entry.material_name || !entry.origin) {
-              console.error("Missing name or origin in:", entry);
-              return null;  // Skip this entry
-          }
+        if (!entry.material_name || !entry.origin) {
+            console.error("Missing name or origin in:", entry);
+            return null;  // Skip this entry
+        }
 
-          return {
-              material_id: wasteMaterialMap[entry.material_name.toLowerCase()] || null,
-              origin_id: Number(entry.origin) || null,
-              waste_amount: entry.waste_amount || 0,  // Ensure weight is always a number
-              subtype_remarks: entry.subtype_remarks || null
-          };
-      }).filter(entry => entry !== null); // Remove any invalid entries
+        return {
+            material_id: wasteMaterialMap[entry.material_name.toLowerCase()] || null,
+            origin_id: Number(entry.origin) || null,
+            waste_amount: entry.waste_amount || 0,  // Ensure weight is always a number
+            subtype_remarks: entry.subtype_remarks || null
+        };
+    }).filter(entry => entry !== null); // Remove any invalid entries
 
-      console.log(formattedWasteComposition)
+    console.log(formattedWasteComposition);
 
-      const result = await submitForm(
-          name, company_name, region, province, municipality, barangay, 
-          population, per_capita, annual, date_submitted, 
-          year_collected, date_start, date_end, formattedWasteComposition
-      );
+    // Submit form data
+    const result = await submitForm(
+        name, company_name, region, province, municipality, barangay, 
+        population, per_capita, annual, date_submitted, 
+        year_collected, date_start, date_end, formattedWasteComposition
+    );
 
-      res.status(200).json(result);
+    // 🔹 Fetch updated waste data after submitting the report
+    const wasteData = await getWasteDataWithCoordinates();
+    console.log("Updated waste data:", wasteData);
+
+    res.status(200).json({
+        message: "Report submitted successfully",
+        reportResult: result,
+        updatedWasteData: wasteData
+    });
+
   } catch (error) {
-      console.error("Error processing report:", error);
-      res.status(500).json({ error: "Failed to submit report" });
+    console.error("Error processing report:", error);
+    res.status(500).json({ error: "Failed to submit report" });
   }
 });
+
 
 
 // API: Get locations from json
