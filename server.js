@@ -466,6 +466,8 @@ app.post("/submit-report", async (req, res) => {
           
 
       const formattedWasteComposition = wasteComposition.map((entry) => {
+          console.log(entry)
+
           if (!entry.material_name || !entry.origin) {
               console.error("Missing name or origin in:", entry);
               return null;  // Skip this entry
@@ -474,7 +476,7 @@ app.post("/submit-report", async (req, res) => {
           return {
               material_id: wasteMaterialMap[entry.material_name.toLowerCase()] || null,
               origin_id: Number(entry.origin) || null,
-              waste_amount: entry.weight || 0,  // Ensure weight is always a number
+              waste_amount: entry.waste_amount || 0,  // Ensure weight is always a number
               subtype_remarks: entry.subtype_remarks || null
           };
       }).filter(entry => entry !== null); // Remove any invalid entries
