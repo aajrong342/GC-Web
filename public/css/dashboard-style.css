@@ -382,3 +382,8 @@ select {
     margin-top: 15px;
     height: max-content;
 }
+
+.waste-comp-bar {
+    width: 485px;
+    margin-top: 15px;
+}

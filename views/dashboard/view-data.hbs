@@ -55,50 +55,80 @@
 </div>
 
 <div style="display: flex;">
-    <fieldset class="waste-comp">
-        <legend>Waste Composition</legend>
+    <div>
+        <fieldset class="waste-comp">
+            <legend>Waste Composition</legend>
 
-        <div class="tb-container">
-            <table>
-                <tr class="tb-header">
-                    <td>Material</td>
-                    <td>Subtype</td>
-                    <td>Origin</td>
-                    <td>Percentage</td>
-                </tr>
-                {{#each wasteComp}}
-                    <tr>
-                        <td>{{material_name}}</td>
-                        <td>{{subtype_remarks}}</td>
-                        <td>{{origin_name}}</td>
-                        <td>{{waste_amount}} %</td>
+            <div class="tb-container">
+                <table>
+                    <tr class="tb-header">
+                        <td>Material</td>
+                        <td>Subtype</td>
+                        <td>Origin</td>
+                        <td>Percentage</td>
                     </tr>
-                {{/each}}
-            </table>
-        </div>
-    </fieldset>
+                    {{#each wasteComp}}
+                        <tr>
+                            <td>{{material_name}}</td>
+                            <td>{{subtype_remarks}}</td>
+                            <td>{{origin_name}}</td>
+                            <td>{{waste_amount}} %</td>
+                        </tr>
+                    {{/each}}
+                </table>
+            </div>
+        </fieldset>
+
+        <fieldset class="waste-comp-bar">
+            <legend>Waste Composition per Material</legend>
+
+            <div id="bar-container">
+                <!-- Populated by JS -->
+            </div>
+        </fieldset>
+    </div>
     <div class="pie-chart">
-        <canvas id="summary-pie"></canvas>
+        <canvas id="summary-pie">
+            <!-- Populated by JS -->
+        </canvas>
     </div>
 </div>
 
-<!-- Pass json object -->
+<!-- Pass json object and start javascript -->
+<!-- Using JS in the template is technically foul, but w/e it works -->
 <script>
     const wasteComp = {{{json wasteComp}}} // Embed the server-side data into JavaScript
     const pieDiv = document.getElementById('summary-pie')
 
-    // Chart creation
+    // Calculate total waste amount per material
+    const totals = wasteComp.reduce((acc, item) => {
+        if (!acc[item.material_id]) {
+            acc[item.material_id] = { 
+                material_name: item.material_name, 
+                total_waste: 0 
+            };
+        }
+        acc[item.material_id].total_waste += parseFloat(item.waste_amount);
+        return acc;
+    }, {});
+
+    // Prepare data for the pie chart
+    const pieLabels = Object.values(totals).map(item => item.material_name);
+    const pieData = Object.values(totals).map(item => item.total_waste);
+
+    // Create the pie chart
     new Chart(pieDiv, {
         type: 'pie',
         data: {
-            labels: wasteComp.map(row => row.subtype_remarks),
+            labels: pieLabels,
             datasets: [{
-                label: 'Value',
-                data: wasteComp.map(row => row.waste_amount),
+                data: pieData,
+                hoverOffset: 4,
                 borderWidth: 0
             }]
         },
         options: {
+            responsive: true,
             plugins: {
                 legend: {
                     display: true,
@@ -110,7 +140,61 @@
                 }
             }
         }
-    })
+    });
+
+    // Bar charts code
+    // Group data by material_id
+    const groupedData = wasteComp.reduce((acc, item) => {
+        if (!acc[item.material_id]) {
+            acc[item.material_id] = {
+                material_name: item.material_name,
+                subtypes: [],
+                origins: [],
+                waste_amounts: []
+            };
+        }
+        acc[item.material_id].subtypes.push(item.subtype_remarks);
+        acc[item.material_id].origins.push(item.origin_name);
+        acc[item.material_id].waste_amounts.push(parseFloat(item.waste_amount)); // Convert string to number
+        return acc;
+    }, {});
+
+    // Reference to the charts container
+    const chartsContainer = document.getElementById('bar-container');
+
+    Object.keys(groupedData).forEach(material_id => {
+        const material = groupedData[material_id];
+
+        // Create a new canvas for each material
+        const canvasContainer = document.createElement('div');
+        canvasContainer.innerHTML = `<h3>${material.material_name}</h3><canvas id="chart-${material_id}"></canvas>`;
+        chartsContainer.appendChild(canvasContainer);
+
+        // Create the chart
+        const ctx = document.getElementById(`chart-${material_id}`).getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: material.subtypes, // Labels are subtypes (Wine Bottles, Lightbulbs, etc.)
+                datasets: [{
+                    label: 'Waste Amount (kg)',
+                    data: material.waste_amounts, // Waste amounts as data
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
 </script>
 
 <!-- Access to chart.js -->

@@ -509,7 +509,7 @@ app.get('/dashboard/data/:id', async (req, res) => {
   const wasteGen = await getWasteGenById(id)
   const wasteComp = await getWasteCompById(id)
 
-  //console.log(wasteComp)
+  console.log(wasteComp)
 
   res.render('dashboard/view-data', {
     layout: 'dashboard',
