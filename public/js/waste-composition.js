@@ -29,16 +29,17 @@ document.addEventListener("DOMContentLoaded", function () {
         const jsonObject = Object.fromEntries(formData.entries());
 
         let wasteComposition = [];
+
         document.querySelectorAll(".waste-category").forEach(categoryDiv => {
             categoryDiv.querySelectorAll(".waste-entry").forEach(entry => {
-                const materialName = categoryDiv.dataset.category;
-                const material_id = materialMap[materialName] || null; // Convert category name to ID
+                const material_name = categoryDiv.dataset.category;
+                const material_id = materialMap[material_name] || null; // Convert category name to ID
                 const subtype_remarks = entry.querySelector('input[name$="[name]"]').value.trim();
                 const origin_id = entry.querySelector('select[name$="[origin]"]').value;
                 const waste_amount = parseFloat(entry.querySelector('input[name$="[weight]"]').value) || 0;
 
                 if (material_id && subtype_remarks && origin_id && waste_amount > 0) {
-                    wasteComposition.push({ material_id, subtype_remarks, origin_id, waste_amount });
+                    wasteComposition.push({ material_name, material_id, subtype_remarks, origin: origin_id, waste_amount });
                 }
             });
         });
@@ -63,41 +64,43 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("Something went wrong.");
         }
     });
+
+    
 });
 
 
     
-    const container = document.getElementById("wasteComposition");
-    categories.forEach(category => {
-        let categoryDiv = document.createElement("div");
-        categoryDiv.className = "waste-category";
-        categoryDiv.dataset.category = category;
-        categoryDiv.innerHTML = `
-            <label>${category.replace("_", " ").toUpperCase()}:</label>
-            <div class="entries"></div>
-            <button class="btn-approve" type="button" onclick="addEntry('${category}')">
-                <i class="fa-solid fa-plus"></i> Add Entry
-            </button>
-        `;
-        container.appendChild(categoryDiv);
-    });
+const container = document.getElementById("wasteComposition");
+categories.forEach(category => {
+    let categoryDiv = document.createElement("div");
+    categoryDiv.className = "waste-category";
+    categoryDiv.dataset.category = category;
+    categoryDiv.innerHTML = `
+        <label>${category.replace("_", " ").toUpperCase()}:</label>
+        <div class="entries"></div>
+        <button class="btn-approve" type="button" onclick="addEntry('${category}')">
+            <i class="fa-solid fa-plus"></i> Add Entry
+        </button>
+    `;
+    container.appendChild(categoryDiv);
+});
 
-    // Validate before form submission
-    document.querySelector("form").addEventListener("submit", function (event) {
-        if (!validateTotalPercentage()) {
-            event.preventDefault(); // Prevent form submission
-            alert("Error: Total waste composition must equal 100%.");
-            return false;
-        }
-    });
-    
+// Validate before form submission
+document.querySelector("form").addEventListener("submit", function (event) {
+    if (!validateTotalPercentage()) {
+        event.preventDefault(); // Prevent form submission
+        alert("Error: Total waste composition must equal 100%.");
+        return false;
+    }
+});
 
-    // Validate on input change
-    document.addEventListener("input", function (event) {
-        if (event.target.classList.contains("weight-input")) {
-            validateTotalPercentage();
-        }
-    });
+
+// Validate on input change
+document.addEventListener("input", function (event) {
+    if (event.target.classList.contains("weight-input")) {
+        validateTotalPercentage();
+    }
+});
 
 
 function addEntry(category) {

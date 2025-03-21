@@ -118,38 +118,43 @@ export async function submitForm(name, company_name, region, province, municipal
             throw new Error("Failed to insert into waste_generation, collection_id is NULL.");
         }
 
-        // Insert into data_collection_periods table
-        await sql.query(
+        const [dataCollectResult] = await sql.query(
             `INSERT INTO data_collection_periods (location_code, date_start, date_end)
             VALUES (?, ?, ?)`, 
             [location_id, date_start, date_end]
         );
+        
+        // Get latest ID from the insert result
+        const dataCollectId = dataCollectResult.insertId;
+
 
         // Insert into waste_composition table (only if wasteComposition is provided)
         if (formattedWasteComposition && formattedWasteComposition.length > 0) {
+            const connection = await sql.getConnection(); // Get a connection from the pool
+
             try {
-                await sql.beginTransaction(); // Start transaction
+                await connection.beginTransaction(); // Start transaction
 
                 // Construct bulk insert values
                 let insertValues = [];
                 let insertPlaceholders = [];
                 
                 for (const entry of formattedWasteComposition) {
-                    let { material_name, origin_id, waste_amount, subtype_remarks } = entry;
+                    let { material_id, origin_id, waste_amount, subtype_remarks } = entry;
 
-                    const [materialResult] = await sql.query(
-                        `SELECT id FROM materials WHERE name = ?`, [material_name]
+                    const [materialResult] = await connection.query(
+                        `SELECT id FROM waste_materials WHERE id = ?`, [material_id]
                     );
                     
                     if (materialResult.length === 0) {
-                        throw new Error(`Invalid material category: ${material_name}`);
+                        throw new Error(`Invalid material category: ${material_id}`);
                     }
                     
-                    const material_id = parseInt(materialResult[0].id, 10); // Ensure it's an integer
+                    //const material_id = parseInt(materialResult[0].id, 10); // Ensure it's an integer
                     
                     // Fetch origin_id from database (if necessary)
-                    const [originResult] = await sql.query(
-                        `SELECT id FROM origins WHERE id = ?`, [origin_id]
+                    const [originResult] = await connection.query(
+                        `SELECT id FROM waste_origins WHERE id = ?`, [origin_id]
                     );
 
                     if (originResult.length === 0) {
@@ -157,7 +162,7 @@ export async function submitForm(name, company_name, region, province, municipal
                     }
 
                     // Prepare values for bulk insert
-                    insertValues.push(collection_id, material_id, origin_id, waste_amount, subtype_remarks || null);
+                    insertValues.push(dataCollectId, material_id, origin_id, waste_amount, subtype_remarks || null);
                     insertPlaceholders.push("(?, ?, ?, ?, ?)");
                 }
 
@@ -166,13 +171,16 @@ export async function submitForm(name, company_name, region, province, municipal
                     INSERT INTO waste_composition (collection_id, material_id, origin_id, waste_amount, subtype_remarks) 
                     VALUES ${insertPlaceholders.join(", ")}
                 `;
-                await sql.query(query, insertValues);
+                
+                await connection.query(query, insertValues);
 
-                await sql.commit(); // Commit transaction if successful
+                await connection.commit(); // Commit transaction if successful
             } catch (error) {
-                await sql.rollback(); // Rollback on error
+                await connection.rollback(); // Rollback on error
                 console.error("Error inserting waste composition:", error);
                 throw new Error("Failed to insert waste composition data.");
+            } finally {
+                connection.release(); // Release the connection back to the pool
             }
         }
 

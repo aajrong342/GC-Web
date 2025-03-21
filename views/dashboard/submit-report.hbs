@@ -1,6 +1,6 @@
 <h2>Form Submission</h2>
 
-<form id="waste-form" action="/submit-report" method="POST">
+<form id="waste-form">
 
     <fieldset>
         <legend>Personal Information</legend>
@@ -73,52 +73,3 @@
 </form>
 
 <script src="../js/locations.js"></script>
-<script>
-document.getElementById("waste-form").addEventListener("submit", async function (event) {
-    event.preventDefault(); // Prevent default submission
-
-    if (!validateTotalPercentage()) {
-        alert("Error: Total waste composition must equal 100%.");
-        return;
-    }
-
-    const formData = new FormData(this);
-    const jsonObject = Object.fromEntries(formData.entries());
-
-    // Collect waste composition entries
-    let wasteComposition = [];
-    document.querySelectorAll(".waste-category").forEach(categoryDiv => {
-        const category = categoryDiv.dataset.category;
-        categoryDiv.querySelectorAll(".waste-entry").forEach(entry => {
-            wasteComposition.push({
-                material_id: entry.querySelector('select[name$="[material]"]').value,, // Store category name
-                subtype_remarks: entry.querySelector('input[name$="[name]"]').value,
-                origin_id: entry.querySelector('select[name$="[origin]"]').value,
-                waste_amount: parseFloat(entry.querySelector('input[name$="[weight]"]').value) || 0
-            });
-        });
-    });
-
-    jsonObject.wasteComposition = wasteComposition; // Attach waste composition data
-
-    try {
-        const response = await fetch("/submit-report", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(jsonObject)
-        });
-
-        const result = await response.json();
-        if (response.ok) {
-            alert("Report submitted successfully!");
-        } else {
-            alert(result.error || "Submission failed.");
-        }
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Something went wrong.");
-    }
-});
-
-
-</script>
