@@ -17,6 +17,11 @@ const materialMap = {
 };
 
 document.addEventListener("DOMContentLoaded", function () {
+    // Set date submitted to current date
+    let today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+    document.getElementById("date_submitted").value = today;
+
+    // Waste form submission process begins with clicking submit
     document.getElementById("waste-form").addEventListener("submit", async function (event) {
         event.preventDefault();
 
