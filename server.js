@@ -18,7 +18,9 @@ import {
   deactivateUserByEmail,
   lastLogin,
   submitForm,
-  getDataByLocation
+  getDataByLocation,
+  getWasteGenById,
+  getWasteCompById
 } from './database.js'
 
 // File Upload
@@ -193,6 +195,16 @@ Handlebars.registerHelper('textDateTime', function(date) {
   return `${dateString} ${timeString}` 
 })
 
+// Show number with commas
+Handlebars.registerHelper('commaNumber', function(num) {
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+})
+
+// Return json object
+Handlebars.registerHelper('json', function(context) {
+  return JSON.stringify(context);
+});
+
 /* ---------------------------------------
     ROUTES (PUBLIC)
 --------------------------------------- */
@@ -354,9 +366,6 @@ app.get('/dashboard/users', async (req, res) => {
 
 // Get one user from ID (user profile)
 app.get('/dashboard/profile', async (req, res) => {
-  //const id = req.params.id
-  //const user = await getUserById(id)
-
   res.render('dashboard/user-profile', {
     layout: 'dashboard',
     title: `GC Dashboard | Profile`
@@ -495,6 +504,21 @@ app.post("/submit-report", async (req, res) => {
   }
 });
 
+app.get('/dashboard/data/:id', async (req, res) => {
+  const id = req.params.id
+  const wasteGen = await getWasteGenById(id)
+  const wasteComp = await getWasteCompById(id)
+
+  //console.log(wasteComp)
+
+  res.render('dashboard/view-data', {
+    layout: 'dashboard',
+    title: `GC Dashboard | Entry #${id}`,
+    wasteGen,
+    wasteComp,
+    current_home: true
+  })
+})
 
 // API: Get locations from json
 app.get('/locations', async (req, res) => {

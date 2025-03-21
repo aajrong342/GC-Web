@@ -370,3 +370,15 @@ select {
 .waste-data-btn h1 {
     margin: 0;
 }
+
+/* ------ Data Entry ------ */
+.pie-chart {
+    width: 600px;
+    height: fit-content;
+    padding: 20px;
+}
+
+.waste-comp {
+    margin-top: 15px;
+    height: max-content;
+}

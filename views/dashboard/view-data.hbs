@@ -1,0 +1,117 @@
+<div style="display: flex;">
+    <fieldset>
+        <legend>Submission Info</legend>
+        <table class="user-profile">
+            <tr>
+                <td class="label">Submitted by</td>
+                <td>{{wasteGen.name}}</td>
+            </tr>
+            <tr>
+                <td class="label">Organization Name</td>
+                <td>{{wasteGen.company_name}}</td>
+            </tr>
+            <tr>
+                <td class="label">Date Submitted</td>
+                <td>{{textDate wasteGen.date_submitted}}</td>
+            </tr>
+        </table>
+    </fieldset>
+
+    <fieldset>
+        <legend>Collection Info</legend>
+        <table class="user-profile">
+            <tr>
+                <td class="label">Year of Collection</td>
+                <td>{{wasteGen.year_collected}}</td>
+            </tr>
+            <tr>
+                <td class="label">Start Date</td>
+                <td>{{textDate wasteGen.collection_start}}</td>
+            </tr>
+            <tr>
+                <td class="label">End Date</td>
+                <td>{{textDate wasteGen.collection_end}}</td>
+            </tr>
+        </table>
+    </fieldset>
+
+    <fieldset>
+        <legend>Waste Generation</legend>
+        <table class="user-profile">
+            <tr>
+                <td class="label">Population (based on Census)</td>
+                <td>{{commaNumber wasteGen.population}}</td>
+            </tr>
+            <tr>
+                <td class="label">Waste Generation per Capita (Kg/cap-day)</td>
+                <td>{{commaNumber wasteGen.per_capita}}</td>
+            </tr>
+            <tr>
+                <td class="label">Annual Waste Generation (kg/year)</td>
+                <td>{{commaNumber wasteGen.annual}}</td>
+            </tr>
+        </table>
+    </fieldset>
+</div>
+
+<div style="display: flex;">
+    <fieldset class="waste-comp">
+        <legend>Waste Composition</legend>
+
+        <div class="tb-container">
+            <table>
+                <tr class="tb-header">
+                    <td>Material</td>
+                    <td>Subtype</td>
+                    <td>Origin</td>
+                    <td>Percentage</td>
+                </tr>
+                {{#each wasteComp}}
+                    <tr>
+                        <td>{{material_name}}</td>
+                        <td>{{subtype_remarks}}</td>
+                        <td>{{origin_name}}</td>
+                        <td>{{waste_amount}} %</td>
+                    </tr>
+                {{/each}}
+            </table>
+        </div>
+    </fieldset>
+    <div class="pie-chart">
+        <canvas id="summary-pie"></canvas>
+    </div>
+</div>
+
+<!-- Pass json object -->
+<script>
+    const wasteComp = {{{json wasteComp}}} // Embed the server-side data into JavaScript
+    const pieDiv = document.getElementById('summary-pie')
+
+    // Chart creation
+    new Chart(pieDiv, {
+        type: 'pie',
+        data: {
+            labels: wasteComp.map(row => row.subtype_remarks),
+            datasets: [{
+                label: 'Value',
+                data: wasteComp.map(row => row.waste_amount),
+                borderWidth: 0
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'left',
+                    align: 'start'
+                },
+                tooltip: {
+                    enabled: true
+                }
+            }
+        }
+    })
+</script>
+
+<!-- Access to chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

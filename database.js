@@ -399,3 +399,29 @@ export async function getDataByLocation(locationCode) {
     `)
     return result
 }
+
+// Get single data entry
+export async function getWasteGenById(id) {
+    const [result] = await sql.query(`
+        SELECT
+            c.name, c.company_name,
+            wg.*
+        FROM waste_generation wg
+        JOIN clients c ON wg.client_id = c.client_id
+        WHERE wg.waste_gen_id = ?
+    `, [id])
+    return result[0]
+}
+
+// Get waste composition data
+export async function getWasteCompById(entryId) {
+    const [result] = await sql.query(`
+        SELECT
+            wc.material_id, m.material_name, wc.subtype_remarks, o.origin_name, wc.waste_amount
+        FROM waste_composition wc
+        JOIN waste_materials m ON wc.material_id = m.id
+        JOIN waste_origins o ON wc.origin_id = o.id
+        WHERE wc.waste_gen_id = ?
+    `, [entryId])
+    return result // important, to not return an array
+}
