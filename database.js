@@ -344,48 +344,33 @@ async function getLocationName(regionCode, provinceCode, municipalityCode, exist
             console.log(`Using existing municipality/city name: ${existingMunicipalityName}`);
             return existingMunicipalityName;
         }
+
         console.log(`Searching for region code: ${regionCode}`);
 
+        const psgcRegions = await PSGCResource.getRegions();
+
         // 🔹 Find the region name using the regionEquivalence mapping
-        const regionName = Object.keys(regionEquivalence).find(key => regionEquivalence[key] === regionCode);
+        const regionName = psgcRegions?.find(r => r.code === regionCode)?.name ||
+                             `Unknown Region (${regionCode})`;
         if (!regionName) {
             console.error(`Region not found for code: ${regionCode}`);
             return `Unknown Region (${regionCode})`;
         }
 
-        // 🔹 Determine which province mapping to use
-        let provinceMapping;
-        switch (regionCode) {
-            case '1': provinceMapping = provinceCAR; break;
-            case '2': provinceMapping = provinceIllocos; break;
-            case '3': provinceMapping = provinceCagayan; break;
-            case '4': provinceMapping = provinceCentralLuzon; break;
-            case '5': provinceMapping = provinceCALABARZON; break;
-            case '6': provinceMapping = provinceMIMAROPA; break;
-            case '7': provinceMapping = provinceBicol; break;
-            case '8': provinceMapping = provinceWestVis; break;
-            case '9': provinceMapping = provinceCentralVis; break;
-            case '10': provinceMapping = provinceEastVis; break;
-            case '11': provinceMapping = provinceZamb; break;
-            case '12': provinceMapping = provinceNorthMin; break;
-            case '13': provinceMapping = provinceDavao; break;
-            case '14': provinceMapping = provinceSOCCSKSARGEN; break;
-            case '15': provinceMapping = provinceCaraga; break;
-            case '16': provinceMapping = provinceBARMM; break;
-            default: 
-                console.error(`Unknown region code: ${regionCode}`);
-                provinceMapping = null;
+        // 🔹 Find the province name if applicable
+        const psgcProvinces = await PSGCResource.getProvinces()
+
+        const provinceName = psgcProvinces?.find(p => p.code === provinceCode)?.name ||
+                             `Unknown Province (${provinceCode})`;
+        if (!provinceName) {
+            console.error(`Region not found for code: ${provinceCode}`);
+            return `Unknown Region (${provinceCode})`;
         }
 
-        // 🔹 Find the province name if applicable
-        let provinceName = null; // Set explicitly to null unless found.
-        if (provinceMapping && provinceCode) {
-            provinceName = Object.keys(provinceMapping)
-                .find(key => String(provinceMapping[key]) === String(provinceCode)) || null;
-        }
         
         // 🔹 Fetch municipality or city name from PSGC data
         const psgcData = await fetchPSGCData();
+
         const locationName = psgcData?.municipalities?.find(m => m.code === municipalityCode)?.name ||
                              psgcData?.cities?.find(c => c.code === municipalityCode)?.name ||
                              `Unknown Municipality/City (${municipalityCode})`;

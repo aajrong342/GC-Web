@@ -542,6 +542,17 @@ app.get('/locations', async (req, res) => {
   res.send(locations)
 })
 
+app.get('/test-locations', async (req, res) => {
+  // Get all location names
+  const [municipalities, cities] = await Promise.all([
+    PSGCResource.getMunicipalities(),
+    PSGCResource.getCities()
+  ]);
+
+  const locations = { municipalities, cities };
+  res.send(locations)
+})
+
 // API: Create user
 app.post('/users', async (req, res) => {
   const { roleId, lastName, firstName, email, password, contactNo } = req.body
