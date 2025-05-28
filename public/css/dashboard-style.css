@@ -402,3 +402,33 @@ select {
     color: white;
     border: none;
 }
+
+/* ------ Data Submission Menu ------ */
+.btn-dat-submission {
+    font-size: larger;
+    border: none;
+    border-radius: 10px;
+    background-color: #18A50C;
+    color: white;
+    padding: 25px;
+    margin: 10px;
+}
+.btn-dat-submission:hover {
+    cursor: pointer;
+}
+
+/* ------ Data Form ------ */
+.step { display: none; }
+.step.active { display: block; }
+
+.step-labels span {
+    margin-right: 10px;
+    padding: 5px 10px;
+    background: #eee;
+    border-radius: 5px;
+}
+
+.step-labels .current {
+    background: #007bff;
+    color: white;
+}

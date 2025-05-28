@@ -481,7 +481,17 @@ app.get('/tests', async (req, res) => {
   }
 });
 
+// Data submission menu
 app.get('/dashboard/submit-report', async (req, res) => {
+  res.render('dashboard/submit-report-menu', {
+    layout: 'dashboard',
+    title: 'GC Dashboard | Data Submission Menu',
+    current_report: true
+  })
+})
+
+// Submit data by manual form
+app.get('/dashboard/submit-report/form', async (req, res) => {
   const sectors = await getSectors()
   const supertypes = await getWasteSupertypes()
   const types = await getWasteTypes()
@@ -491,13 +501,22 @@ app.get('/dashboard/submit-report', async (req, res) => {
     supertype.types = types.filter(t => t.supertype_id === supertype.id)
   }
 
-  res.render('dashboard/submit-report', {
+  res.render('dashboard/data-form', {
     layout: 'dashboard',
-    title: 'GC Dashboard | Submit Your Report',
+    title: 'GC Dashboard | Data Submission Form',
     current_report: true,
     sectors,
     supertypes,
     types
+  })
+})
+
+// Submit data by uploading a spreadsheet
+app.get('/dashboard/submit-report/upload', async (req, res) => {
+  res.render('dashboard/data-upload', {
+    layout: 'dashboard',
+    title: 'GC Dashboard | Upload Data Spreadsheet',
+    current_report: true
   })
 })
 
