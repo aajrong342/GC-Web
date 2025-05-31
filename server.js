@@ -35,6 +35,9 @@ import { PSGCResource } from 'psgc-areas'
 // Favicon
 import favicon from 'serve-favicon'
 
+// SheetJS
+import * as XLSX from 'xlsx'
+
 /* ---------------------------------------
     EXPRESS
 --------------------------------------- */
@@ -241,7 +244,8 @@ app.post('/login', async (req, res) => {
     contact_no: user.contact_no,
     org_id: user.partner_org_id,
     role_name: user.role_name,
-    supertype: user.supertype
+    supertype: user.supertype,
+    company: user.company_name
   }
 
   // Update user's last login date
@@ -465,22 +469,6 @@ app.get('/dashboard/partners', async (req, res) => {
   })
 })
 
-app.get('/tests', async (req, res) => {
-  try {
-      const wasteData = await getWasteDataWithCoordinates();
-      console.log("Fetched Waste Data:", wasteData); // Debugging output
-
-      res.render('tests', {
-          layout: 'public',
-          title: 'Test Table',
-          wasteData 
-      });
-  } catch (error) {
-      console.error("Error fetching waste data:", error);
-      res.status(500).send("Internal Server Error");
-  }
-});
-
 // Data submission menu
 app.get('/dashboard/submit-report', async (req, res) => {
   res.render('dashboard/submit-report-menu', {
@@ -535,11 +523,14 @@ const wasteMaterialMap = {
 
 app.post("/submit-report", async (req, res) => {
   try {
-    console.log("Received payload:", req.body); // Debugging line
-    const { name, company_name, region, province, municipality, barangay, 
-        population, per_capita, annual, date_submitted, year_collected, 
-        date_start, date_end, location_id, wasteComposition } = req.body;
+    const { region, province, municipality, population, per_capita,
+         annual, date_start, date_end,
+        //wasteComposition
+      } = req.body;
 
+    console.log("Received payload:", req.body); // Debugging line
+
+    /*
     const formattedWasteComposition = wasteComposition.map((entry) => {
         console.log(entry);
 
@@ -555,24 +546,23 @@ app.post("/submit-report", async (req, res) => {
             subtype_remarks: entry.subtype_remarks || null
         };
     }).filter(entry => entry !== null); // Remove any invalid entries
+    */
 
-    console.log(formattedWasteComposition);
+    //console.log(formattedWasteComposition);
 
     // Submit form data
     const result = await submitForm(
-        name, company_name, region, province, municipality, barangay, 
-        population, per_capita, annual, date_submitted, 
-        year_collected, date_start, date_end, formattedWasteComposition
+      req.session.user.id, region, province, municipality, population, per_capita, annual, date_start, date_end
     );
 
     // 🔹 Fetch updated waste data after submitting the report
-    const wasteData = await getWasteDataWithCoordinates();
-    console.log("Updated waste data:", wasteData);
+    //const wasteData = await getWasteDataWithCoordinates();
+    //console.log("Updated waste data:", wasteData);
 
     res.status(200).json({
         message: "Report submitted successfully",
         reportResult: result,
-        updatedWasteData: wasteData
+        //updatedWasteData: wasteData
     });
 
   } catch (error) {

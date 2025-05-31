@@ -106,40 +106,25 @@ export async function getWasteTypes() {
 /* ---------------------------------------
     DATA SUBMISSION
 --------------------------------------- */
-export async function submitForm(name, company_name, region, province, municipality,
-    barangay, population, per_capita, annual, date_submitted, year_collected, date_start, date_end, formattedWasteComposition) {
+export async function submitForm(user_id, region_id, province_id, municipality_id,
+    population, per_capita, annual, collection_start, collection_end) {
    try {
-       // Insert into clients table
-       const [clientResult] = await sql.query(
-           `INSERT INTO clients (name, company_name) VALUES (?, ?)`, 
-           [name, company_name]
-       );
-       const client_id = clientResult.insertId;
-
-       // Insert into locations table
-       const [locationResult] = await sql.query(
-           `INSERT INTO locations (region, province, municipality, barangay) VALUES (?, ?, ?, ?)`, 
-           [region, province, municipality, barangay]
-       );
-       const location_id = locationResult.insertId;
-       const location_code = location_id; // Assuming location_code is the same as location_id
-
-       // Insert into waste_generation table
-       const [wasteGenResult] = await sql.query(
-           `INSERT INTO waste_generation (client_id, location_id, population, per_capita, annual, date_submitted, year_collected, collection_start, collection_end)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
-           [client_id, location_id, population, per_capita, annual, date_submitted, year_collected, date_start, date_end]
+       // Insert into date_entry table
+       const [dataEntryResult] = await sql.query(
+           `INSERT INTO greencycle.data_entry (user_id, region_id, province_id, municipality_id, population, per_capita, annual, date_submitted, collection_start, collection_end, status)
+           VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, 'Pending Review')`, 
+           [user_id, region_id, province_id, municipality_id, population, per_capita, annual, collection_start, collection_end]
        );
 
-       const collection_id = wasteGenResult.insertId;
+       const collection_id = dataEntryResult.insertId;
 
        // Ensure collection_id is valid
        if (!collection_id) {
-           throw new Error("Failed to insert into waste_generation, collection_id is NULL.");
+           throw new Error("Failed to insert into data_entry, collection_id is NULL.");
        }
 
-
        // Insert into waste_composition table (only if wasteComposition is provided)
+       /*
        if (formattedWasteComposition && formattedWasteComposition.length > 0) {
            const connection = await sql.getConnection(); // Get a connection from the pool
 
@@ -192,6 +177,7 @@ export async function submitForm(name, company_name, region, province, municipal
                connection.release(); // Release the connection back to the pool
            }
        }
+        */
 
        return { success: true, message: "Form submitted successfully!" };
 

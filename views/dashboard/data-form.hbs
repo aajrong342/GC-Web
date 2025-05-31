@@ -27,7 +27,7 @@
             <input type="text" name="name" id="name" value="{{user.firstname}} {{user.lastname}}" readonly><br><br>
             
             <label for="client">Company:</label>
-            <input type="text" id="client" name="company_name" placeholder="Enter Company Name" required><br><br>
+            <input type="text" id="client" name="company_name" value="{{user.company}}" readonly><br><br>
         </fieldset><br>
         
         <!-- Location Selection -->
@@ -47,6 +47,7 @@
                     <option value=''>Select a province</option>
                     <!-- Populated by locations.js -->
                 </select>
+            </p>
 
             <p>
                 <label for="municipalities">Select a city/municipality:</label><br>
@@ -54,13 +55,17 @@
                     <option value=''>Select a city/municipality</option>
                     <!-- Populated by locations.js -->
                 </select>
+            </p>
+
+            <p>
+                <label for="barangay">Barangay (if applicable):</label><br>
+                <input type="text" id="barangay" name="barangay">
+            </p>
         </fieldset>
 
         <!-- Waste Generation -->
         <fieldset>
             <legend>Location Information</legend>
-            <label for="barangay">Barangay (if applicable):</label>
-            <input type="text" id="barangay" name="barangay"><br><br>
                 
             <label for="population">Population based on Census:</label>
             <input type="number" id="population" name="population" required min="0"><br><br>
@@ -106,23 +111,19 @@
                             </tr>
                         {{/each}}
                     </table>
-
-                <!--
-                    <div id="wasteComposition" name="waste_composition">
-                        <script src="/js/waste-composition.js"></script>
-                    </div>
-                -->
+                    
             </fieldset>
         </div>
     {{/each}}
 
     <div>
-        <button type="button" id="prevBtn">Previous</button>
-        <button type="button" id="nextBtn">Next</button>
-        <button type="submit" id="submitBtn" style="display:none;">Submit</button>
+        <button id="prevBtn" class="disabled">Previous</button>
+        <button id="nextBtn" class="disabled">Next</button>
+        <button class="btn-approve" type="submit" id="submitBtn">Submit</button>
     </div>
     {{!-- <br><button class="btn-approve" type="submit">Submit</button> --}}
 </form>
 
 <script src="/../js/form-step.js" type="text/javascript"></script>
 <script src="/../js/locations.js" type="text/javascript"></script>
+<script src="/../js/waste-composition.js"></script>
