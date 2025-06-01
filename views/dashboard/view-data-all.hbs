@@ -1,0 +1,21 @@
+<h1>Results: {{data.length}} entries</h1>
+
+{{#ifEquals data.length 0}}
+    No entries found.
+{{/ifEquals}}
+
+{{#each data}}
+    <a href='/dashboard/data/{{data_entry_id}}'>
+        <button class='waste-data-btn'>
+            <h1>Entry #{{data_entry_id}}</h1>
+            <i>Submitted on {{textDate date_submitted}}</i>
+            
+            <p>
+                <b>Submitted by:</b> {{uppercase lastname}}, {{firstname}}<br>
+                <i>{{company_name}}</i>
+            </p>
+
+            <b>Collection Period:</b> {{textDate collection_start}} - {{textDate collection_end}}<br>
+        </button>
+    </a>
+{{/each}}

@@ -68,7 +68,7 @@ export async function createUser(roleId, lastName, firstName, email, password, c
 }
 
 export async function lastLogin(userId) {
-    await sql.query(`UPDATE user SET last_login = now() WHERE user_id=?`, [userId], function (err, result) {
+    await sql.query(`UPDATE user SET last_login = now(), successful_logins = successful_logins + 1 WHERE user_id=?`, [userId], function (err, result) {
         if (err) throw err;
         console.log(result.affectedRows + " record(s) updated");
     })
@@ -528,16 +528,32 @@ export async function resetApplicationStatus(appId, adminNotes) {
     DATA RETRIEVAL
 --------------------------------------- */
 
-// Get all data (unfiltered)
-export async function getAllData() {
+// Get all data with status
+export async function getDataByStatus(status) {
     const [result] = await sql.query(`
         SELECT
-            loc.region, loc.region_name, loc.province, loc.province_name, loc.municipality, loc.municipality_name,
-            c.name, c.company_name,
-            wg.*
-        FROM waste_generation wg
-        JOIN locations loc ON wg.location_id = loc.location_id
-        JOIN clients c ON wg.client_id = c.client_id
+            dat.data_entry_id, u.lastname, u.firstname, u.company_name,
+            dat.region_id, dat.province_id, dat.municipality_id,
+            dat.date_submitted, dat.collection_start, dat.collection_end,
+            dat.status
+        FROM data_entry dat
+        JOIN user u ON u.user_id = dat.user_id
+        WHERE dat.status = '${status}'
+    `)
+    return result
+}
+
+// Get all data by user
+export async function getDataByUser(userId) {
+    const [result] = await sql.query(`
+        SELECT
+            dat.data_entry_id, u.lastname, u.firstname, u.company_name,
+            dat.region_id, dat.province_id, dat.municipality_id,
+            dat.date_submitted, dat.collection_start, dat.collection_end,
+            dat.status
+        FROM data_entry dat
+        JOIN user u ON u.user_id = dat.user_id
+        WHERE u.user_id = ${userId}
     `)
     return result
 }
@@ -546,15 +562,15 @@ export async function getAllData() {
 export async function getDataByLocation(locationCode) {
     const [result] = await sql.query(`
         SELECT
-            loc.region, loc.region_name, loc.province, loc.province_name, loc.municipality, loc.municipality_name,
-            c.name, c.company_name,
-            wg.*
-        FROM waste_generation wg
-        JOIN locations loc ON wg.location_id = loc.location_id
-        JOIN clients c ON wg.client_id = c.client_id
-        WHERE loc.region = ${locationCode}
-        OR loc.province = ${locationCode}
-        OR loc.municipality = ${locationCode}
+            dat.data_entry_id, u.lastname, u.firstname, u.company_name,
+            dat.region_id, dat.province_id, dat.municipality_id,
+            dat.date_submitted, dat.collection_start, dat.collection_end,
+            dat.status
+        FROM data_entry dat
+        JOIN user u ON u.user_id = dat.user_id
+        WHERE dat.region_id = ${locationCode}
+        OR dat.province_id = ${locationCode}
+        OR dat.municipality_id = ${locationCode}
     `)
     return result
 }
@@ -585,4 +601,32 @@ export async function getWasteCompById(entryId) {
         WHERE wc.waste_gen_id = ?
     `, [entryId])
     return result // important, to not return an array
+}
+
+/* ---------------------------------------
+    DATA REVIEW
+--------------------------------------- */
+
+// Approve data entry
+export async function approveData(dataId) {
+    await sql.query(`
+        UPDATE greencycle.data_entry
+        SET status = 'Approved'
+        WHERE data_entry_id = ?
+    `, [dataId], function (err, result) {
+        if (err) throw err;
+        console.log(result.affectedRows + " record(s) updated");
+    })
+}
+
+// Reject data entry
+export async function rejectData(dataId, comment) {
+    await sql.query(`
+        UPDATE greencycle.data_entry
+        SET status = 'Rejected', rejection_reason = ?
+        WHERE data_entry_id = ?
+    `, [comment, dataId], function (err, result) {
+        if (err) throw err;
+        console.log(result.affectedRows + " record(s) updated");
+    })
 }

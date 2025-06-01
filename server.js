@@ -19,9 +19,10 @@ import {
   lastLogin,
   getSectors, submitForm,
   getDataByLocation,
-  getWasteGenById, getWasteCompById, getAllData,
+  getWasteGenById, getWasteCompById, getDataByStatus,
   getWasteSupertypes,
-  getWasteTypes
+  getWasteTypes,
+  getDataByUser
 } from './database.js'
 
 // File Upload
@@ -350,19 +351,18 @@ app.get('/test-chart', (req, res) => {
 // Dashboard home page
 app.get('/dashboard', (req, res) => {
   // This would typically check for authentication
-  res.render('dashboard/waste-comp-main', {
+  res.render('dashboard/view-data-search', {
     layout: 'dashboard',
     title: 'GC Dashboard | Main Dashboard',
     current_home: true
   })
 })
 
-// Get all data entries
-app.get('/dashboard/all', async (req, res) => {
-  const data = await getAllData()
+// Get all approved data entries
+app.get('/dashboard/data/all', async (req, res) => {
+  const data = await getDataByStatus('Approved')
 
-  // This would typically check for authentication
-  res.render('dashboard/all-data', {
+  res.render('dashboard/view-data-all', {
     layout: 'dashboard',
     title: 'GC Dashboard | All Data Entries',
     data,
@@ -370,6 +370,20 @@ app.get('/dashboard/all', async (req, res) => {
   })
 })
 
+// Get all data entries by one user
+app.get('/dashboard/data/user/:id', async (req, res) => {
+  const user = Number(req.session.user.id)
+  const data = await getDataByUser(user)
+
+  res.render('dashboard/view-data-all', {
+    layout: 'dashboard',
+    title: 'GC Dashboard | Your Reports',
+    data,
+    current_user_report: true
+  })
+})
+
+// View one data entry
 app.get('/dashboard/data/:id', async (req, res) => {
   const id = req.params.id
   const wasteGen = await getWasteGenById(id)

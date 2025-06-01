@@ -163,16 +163,28 @@ function showWasteData(wasteData) {
         wasteData.forEach((entry) => {
             // Format submission date
             var options = { year: 'numeric', month: 'long', day: 'numeric' };
+            
             var date = new Date(entry.date_submitted)
-            var formattedDate = date.toLocaleDateString("en-US", options); //  September 17, 2016
+            var newSubmissionDate = date.toLocaleDateString("en-US", options); //  September 17, 2016
+
+            var colStart = new Date(entry.collection_start)
+            var newColStart = colStart.toLocaleDateString("en-US", options); //  September 17, 2016
+
+            var colEnd = new Date(entry.collection_end)
+            var newColEnd = colEnd.toLocaleDateString("en-US", options); //  September 17, 2016
 
             output += `
-                <a href='/dashboard/data/${entry.waste_gen_id}'>
+                <a href='/dashboard/data/${entry.data_entry_id}'>
                     <button class='waste-data-btn'>
-                        <h1>Entry #${entry.waste_gen_id} - ${entry.municipality_name}, ${entry.province_name}, ${entry.region_name}</h1>
-                        <i>Submitted on ${formattedDate}</i>
+                        <h1>Entry #${entry.data_entry_id}</h1>
+                        <i>Submitted on ${newSubmissionDate}</i>
                         
-                        <p><b>Submitted by:</b> ${entry.name}</p>
+                        <p>
+                            <b>Submitted by:</b> ${entry.lastname.toUpperCase()}, ${entry.firstname}<br>
+                            <i>${entry.company_name}</i>
+                        </p>
+
+                        <b>Collection Period:</b> ${newColStart} - ${newColEnd}
                     </button>
                 </a>
         `})
