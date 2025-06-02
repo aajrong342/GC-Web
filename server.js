@@ -22,7 +22,8 @@ import {
   getWasteGenById, getWasteCompById, getDataByStatus,
   getWasteSupertypes,
   getWasteTypes,
-  getDataByUser
+  getDataByUser,
+  getPsgcName
 } from './database.js'
 
 // File Upload
@@ -523,11 +524,27 @@ app.get('/dashboard/submit-report/upload', async (req, res) => {
 })
 
 app.post("/submit-report", async (req, res) => {
-  try {
-    const {
-        region, province, municipality, population, per_capita, annual, date_start, date_end, wasteComposition
-      } = req.body;
+  // Request body
+  const {
+    region, province, municipality, population, per_capita, annual, date_start, date_end, wasteComposition
+  } = req.body;
 
+  // Prepare PSGC data for location names
+  const psgcRegions = await PSGCResource.getRegions()
+  const psgcProvinces = await PSGCResource.getProvinces()
+  const psgcMunicipalities = await PSGCResource.getMunicipalities()
+  const psgcCities = await PSGCResource.getCities()
+
+  // Get location names
+  const regionName = getPsgcName(psgcRegions, region)
+  const provinceName = getPsgcName(psgcProvinces, province) || null
+  const municipalityName = getPsgcName(psgcMunicipalities, municipality) || getPsgcName(psgcCities, municipality) || null
+
+  // Set full location name
+  const parts = [municipalityName, provinceName, regionName].filter(Boolean)
+  const fullLocation = parts.join(', ')
+
+  try {
     // Format waste composition entries for insertion to DB
     const newWasteComp = wasteComposition.map((entry) => {
         return {
@@ -537,11 +554,9 @@ app.post("/submit-report", async (req, res) => {
         };
     }).filter(entry => entry !== null); // Remove any invalid entries
 
-    console.log("Received payload:", req.body); // Debugging line
-
     // Submit form data
     const result = await submitForm(
-      req.session.user.id, region, province, municipality, population, per_capita, annual, date_start, date_end, newWasteComp
+      req.session.user.id, region, province, municipality, fullLocation, population, per_capita, annual, date_start, date_end, newWasteComp
     );
 
     res.status(200).json({

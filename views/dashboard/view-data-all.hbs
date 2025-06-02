@@ -7,8 +7,8 @@
 {{#each data}}
     <a href='/dashboard/data/{{data_entry_id}}'>
         <button class='waste-data-btn'>
-            <h1>Entry #{{data_entry_id}}</h1>
-            <i>Submitted on {{textDate date_submitted}}</i>
+            <h2 style="margin: 0">Entry #{{data_entry_id}} - {{location_name}}</h2>
+            <i>Submitted on {{textDate date_submitted}}</i><br>
             
             <p>
                 <b>Submitted by:</b> {{uppercase lastname}}, {{firstname}}<br>

@@ -106,14 +106,14 @@ export async function getWasteTypes() {
 /* ---------------------------------------
     DATA SUBMISSION
 --------------------------------------- */
-export async function submitForm(user_id, region_id, province_id, municipality_id,
-    population, per_capita, annual, collection_start, collection_end, wasteComposition) {
+export async function submitForm(user_id, region_id, province_id, municipality_id, location_name, population, per_capita, annual, collection_start, collection_end, wasteComposition) {
+
    try {
        // Insert into date_entry table
        const [dataEntryResult] = await sql.query(
-           `INSERT INTO greencycle.data_entry (user_id, region_id, province_id, municipality_id, population, per_capita, annual, date_submitted, collection_start, collection_end, status)
-           VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, 'Pending Review')`, 
-           [user_id, region_id, province_id, municipality_id, population, per_capita, annual, collection_start, collection_end]
+           `INSERT INTO greencycle.data_entry (user_id, region_id, province_id, municipality_id, location_name, population, per_capita, annual, date_submitted, collection_start, collection_end, status)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, 'Pending Review')`, 
+           [user_id, region_id, province_id, municipality_id, location_name, population, per_capita, annual, collection_start, collection_end]
        );
 
        const data_entry_id = dataEntryResult.insertId;
@@ -532,7 +532,8 @@ export async function resetApplicationStatus(appId, adminNotes) {
 export async function getDataByStatus(status) {
     const [result] = await sql.query(`
         SELECT
-            dat.data_entry_id, u.lastname, u.firstname, u.company_name,
+            dat.data_entry_id, dat.location_name,
+            u.lastname, u.firstname, u.company_name,
             dat.region_id, dat.province_id, dat.municipality_id,
             dat.date_submitted, dat.collection_start, dat.collection_end,
             dat.status
@@ -540,6 +541,7 @@ export async function getDataByStatus(status) {
         JOIN user u ON u.user_id = dat.user_id
         WHERE dat.status = '${status}'
     `)
+
     return result
 }
 
@@ -547,7 +549,8 @@ export async function getDataByStatus(status) {
 export async function getDataByUser(userId) {
     const [result] = await sql.query(`
         SELECT
-            dat.data_entry_id, u.lastname, u.firstname, u.company_name,
+            dat.data_entry_id, dat.location_name,
+            u.lastname, u.firstname, u.company_name,
             dat.region_id, dat.province_id, dat.municipality_id,
             dat.date_submitted, dat.collection_start, dat.collection_end,
             dat.status
@@ -555,6 +558,7 @@ export async function getDataByUser(userId) {
         JOIN user u ON u.user_id = dat.user_id
         WHERE u.user_id = ${userId}
     `)
+
     return result
 }
 
@@ -562,7 +566,8 @@ export async function getDataByUser(userId) {
 export async function getDataByLocation(locationCode) {
     const [result] = await sql.query(`
         SELECT
-            dat.data_entry_id, u.lastname, u.firstname, u.company_name,
+            dat.data_entry_id, dat.location_name,
+            u.lastname, u.firstname, u.company_name,
             dat.region_id, dat.province_id, dat.municipality_id,
             dat.date_submitted, dat.collection_start, dat.collection_end,
             dat.status
@@ -629,4 +634,14 @@ export async function rejectData(dataId, comment) {
         if (err) throw err;
         console.log(result.affectedRows + " record(s) updated");
     })
+}
+
+/* ---------------------------------------
+    PSGC FUNCTIONS
+--------------------------------------- */
+
+// Converts code (e.g., "130000000") to a location name
+export function getPsgcName(locationSet, code) {
+    const entry = locationSet.find(loc => loc.code === code)
+    return entry ? entry.name : null
 }
