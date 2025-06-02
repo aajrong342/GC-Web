@@ -432,3 +432,36 @@ select {
     background: #007bff;
     color: white;
 }
+
+/* ------ Data Review ------ */
+.review-window {
+    width: 100%;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.review-approve {
+    background-color: #1dc20e;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: large;
+    padding: 10px;
+    width: 250px;
+}
+.review-approve:hover {
+    cursor: pointer;
+}
+
+.review-reject {
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: large;
+    padding: 10px;
+    width: 250px;
+}
+.review-reject:hover {
+    cursor: pointer;
+}

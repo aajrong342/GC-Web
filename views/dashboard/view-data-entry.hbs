@@ -1,6 +1,23 @@
-<fieldset style="width: 100%; margin-bottom: 10px;">
-    <h3>
-        {{wasteGen.municipality_name}}, {{wasteGen.province_name}}, {{wasteGen.region_name}}
+<!-- Only display modal if data is for approval -->
+{{#ifEquals wasteGen.status 'Pending Review'}}
+    <fieldset class="review-window">
+        <h3 style="font-weight: normal;">Approve data entry?</h3>
+
+        <button type="button" class="review-approve">
+            <i class="fa-solid fa-thumbs-up"></i>&nbsp; Approve
+        </button>&emsp;
+
+        <button type="button" class="review-reject">
+            <i class="fa-solid fa-thumbs-down"></i>&nbsp; Reject
+        </button>
+    </fieldset>
+{{/ifEquals}}
+
+<!-- Actual Data Display -->
+<fieldset style="width: 100%; margin-bottom: 10px; padding-top: 20px; padding-bottom: 20px">
+    <h1 style="margin:0">Insert Title Here</h1>
+    <h3 style="margin:0; font-weight:normal;">
+        <i>{{wasteGen.location_name}}</i>
     </h3>
 </fieldset>
 
@@ -10,7 +27,7 @@
         <table class="user-profile">
             <tr>
                 <td class="label">Submitted by</td>
-                <td>{{wasteGen.name}}</td>
+                <td>{{uppercase wasteGen.lastname}}, {{wasteGen.firstname}}</td>
             </tr>
             <tr>
                 <td class="label">Organization Name</td>
@@ -26,10 +43,6 @@
     <fieldset style="width: 100%;">
         <legend>Collection Info</legend>
         <table class="user-profile">
-            <tr>
-                <td class="label">Year of Collection</td>
-                <td>{{wasteGen.year_collected}}</td>
-            </tr>
             <tr>
                 <td class="label">Start Date</td>
                 <td>{{textDate wasteGen.collection_start}}</td>
@@ -59,6 +72,8 @@
             </table>
         </fieldset>
 </div>
+
+{{!--
 
 <div style="display: flex;">
     <div>
@@ -213,3 +228,5 @@
 
 <!-- Access to chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+--}}

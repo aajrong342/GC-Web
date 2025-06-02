@@ -562,7 +562,7 @@ export async function getDataByUser(userId) {
     return result
 }
 
-// Get data entries from a location
+// Get approved data entries from a location
 export async function getDataByLocation(locationCode) {
     const [result] = await sql.query(`
         SELECT
@@ -573,9 +573,10 @@ export async function getDataByLocation(locationCode) {
             dat.status
         FROM data_entry dat
         JOIN user u ON u.user_id = dat.user_id
-        WHERE dat.region_id = ${locationCode}
+        WHERE (dat.region_id = ${locationCode}
         OR dat.province_id = ${locationCode}
-        OR dat.municipality_id = ${locationCode}
+        OR dat.municipality_id = ${locationCode})
+        AND dat.status = 'Approved'
     `)
     return result
 }
@@ -584,13 +585,11 @@ export async function getDataByLocation(locationCode) {
 export async function getWasteGenById(id) {
     const [result] = await sql.query(`
         SELECT
-            c.name, c.company_name,
-            wg.*,
-            loc.region_name, loc.province_name, loc.municipality_name
-        FROM waste_generation wg
-        JOIN clients c ON wg.client_id = c.client_id
-        JOIN locations loc ON wg.location_id = loc.location_id
-        WHERE wg.waste_gen_id = ?
+            dat.*,
+            u.lastname, u.firstname, u.company_name
+        FROM data_entry dat
+        JOIN user u ON u.user_id = dat.user_id
+        WHERE dat.data_entry_id = ?
     `, [id])
     return result[0]
 }

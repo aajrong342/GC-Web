@@ -388,13 +388,13 @@ app.get('/dashboard/data/user/:id', async (req, res) => {
 app.get('/dashboard/data/:id', async (req, res) => {
   const id = req.params.id
   const wasteGen = await getWasteGenById(id)
-  const wasteComp = await getWasteCompById(id)
+  //const wasteComp = await getWasteCompById(id)
 
-  res.render('dashboard/view-data', {
+  res.render('dashboard/view-data-entry', {
     layout: 'dashboard',
     title: `GC Dashboard | Entry #${id}`,
     wasteGen,
-    wasteComp,
+    //wasteComp,
     current_all: true
   })
 })
