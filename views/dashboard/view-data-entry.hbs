@@ -1,5 +1,7 @@
 
 <!-- Actual Data Display -->
+
+<!-- Title card -->
 <fieldset style="width: 100%; margin-bottom: 10px; padding-top: 20px; padding-bottom: 20px">
     <h1 style="margin:0">Insert Title Here</h1>
     <h3 style="margin:0; font-weight:normal;">
@@ -7,6 +9,7 @@
     </h3>
 </fieldset>
 
+<!-- Data entry info -->
 <div style="display: flex;">
     <fieldset style="width: 100%;">
         <legend>Submission Info</legend>
@@ -59,11 +62,28 @@
         </fieldset>
 </div>
 
-<div style="display: flex;">
-    <div>
-        <fieldset class="waste-comp">
-            <legend>Waste Composition</legend>
+<!-- Data tabs -->
+<div class="tab">
+  <button class="tablinks" onclick="openTab(event, 'Chart')" id="defaultOpen">CHART</button>
+  <button class="tablinks" onclick="openTab(event, 'Table')">RAW DATA</button>
+</div>
 
+<!-- Display A: Chart -->
+<div id="Chart" class="tabcontent">
+    <!-- Supertype summary pie chart -->
+    <div class="pie-chart">
+        <canvas id="summary-pie">
+            <!-- Populated by JS -->
+        </canvas>
+    </div>
+
+    <!-- Subtypes bar charts -->
+</div>
+
+<!-- Display B: Raw Data -->
+<div id="Table" class="tabcontent">
+    <div style="display: flex;">
+        <div>
             <!-- Waste Composition -->
             <table>
                 <thead>
@@ -91,16 +111,10 @@
                         {{/each}}
                     {{/each}}
                 </tbody>
-                </table>
-        </fieldset>
+            </table>
+        </div>
     </div>
 </div>
-
-<div class="pie-chart">
-        <canvas id="summary-pie">
-            <!-- Populated by JS -->
-        </canvas>
-    </div>
 
 <!-- Pie chart script -->
 <script>
@@ -143,128 +157,8 @@ const chart = new Chart(ctx, {
 
 </script>
 
-{{!--
-
-<fieldset class="waste-comp-bar" id="waste-comp-bar">
-    <legend>Waste Composition per Material</legend>
-
-        <!-- Populated by JS -->
-    
-</fieldset>
-
-<!-- Pass json object and start javascript -->
-<!-- Using JS in the template is technically foul, but w/e it works -->
-<script>
-    const wasteComp = {{{json wasteComp}}} // Embed the server-side data into JavaScript
-    const pieDiv = document.getElementById('summary-pie')
-
-    // Calculate total waste amount per material
-    const totals = wasteComp.reduce((acc, item) => {
-        if (!acc[item.material_id]) {
-            acc[item.material_id] = { 
-                material_name: item.material_name, 
-                total_waste: 0 
-            };
-        }
-        acc[item.material_id].total_waste += parseFloat(item.waste_amount);
-        return acc;
-    }, {});
-
-    // Convert totals object into a sorted array (least to greatest)
-    const sortedTotals = Object.values(totals).sort((a, b) => a.total_waste - b.total_waste);
-
-    // Extract sorted labels and data
-    const pieLabels = sortedTotals.map(item => item.material_name);
-    const pieData = sortedTotals.map(item => item.total_waste);
-
-    // Create the pie chart
-    new Chart(pieDiv, {
-        type: 'pie',
-        data: {
-            labels: pieLabels,
-            datasets: [{
-                data: pieData,
-                hoverOffset: 8,
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'left',
-                    align: 'start'
-                },
-                tooltip: {
-                    enabled: true
-                }
-            }
-        }
-    });
-
-    // Bar charts code
-    // Group data by material_id
-    const groupedData = wasteComp.reduce((acc, item) => {
-        if (!acc[item.material_id]) {
-            acc[item.material_id] = {
-                material_name: item.material_name,
-                subtypes: [],
-                origins: [],
-                waste_amounts: []
-            };
-        }
-        acc[item.material_id].subtypes.push(item.subtype_remarks);
-        acc[item.material_id].origins.push(item.origin_name);
-        acc[item.material_id].waste_amounts.push(parseFloat(item.waste_amount)); // Convert string to number
-        return acc;
-    }, {});
-
-    // Reference to the charts container
-    const chartsContainer = document.getElementById('waste-comp-bar');
-
-    Object.keys(groupedData).forEach(material_id => {
-        const material = groupedData[material_id];
-
-        // Create a new canvas for each material
-        const canvasContainer = document.createElement('div');
-        canvasContainer.classList.add('bar-container');
-
-        canvasContainer.innerHTML = `
-        <div class='bar-chart-container'>
-            <h3>${material.material_name}</h3>
-            <canvas id="chart-${material_id}"></canvas>
-        </div>`;
-        chartsContainer.appendChild(canvasContainer);
-
-        // Create the chart
-        const ctx = document.getElementById(`chart-${material_id}`).getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: material.subtypes, // Labels are subtypes (Wine Bottles, Lightbulbs, etc.)
-                datasets: [{
-                    label: 'Waste Amount (kg)',
-                    data: material.waste_amounts, // Waste amounts as data
-                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    });
-</script>
-
---}}
-
 <!-- Access to chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- JS behind the tabs -->
+<script src="/js/tabs.js"></script>
