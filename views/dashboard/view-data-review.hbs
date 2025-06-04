@@ -249,7 +249,7 @@
             <i class="fa-solid fa-think"></i>&nbsp; Cancel
         </button>&emsp;
 
-        <button type="button" class="review-approve">
+        <button type="button" class="review-approve" onclick="updateEntry('Approved')">
             <i class="fa-solid fa-thumbs-up"></i>&nbsp; Approve
         </button>
     </div>
@@ -261,29 +261,56 @@
         <span id="reject-close" class="close">&times;</span>
         <h3 style="font-weight: normal;">Reject data entry?</h3>
 
-        <form id="rejectForm">
-            <div>
-                <!-- Reasons for rejection -->
-                <h3 style="text-align: left; margin-left: 5%;">Reasons for rejection:</h3>
+        <div>
+            <!-- Reasons for rejection -->
+            <h3 style="text-align: left; margin-left: 5%;">Reasons for rejection:</h3>
 
-                <textarea id="reject-notes" placeholder="State reasons of rejection..."></textarea>
-            </div><br>
+            <textarea id="reject-notes" placeholder="State reasons for rejection... (up to 300 characters only)"></textarea>
+        </div><br>
 
-            <!-- Modal buttons -->
-            <button type="button" id="reject-cancel" class="review-cancel">
-                <i class="fa-solid fa-think"></i>&nbsp; Cancel
-            </button>&emsp;
+        <!-- Modal buttons -->
+        <button type="button" id="reject-cancel" class="review-cancel">
+            <i class="fa-solid fa-think"></i>&nbsp; Cancel
+        </button>&emsp;
 
-            <button type="submit" class="review-reject">
-                <i class="fa-solid fa-thumbs-down"></i>&nbsp; Reject
+        <button type="button" class="review-reject" onclick="updateEntry('Rejected')">
+            <i class="fa-solid fa-thumbs-down"></i>&nbsp; Reject
+        </button>
+    </div>
+</div>
+
+<!-- Success modals -->
+<div id="success-approve" class="modal">
+    <div class="modal-content">
+        <h3>Success</h3>
+        Data entry has been approved.<br><br>
+
+        <a href="/dashboard/data/submissions">
+            <button type="button" class="review-approve">
+                Return to Submissions List
             </button>
+        </a>
+    </div>
+</div>
 
-        </form>
+<div id="success-reject" class="modal">
+    <div class="modal-content">
+        <h3>Success</h3>
+        Data entry has been rejected.<br><br>
+
+        <a href="/dashboard/data/submissions">
+            <button type="button" class="review-approve">
+                Return to Submissions List
+            </button>
+        </a>
     </div>
 </div>
 
 <!-- Modal script -->
 <script>
+
+// Get ID of current entry
+const entryId = {{{ entryId }}}
 
 // Wait for the DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -347,6 +374,75 @@ function showApprove() {
 
 function showReject() {
     document.getElementById('reject-modal').style.display = 'block';
+}
+
+function updateEntry(status) {
+    if(status === 'Approved') {
+        // Send request to server
+        reviewApi('Approved', null)
+            .then(response => {
+                if (response.success) {                
+                    // Pop up to show success
+                    document.getElementById('approve-modal').style.display = 'none'
+                    document.getElementById('success-approve').style.display = 'block'
+                } else {
+                    throw new Error(response.message || 'Failed to approve application')
+                }
+            })
+    } else { // Rejected
+        const rejectionReason = document.getElementById('reject-notes').value
+
+        // Send request to server
+        reviewApi('Rejected', rejectionReason)
+            .then(response => {
+                if (response.success) {                
+                    // Pop up to show success
+                    document.getElementById('reject-modal').style.display = 'none'
+                    document.getElementById('success-reject').style.display = 'block'
+                } else {
+                    throw new Error(response.message || 'Failed to reject application')
+                }
+            })
+    }
+}
+
+async function reviewApi(status, rejectionReason) {
+    try {
+        const response = await fetch(`/api/data/${entryId}/status`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                status,
+                rejectionReason
+            })
+        });
+        
+        if (!response.ok) {
+            console.error(`Server response not OK: ${response.status} ${response.statusText}`);
+            const errorText = await response.text();
+            console.error('Error response body:', errorText);
+            throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('Status update response:', data);
+        return data;
+    } catch (error) {
+        console.error('Error in reviewApi() -- ', error);
+        throw error;
+    }
+}
+
+function successModal(status) {
+    if(status === 'Approved') {
+        document.getElementById('approve-modal').style.display = 'none'
+        document.getElementById('success-approve').style.display = 'block'
+    } else {
+        document.getElementById('reject-modal').style.display = 'none'
+        document.getElementById('success-reject').style.display = 'block'
+    }
 }
 
 </script>

@@ -23,7 +23,8 @@ import {
   getWasteSupertypes,
   getWasteTypes,
   getDataByUser,
-  getPsgcName
+  getPsgcName,
+  updateDataStatus
 } from './database.js'
 
 // File Upload
@@ -397,8 +398,8 @@ app.get('/dashboard/data/user/:id', async (req, res) => {
 
 // View one data entry
 app.get('/dashboard/data/review/:id', async (req, res) => {
-  const id = req.params.id
-  const wasteGen = await getWasteGenById(id)
+  const entryId = req.params.id
+  const wasteGen = await getWasteGenById(entryId)
 
   const sectors = await getSectors()
   const supertypes = await getWasteSupertypes()
@@ -409,17 +410,18 @@ app.get('/dashboard/data/review/:id', async (req, res) => {
     supertype.types = types.filter(t => t.supertype_id === supertype.id)
   }
 
-  //const wasteComp = await getWasteCompById(id)
+  //const wasteComp = await getWasteCompById(entryId)
 
   res.render('dashboard/view-data-review', {
     layout: 'dashboard',
-    title: `GC Dashboard | Entry #${id}`,
+    title: `GC Dashboard | Entry #${entryId}`,
     wasteGen,
     //wasteComp,
-    current_all: true,
+    current_datasubs: true,
     sectors,
     supertypes,
-    types
+    types,
+    entryId
   })
 })
 
@@ -848,6 +850,36 @@ app.get('/api/waste-data/:location', async (req, res) => {
   } catch (error) {
     console.error('Error fetching data:', error)
     res.status(500).json({ success: false, message: 'Error fetching data' })
+  }
+})
+
+/* ---------------------------------------
+    DATA REVIEW API ENDPOINTS
+--------------------------------------- */
+
+app.patch('/api/data/:id/status', async (req, res) => {
+  try {
+    const id = req.params.id
+    const { status, rejectionReason } = req.body
+    
+    // Basic validation
+    if (!status) {
+      return res.status(400).json({ success: false, message: 'Status is required' })
+    }
+    
+    let result = await updateDataStatus(id, status, rejectionReason || '')
+    
+    res.json({ 
+      success: true,
+      message: `Application ${id} status updated to ${status}`,
+      data: result
+    })
+  } catch (error) {
+    console.error('Error updating application status:', error)
+    res.status(500).json({ 
+      success: false,
+      message: 'Error updating application status' 
+    })
   }
 })
 

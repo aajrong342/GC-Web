@@ -611,25 +611,13 @@ export async function getWasteCompById(entryId) {
     DATA REVIEW
 --------------------------------------- */
 
-// Approve data entry
-export async function approveData(dataId) {
+// Change status of data entry
+export async function updateDataStatus(dataId, status, rejectionReason) {
     await sql.query(`
         UPDATE greencycle.data_entry
-        SET status = 'Approved'
+        SET status = ?, rejection_reason = ?
         WHERE data_entry_id = ?
-    `, [dataId], function (err, result) {
-        if (err) throw err;
-        console.log(result.affectedRows + " record(s) updated");
-    })
-}
-
-// Reject data entry
-export async function rejectData(dataId, comment) {
-    await sql.query(`
-        UPDATE greencycle.data_entry
-        SET status = 'Rejected', rejection_reason = ?
-        WHERE data_entry_id = ?
-    `, [comment, dataId], function (err, result) {
+    `, [status, rejectionReason, dataId], function (err, result) {
         if (err) throw err;
         console.log(result.affectedRows + " record(s) updated");
     })
