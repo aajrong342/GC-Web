@@ -94,14 +94,54 @@
                 </table>
         </fieldset>
     </div>
-    {{!--
-    <div class="pie-chart">
+</div>
+
+<div class="pie-chart">
         <canvas id="summary-pie">
             <!-- Populated by JS -->
         </canvas>
     </div>
-    --}}
-</div>
+
+<!-- Pie chart script -->
+<script>
+
+const pieData = {{{ pieData }}}; // safe JSON (triple mustaches for raw output)
+
+const ctx = document.getElementById('summary-pie').getContext('2d');
+const chart = new Chart(ctx, {
+    type: 'pie',
+    data: {
+        labels: pieData.labels,
+        datasets: [{
+            label: 'Total Waste (kg)',
+            data: pieData.data,
+            backgroundColor: ['#4caf50', '#2196f3', '#ff9800', '#f44336'], // Customize as needed
+            hoverOffset: 30
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const value = context.parsed;
+                        const total = context.chart._metasets[0].total || 
+                                    context.chart._metasets[0].data.reduce((a, b) => a + b, 0);
+
+                        const percentage = ((value / total) * 100).toFixed(1);
+                        return ` ${value} kg (${percentage}%)`;
+                    }
+                }
+            }
+        }
+    }
+});
+
+</script>
 
 {{!--
 
@@ -224,7 +264,7 @@
     });
 </script>
 
+--}}
+
 <!-- Access to chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
---}}

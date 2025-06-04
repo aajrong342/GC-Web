@@ -432,6 +432,8 @@ app.get('/dashboard/data/review/:id', async (req, res) => {
 
 // View one data entry
 app.get('/dashboard/data/:id', async (req, res) => {
+  /* -------- INITIALIZATION -------- */
+
   // Initialize main data entry
   const id = req.params.id
   const wasteGen = await getWasteGenById(id)
@@ -447,6 +449,8 @@ app.get('/dashboard/data/:id', async (req, res) => {
       if (!wasteMap[row.type_id]) wasteMap[row.type_id] = {};
       wasteMap[row.type_id][row.sector_id] = row.waste_amount;
   }
+
+  /* -------- TABLE INITIALIZATION -------- */
 
   // Group types under supertypes
   const supertypeMap = {};
@@ -465,14 +469,53 @@ app.get('/dashboard/data/:id', async (req, res) => {
       });
   }
 
+  /* -------- PIE CHART -------- */
+
+  // Total per supertype
+  const supertypeTotals = {}; // { supertype_id: totalWaste }
+
+  for (const row of supertypes) {
+    const typeId = row.type_id;
+    const supertypeId = row.supertype_id;
+
+    const amounts = wasteMap[typeId] || {};
+    const typeTotal = Object.values(amounts).reduce((a, b) => a + Number(b), 0);
+
+    if (!supertypeTotals[supertypeId]) supertypeTotals[supertypeId] = 0;
+    supertypeTotals[supertypeId] += typeTotal;
+  }
+
+  // Map to { labels: [], data: [] }
+  const pieData = {
+      labels: [],
+      data: []
+  };
+  const supertypeNames = {};
+
+  for (const row of supertypes) {
+      supertypeNames[row.supertype_id] = row.supertype_name;
+  }
+
+  // Sort supertypes from highest to lowest
+  const sortedSupertypes = Object.entries(supertypeTotals)
+    .map(([id, total]) => ({ name: supertypeNames[id], total: Number(total) }))
+    .sort((a, b) => b.total - a.total);
+
+  for (const item of sortedSupertypes) {
+      pieData.labels.push(item.name);
+      pieData.data.push(item.total);
+  }
+
+  /* -------- RENDER PAGE -------- */
+
   res.render('dashboard/view-data-entry', {
     layout: 'dashboard',
     title: `GC Dashboard | Entry #${id}`,
     wasteGen,
-    //wasteComp,
     current_all: true,
     sectors,
-    supertypes: Object.values(supertypeMap)
+    supertypes: Object.values(supertypeMap),
+    pieData: JSON.stringify(pieData) // pass as JSON for Chart.js
   })
 })
 
