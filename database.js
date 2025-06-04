@@ -103,6 +103,18 @@ export async function getWasteTypes() {
     return result
 }
 
+// Get supertypes AND types
+export async function getAllTypes() {
+    const [result] = await sql.query(`
+        SELECT st.id AS supertype_id, st.name AS supertype_name,
+            t.id AS type_id, t.name AS type_name
+        FROM greencycle.waste_supertype st
+        JOIN greencycle.waste_type t ON st.id = t.supertype_id
+        ORDER BY st.id, t.id    
+    `)
+    return result
+}
+
 /* ---------------------------------------
     DATA SUBMISSION
 --------------------------------------- */
@@ -603,6 +615,10 @@ export async function getDataByLocation(locationCode) {
     return result
 }
 
+/* ---------------------------------------
+    DATA RETRIEVAL (SINGLE ENTRY)
+--------------------------------------- */
+
 // Get single data entry
 export async function getWasteGenById(id) {
     const [result] = await sql.query(`
@@ -619,12 +635,9 @@ export async function getWasteGenById(id) {
 // Get waste composition data
 export async function getWasteCompById(entryId) {
     const [result] = await sql.query(`
-        SELECT
-        wc.material_id, m.material_name, wc.subtype_remarks, o.origin_name, wc.waste_amount
-        FROM waste_composition wc
-        JOIN waste_materials m ON wc.material_id = m.id
-        JOIN waste_origins o ON wc.origin_id = o.id
-        WHERE wc.waste_gen_id = ?
+        SELECT sector_id, type_id, waste_amount
+        FROM greencycle.data_waste_composition
+        WHERE data_entry_id = ?
     `, [entryId])
     return result // important, to not return an array
 }

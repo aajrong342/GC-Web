@@ -65,31 +65,33 @@
             <legend>Waste Composition</legend>
 
             <!-- Waste Composition -->
-            {{#each supertypes}}
-                <div>
-                    {{uppercase name}}
-
-                    <!-- Display types of current supertype -->
-                    <table>
+            <table>
+                <thead>
+                    <tr>
+                    <th>Waste Type</th>
+                    {{#each sectors}}
+                        <th>{{name}}</th>
+                    {{/each}}
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each supertypes}}
                         <tr>
-                            <td><!-- Blank cell for type --></td>
-                            {{#each ../sectors}}
-                                <td>{{name}}</td>
-                            {{/each}}
+                            <td colspan="7"><strong>{{name}}</strong></td>
                         </tr>
                         {{#each types}}
                             <tr>
-                                <td>{{name}}</td>
-                                {{#each ../../sectors}}
-                                    <td>
-                                        0.00
-                                    </td>
+                            <td>{{name}}</td>
+                            {{#with amounts as |a|}} <!-- Set alias for amounts -->
+                                {{#each ../../../sectors}}
+                                <td>{{lookup a this.id}}</td>
                                 {{/each}}
+                            {{/with}}
                             </tr>
                         {{/each}}
-                    </table>
-                </div>
-            {{/each}}
+                    {{/each}}
+                </tbody>
+                </table>
         </fieldset>
     </div>
     {{!--

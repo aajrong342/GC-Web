@@ -25,7 +25,8 @@ import {
   getDataByUser,
   getPsgcName,
   updateDataStatus,
-  getDataForReview
+  getDataForReview,
+  getAllTypes
 } from './database.js'
 
 // File Upload
@@ -398,7 +399,7 @@ app.get('/dashboard/data/user/:id', async (req, res) => {
   })
 })
 
-// View one data entry
+// View one data entry (for review)
 app.get('/dashboard/data/review/:id', async (req, res) => {
   const entryId = req.params.id
   const reviewer = req.session.user.id
@@ -431,19 +432,38 @@ app.get('/dashboard/data/review/:id', async (req, res) => {
 
 // View one data entry
 app.get('/dashboard/data/:id', async (req, res) => {
+  // Initialize main data entry
   const id = req.params.id
   const wasteGen = await getWasteGenById(id)
 
+  // Initialize waste comp
   const sectors = await getSectors()
-  const supertypes = await getWasteSupertypes()
-  const types = await getWasteTypes()
+  const supertypes = await getAllTypes()
+  const wasteComp = await getWasteCompById(id)
 
-  // Map types to supertypes
-  for (const supertype of supertypes) {
-    supertype.types = types.filter(t => t.supertype_id === supertype.id)
+  // Create a lookup map for waste amounts
+  const wasteMap = {};
+  for (const row of wasteComp) {
+      if (!wasteMap[row.type_id]) wasteMap[row.type_id] = {};
+      wasteMap[row.type_id][row.sector_id] = row.waste_amount;
   }
 
-  //const wasteComp = await getWasteCompById(id)
+  // Group types under supertypes
+  const supertypeMap = {};
+  for (const row of supertypes) {
+      if (!supertypeMap[row.supertype_id]) {
+          supertypeMap[row.supertype_id] = {
+              id: row.supertype_id,
+              name: row.supertype_name,
+              types: []
+          };
+      }
+      supertypeMap[row.supertype_id].types.push({
+          id: row.type_id,
+          name: row.type_name,
+          amounts: wasteMap[row.type_id] || {}
+      });
+  }
 
   res.render('dashboard/view-data-entry', {
     layout: 'dashboard',
@@ -452,8 +472,7 @@ app.get('/dashboard/data/:id', async (req, res) => {
     //wasteComp,
     current_all: true,
     sectors,
-    supertypes,
-    types
+    supertypes: Object.values(supertypeMap)
   })
 })
 
