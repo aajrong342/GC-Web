@@ -84,9 +84,22 @@
 <div id="Table" class="tabcontent">
     <div style="display: flex;">
         <div id="data-table-container">
-            <!-- Export buttons -->
-            <button onclick="exportTableToCSV()">Export as CSV</button>
-            <button onclick="exportTableToExcel()">Export as Excel</button>
+            <div class="table-operations">
+                <input type="text" class="tbl-search" placeholder="Enter keyword...">&nbsp;
+                <button type="button" class="tbl-export">
+                    <i class="fa-solid fa-magnifying-glass"></i>&nbsp; Search
+                </button>
+                
+                <!-- Export buttons -->
+                <div style="margin-left: auto;">
+                    <button onclick="exportTableToCSV()" class="button tbl-export">
+                        <i class="fa-solid fa-file-csv"></i>&nbsp; Export as CSV
+                    </button>
+                    <button onclick="exportTableToExcel()" class="button tbl-export">
+                        <i class="fa-solid fa-file-excel"></i>&nbsp; Export as Excel
+                    </button>
+                </div>
+            </div>
 
             <!-- Waste Composition -->
             <table class="data-table" id="waste-comp-table">

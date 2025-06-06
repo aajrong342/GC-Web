@@ -578,3 +578,26 @@ select {
     background-color: rgb(219, 250, 207) !important;
     text-align: center;
 }
+
+.table-operations {
+    border: 2px solid lightgray;
+    border-radius: 5px;
+    padding: 5px;
+    margin-bottom: 10px;
+    display: flex;
+}
+
+.tbl-search {
+    width: 300px;
+    font-size: 14px;
+}
+
+.tbl-export {
+    cursor: pointer;
+    background-color: #209915;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+}
