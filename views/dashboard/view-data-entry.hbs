@@ -78,6 +78,7 @@
     </div>
 
     <!-- Subtypes bar charts -->
+    <div id="bar-charts-container"></div>
 </div>
 
 <!-- Display B: Raw Data -->
@@ -158,9 +159,23 @@
 <!-- Pie chart script -->
 <script>
 
-const pieData = {{{ pieData }}}; // safe JSON (triple mustaches for raw output)
+/* --------- PIE CHART --------- */
+const pieData = {{{ pieData }}}; // pass from server side to this file
 
 const ctx = document.getElementById('summary-pie').getContext('2d');
+
+// Mapping colors according to supertype
+const colorMap = {
+    'Biodegradable': '#4caf50',
+    'Recyclable': '#2196f3',
+    'Residual': '#ff9800',
+    'Special/Hazardous': '#f44336'
+}
+
+const labels = pieData.labels  // already sorted
+const backgroundColor = labels.map(label => colorMap[label])
+
+// Build pie chart
 const chart = new Chart(ctx, {
     type: 'pie',
     data: {
@@ -168,7 +183,7 @@ const chart = new Chart(ctx, {
         datasets: [{
             label: 'Total Waste (kg)',
             data: pieData.data,
-            backgroundColor: ['#4caf50', '#2196f3', '#ff9800', '#f44336'], // Customize as needed
+            backgroundColor,
             hoverOffset: 30
         }]
     },
@@ -193,6 +208,71 @@ const chart = new Chart(ctx, {
         }
     }
 });
+
+/* --------- BAR CHART --------- */
+
+// Build bar chart
+const barChartData = {{{barChartData}}}; // already JSON string
+
+const container = document.getElementById('bar-charts-container');
+
+for (const [supertype, chartData] of Object.entries(barChartData)) {
+
+// Create canvas for each supertype
+const canvas = document.createElement('canvas');
+canvas.id = `barChart-${supertype.replace(/\s+/g, '-')}`;
+canvas.style.maxWidth = '600px';
+canvas.style.marginBottom = '40px';
+container.appendChild(canvas);
+
+// Create chart
+new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+        labels: chartData.labels,
+        datasets: [{
+            label: `${supertype} Waste Types`,
+            data: chartData.data,
+            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        indexAxis: 'x', // vertical
+        plugins: {
+            title: {
+            display: true,
+            text: supertype
+            },
+            tooltip: {
+            callbacks: {
+                label: function(context) {
+                return `${context.parsed.y.toFixed(3)} kg`;
+                }
+            }
+            }
+        },
+        scales: {
+            y: {
+            beginAtZero: true,
+            title: {
+                display: true,
+                text: 'Weight (kg)'
+            }
+            },
+            x: {
+            ticks: {
+                autoSkip: false,
+                maxRotation: 45,
+                minRotation: 20
+            }
+            }
+        }
+    }
+});
+}
 
 </script>
 

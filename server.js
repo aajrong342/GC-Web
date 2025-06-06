@@ -510,8 +510,6 @@ app.get('/dashboard/data/review/:id', async (req, res) => {
       : '0.000';
   }
 
-  //res.json(supertypeMap)
-
   res.render('dashboard/view-data-review', {
     layout: 'dashboard',
     title: `GC Dashboard | Entry #${entryId}`,
@@ -670,7 +668,25 @@ app.get('/dashboard/data/:id', async (req, res) => {
       pieData.data.push(item.total);
   }
 
-  //res.json(supertypeMap)
+  /* -------- BAR CHART -------- */
+
+  const barChartData = {}; // keyed by supertype name or ID
+
+  for (const supertype of Object.values(supertypeMap)) {
+    const labels = [];
+    const data = [];
+
+    for (const type of supertype.types) {
+      labels.push(type.name);
+      const weight = Object.values(type.amounts || {}).reduce((a, b) => a + Number(b), 0);
+      data.push(Number(weight.toFixed(3)));
+    }
+
+    barChartData[supertype.name] = {
+      labels,
+      data
+    };
+  }
 
   /* -------- RENDER PAGE -------- */
 
@@ -683,7 +699,8 @@ app.get('/dashboard/data/:id', async (req, res) => {
     supertypes: Object.values(supertypeMap),
     sectorTotals,
     grandTotal: grandTotal.toFixed(3),
-    pieData: JSON.stringify(pieData) // pass as JSON for Chart.js
+    pieData: JSON.stringify(pieData), // pass as JSON for Chart.js
+    barChartData: JSON.stringify(barChartData)
   })
 })
 
