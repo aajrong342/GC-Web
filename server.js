@@ -363,7 +363,7 @@ app.get('/dashboard', (req, res) => {
   // This would typically check for authentication
   res.render('dashboard/view-data-search', {
     layout: 'dashboard',
-    title: 'GC Dashboard | Main Dashboard',
+    title: 'Main Dashboard | GC Dashboard',
     current_home: true
   })
 })
@@ -374,7 +374,7 @@ app.get('/dashboard/data/all', async (req, res) => {
 
   res.render('dashboard/view-data-all', {
     layout: 'dashboard',
-    title: 'GC Dashboard | All Data Entries',
+    title: 'All Data Entries | GC Dashboard',
     data,
     current_all: true
   })
@@ -386,7 +386,7 @@ app.get('/dashboard/data/submissions', async (req, res) => {
 
   res.render('dashboard/view-data-all', {
     layout: 'dashboard',
-    title: 'GC Dashboard | Data Submissions for Review',
+    title: 'Data Submissions for Review | GC Dashboard',
     data,
     current_datasubs: true
   })
@@ -399,7 +399,7 @@ app.get('/dashboard/data/user/:id', async (req, res) => {
 
   res.render('dashboard/view-data-all', {
     layout: 'dashboard',
-    title: 'GC Dashboard | Your Reports',
+    title: 'Your Reports | GC Dashboard',
     data,
     current_user_report: true
   })
@@ -512,7 +512,7 @@ app.get('/dashboard/data/review/:id', async (req, res) => {
 
   res.render('dashboard/view-data-review', {
     layout: 'dashboard',
-    title: `GC Dashboard | Entry #${entryId}`,
+    title: `${wasteGen.title} | GC Dashboard`,
     wasteGen,
     current_datasubs: true,
     sectors,
@@ -633,44 +633,6 @@ app.get('/dashboard/data/:id', async (req, res) => {
 
   /* -------- PIE CHART -------- */
 
-  /*
-  // Total per supertype
-  const supertypeTotals = {}; // { supertype_id: totalWaste }
-
-  for (const row of supertypes) {
-    const typeId = row.type_id;
-    const supertypeId = row.supertype_id;
-
-    const amounts = wasteMap[typeId] || {};
-    const typeTotal = Object.values(amounts).reduce((a, b) => a + Number(b), 0);
-
-    if (!supertypeTotals[supertypeId]) supertypeTotals[supertypeId] = 0;
-    supertypeTotals[supertypeId] += typeTotal;
-  }
-
-  // Map to { labels: [], data: [] }
-  const pieData = {
-      labels: [],
-      data: []
-  };
-  const supertypeNames = {};
-
-  for (const row of supertypes) {
-      supertypeNames[row.supertype_id] = row.supertype_name;
-  }
-
-  // Sort supertypes from highest to lowest
-  const sortedSupertypes = Object.entries(supertypeTotals)
-    .map(([id, total]) => ({ name: supertypeNames[id], total: Number(total) }))
-    .sort((a, b) => b.total - a.total);
-
-  for (const item of sortedSupertypes) {
-      pieData.labels.push(item.name);
-      pieData.data.push(item.total);
-  }
-
-  */
-
   // Generate summary pie
   const summaryData = {
     labels: [],
@@ -743,11 +705,13 @@ app.get('/dashboard/data/:id', async (req, res) => {
 
     for (const type of supertype.types) {
       labels.push(type.name);
+
       const weight = Object.values(type.amounts || {}).reduce((a, b) => a + Number(b), 0);
       data.push(Number(weight.toFixed(3)));
     }
 
     barChartData[supertype.name] = {
+      color: baseHexMap[supertype.name] || '#9e9e9e',
       labels,
       data
     };
@@ -755,16 +719,17 @@ app.get('/dashboard/data/:id', async (req, res) => {
 
   /* -------- RENDER PAGE -------- */
 
+  //res.json(barChartData)
+
   res.render('dashboard/view-data-entry', {
     layout: 'dashboard',
-    title: `GC Dashboard | Entry #${id}`,
+    title: `${wasteGen.title} | GC Dashboard`,
     wasteGen,
     current_all: true,
     sectors,
     supertypes: Object.values(supertypeMap),
     sectorTotals,
     grandTotal: grandTotal.toFixed(3),
-    //pieData: JSON.stringify(pieData), // pass as JSON for Chart.js
     barChartData: JSON.stringify(barChartData),
     summaryPieData: JSON.stringify(summaryData),
     detailedPieData: JSON.stringify(detailedData)
@@ -777,7 +742,7 @@ app.get('/dashboard/users', async (req, res) => {
   const users = await getUsers()
   res.render('dashboard/users', {
     layout: 'dashboard',
-    title: 'GC Dashboard | Users',
+    title: 'Users | GC Dashboard',
     users,
     current_users: true
   })
@@ -787,7 +752,7 @@ app.get('/dashboard/users', async (req, res) => {
 app.get('/dashboard/profile', async (req, res) => {
   res.render('dashboard/user-profile', {
     layout: 'dashboard',
-    title: `GC Dashboard | Profile`
+    title: `Profile`
   })
 })
 
@@ -806,7 +771,7 @@ app.get('/dashboard/users/create', async (req, res) => {
 
   res.render('dashboard/create-user', {
     layout: 'dashboard',
-    title: 'GC Dashboard | Create New Staff Account',
+    title: 'Create New Staff Account | GC Dashboard',
     current_users: true,
     gcRoles
   });
@@ -826,7 +791,7 @@ app.get('/dashboard/roles', async (req, res) => {
 
   res.render('dashboard/roles', {
     layout: 'dashboard',
-    title: 'GC Dashboard | Roles',
+    title: 'Roles | GC Dashboard',
     adminRoles,
     gcRoles,
     clientRoles,
@@ -840,7 +805,7 @@ app.get('/dashboard/user-applications', async (req, res) => {
 
   res.render('dashboard/user-applications', { 
     layout: 'dashboard',
-    title: 'GC Dashboard | User Applications',
+    title: 'User Applications | GC Dashboard',
     current_userapp: true,
     applications
   })
@@ -850,7 +815,7 @@ app.get('/dashboard/partners', async (req, res) => {
   const partners = await getPartners()
   res.render('dashboard/partners', {
     layout: 'dashboard',
-    title: 'GC Dashboard | Partner Organizations',
+    title: 'Partner Organizations | GC Dashboard',
     partners,
     current_partners: true
   })
@@ -860,7 +825,7 @@ app.get('/dashboard/partners', async (req, res) => {
 app.get('/dashboard/submit-report', async (req, res) => {
   res.render('dashboard/submit-report-menu', {
     layout: 'dashboard',
-    title: 'GC Dashboard | Data Submission Menu',
+    title: 'Data Submission Menu | GC Dashboard',
     current_report: true
   })
 })
@@ -878,7 +843,7 @@ app.get('/dashboard/submit-report/form', async (req, res) => {
 
   res.render('dashboard/data-form', {
     layout: 'dashboard',
-    title: 'GC Dashboard | Data Submission Form',
+    title: 'Data Submission Form | GC Dashboard',
     current_report: true,
     sectors,
     supertypes,
@@ -890,7 +855,7 @@ app.get('/dashboard/submit-report/form', async (req, res) => {
 app.get('/dashboard/submit-report/upload', async (req, res) => {
   res.render('dashboard/data-upload', {
     layout: 'dashboard',
-    title: 'GC Dashboard | Upload Data Spreadsheet',
+    title: 'Upload Data Spreadsheet | GC Dashboard',
     current_report: true
   })
 })

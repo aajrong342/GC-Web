@@ -544,7 +544,7 @@ export async function resetApplicationStatus(appId, adminNotes) {
 export async function getDataByStatus(status) {
     const [result] = await sql.query(`
         SELECT
-            dat.data_entry_id, dat.location_name,
+            dat.data_entry_id, dat.title, dat.location_name,
             u.lastname, u.firstname, u.company_name,
             dat.region_id, dat.province_id, dat.municipality_id,
             dat.date_submitted, dat.collection_start, dat.collection_end,
@@ -563,7 +563,7 @@ export async function getDataByStatus(status) {
 export async function getDataForReview(currentUser) {
     const [result] = await sql.query(`
         SELECT
-            dat.data_entry_id, dat.user_id, dat.location_name,
+            dat.data_entry_id, dat.user_id, dat.title, dat.location_name,
             u.lastname, u.firstname, u.company_name,
             dat.region_id, dat.province_id, dat.municipality_id,
             dat.date_submitted, dat.collection_start, dat.collection_end,
@@ -581,7 +581,7 @@ export async function getDataForReview(currentUser) {
 export async function getDataByUser(userId) {
     const [result] = await sql.query(`
         SELECT
-            dat.data_entry_id, dat.location_name,
+            dat.data_entry_id, dat.title, dat.location_name,
             u.lastname, u.firstname, u.company_name,
             dat.region_id, dat.province_id, dat.municipality_id,
             dat.date_submitted, dat.collection_start, dat.collection_end,
@@ -599,7 +599,7 @@ export async function getDataByUser(userId) {
 export async function getDataByLocation(locationCode) {
     const [result] = await sql.query(`
         SELECT
-            dat.data_entry_id, dat.location_name,
+            dat.data_entry_id, dat.title, dat.location_name,
             u.lastname, u.firstname, u.company_name,
             dat.region_id, dat.province_id, dat.municipality_id,
             dat.date_submitted, dat.collection_start, dat.collection_end,

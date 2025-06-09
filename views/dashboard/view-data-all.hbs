@@ -15,13 +15,16 @@
         <button class='waste-data-btn'>
             <div style="display: flex;">
                 <!-- Title -->
-                <h2 style="margin: 0">Entry #{{data_entry_id}} - {{location_name}}</h2>
+                <h2 style="margin: 0">{{title}}</h2>
 
                 <!-- Data entry status -->
                 <span class="data-status {{#ifEquals status 'Pending Review'}}stat-pending{{/ifEquals}} {{#ifEquals status 'Approved'}}stat-approved{{/ifEquals}} {{#ifEquals status 'Rejected'}}stat-rejected{{/ifEquals}}">{{status}}</span>
             </div>
 
-            <i>Submitted on {{textDate date_submitted}}</i><br>
+            <p>
+                <b>Location: </b>{{location_name}} <br>
+                <i>Submitted on {{textDate date_submitted}}</i>
+            </p>
             
             <p>
                 <b>Submitted by:</b> {{uppercase lastname}}, {{firstname}}<br>

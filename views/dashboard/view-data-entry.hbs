@@ -3,7 +3,7 @@
 
 <!-- Title card -->
 <fieldset style="width: 97.3%; margin-bottom: 10px; padding-top: 20px; padding-bottom: 20px">
-    <h1 style="margin:0">Insert Title Here</h1>
+    <h1 style="margin:0">{{wasteGen.title}}</h1>
     <h3 style="margin:0; font-weight:normal;">
         <i class="fa-solid fa-location-dot"></i>&nbsp; {{wasteGen.location_name}}
     </h3>
@@ -229,60 +229,58 @@ const container = document.getElementById('bar-charts-container');
 
 for (const [supertype, chartData] of Object.entries(barChartData)) {
 
-// Create canvas for each supertype
-const canvas = document.createElement('canvas');
-canvas.id = `barChart-${supertype.replace(/\s+/g, '-')}`;
-canvas.style.maxWidth = '600px';
-canvas.style.marginBottom = '40px';
-container.appendChild(canvas);
+    // Create canvas for each supertype
+    const canvas = document.createElement('canvas');
+    canvas.id = `barChart-${supertype.replace(/\s+/g, '-')}`;
+    canvas.style.maxWidth = '600px';
+    canvas.style.marginBottom = '40px';
+    container.appendChild(canvas);
 
-// Create chart
-new Chart(canvas.getContext('2d'), {
-    type: 'bar',
-    data: {
-        labels: chartData.labels,
-        datasets: [{
-            label: `${supertype} Waste Types`,
-            data: chartData.data,
-            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        indexAxis: 'x', // vertical
-        plugins: {
-            title: {
-            display: true,
-            text: supertype
+    // Create chart
+    new Chart(canvas.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: chartData.labels,
+            datasets: [{
+                label: `${supertype} Waste Types`,
+                data: chartData.data,
+                backgroundColor: chartData.color
+            }]
+        },
+        options: {
+            responsive: true,
+            indexAxis: 'x', // vertical
+            plugins: {
+                title: {
+                display: true,
+                text: supertype
+                },
+                tooltip: {
+                callbacks: {
+                    label: function(context) {
+                    return `${context.parsed.y.toFixed(3)} kg`;
+                    }
+                }
+                }
             },
-            tooltip: {
-            callbacks: {
-                label: function(context) {
-                return `${context.parsed.y.toFixed(3)} kg`;
+            scales: {
+                y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Weight (kg)'
+                }
+                },
+                x: {
+                ticks: {
+                    autoSkip: false,
+                    maxRotation: 45,
+                    minRotation: 20
+                }
                 }
             }
-            }
-        },
-        scales: {
-            y: {
-            beginAtZero: true,
-            title: {
-                display: true,
-                text: 'Weight (kg)'
-            }
-            },
-            x: {
-            ticks: {
-                autoSkip: false,
-                maxRotation: 45,
-                minRotation: 20
-            }
-            }
         }
-    }
-});
+    });
 }
 
 </script>

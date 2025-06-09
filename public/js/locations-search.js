@@ -176,8 +176,12 @@ function showWasteData(wasteData) {
             output += `
                 <a href='/dashboard/data/${entry.data_entry_id}'>
                     <button class='waste-data-btn'>
-                        <h2 style='margin: 0'>Entry #${entry.data_entry_id} - ${entry.location_name}</h2>
-                        <i>Submitted on ${newSubmissionDate}</i>
+                        <h2 style='margin: 0'>${entry.title}</h2>
+                        
+                        <p>
+                            <b>Location: </b>${entry.location_name}<br>
+                            <i>Submitted on ${newSubmissionDate}</i>
+                        </p>
                         
                         <p>
                             <b>Submitted by:</b> ${entry.lastname.toUpperCase()}, ${entry.firstname}<br>
