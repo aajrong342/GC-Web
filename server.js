@@ -564,7 +564,13 @@ app.get('/dashboard/data/:id', async (req, res) => {
   const wasteComp = await getWasteCompById(id)
 
   // Initialize latest editing date
-  const latestEdit = await getLatestEdit(id)
+  let latestEdit = await getLatestEdit(id)
+
+  if(latestEdit.length > 0) {
+    latestEdit = latestEdit[0].datetime
+  } else {
+    latestEdit = ''
+  }
 
   // Create a lookup map for waste amounts
   const wasteMap = {};
@@ -762,7 +768,7 @@ app.get('/dashboard/data/:id', async (req, res) => {
     barChartData: JSON.stringify(barChartData),
     summaryPieData: JSON.stringify(summaryData),
     detailedPieData: JSON.stringify(detailedData),
-    latestEdit: latestEdit[0].datetime
+    latestEdit
   })
 })
 
@@ -922,11 +928,6 @@ app.post("/api/data/submit-report", async (req, res) => {
           waste_amount: Number(entry.waste_amount) || 0,  // Ensure weight is always a number
         };
     }).filter(entry => entry !== null); // Remove any invalid entries
-
-    // Submit form data
-    // const result = await submitForm(
-    //   req.session.user.id, title, region, province, municipality, fullLocation, population, per_capita, annual, date_start, date_end, newWasteComp
-    // );
 
     // Push form data to db
     await submitForm(
@@ -1098,6 +1099,7 @@ app.get('/api/applications/:id', async (req, res) => {
 app.put('/api/applications/:id/status', async (req, res) => {
   try {
     const id = req.params.id
+    const reviewerId = req.session.user.id
     const { status, adminNotes } = req.body
     
     // Basic validation
@@ -1193,8 +1195,17 @@ app.patch('/api/data/:id/status', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Status is required' })
     }
     
-    let result = await updateDataStatus(id, status, rejectionReason || '', reviewedBy)
+    // Update data entry
+    await updateDataStatus(id, status, rejectionReason || null, reviewedBy)
     
+    // Update data entry edit history
+    let result
+    
+    if(status === 'Approved')
+      await createEditEntry(id, reviewedBy, 'Approved data entry')
+    else if(status === 'Rejected')
+      await createEditEntry(id, reviewedBy, `Rejected data entry | ${rejectionReason}`)
+
     res.json({ 
       success: true,
       message: `Application ${id} status updated to ${status}`,
