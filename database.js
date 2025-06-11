@@ -74,6 +74,13 @@ export async function lastLogin(userId) {
     })
 }
 
+export async function wrongPassword(userId) {
+    await sql.query(`UPDATE user SET failed_logins = failed_logins + 1 WHERE user_id=?`, [userId], function (err, result) {
+        if (err) throw err;
+        console.log(result.affectedRows + " record(s) updated");
+    })
+}
+
 // Deactivate user by email
 export async function deactivateUserByEmail(email) {
     const [result] = await sql.query(`

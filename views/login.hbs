@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
 
         // Form data to send to server
-        const formData = {
+        let formData = {
             email: emailInput.value,
             password: passwordInput.value,
         };
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if(formData.password === accountEntry[0].password) {
 
                     // Passwords match; send request to API to set user session
-                    fetch('/login', {
+                    fetch('/api/login/success', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -100,9 +100,35 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
 
                 } else { // Passwords do not match
+
+                    // Send request to add number of failed logins for this email
+                    fetch(`/api/login/wrong-pass`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            userId: accountEntry[0].user_id
+                        })
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        }
+                        throw new Error('Network response was not ok');
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error logging in. Please try again.');
+                    });
+
                     // Reveal error on form and return
                     loginError.style.display = 'block';
+                    
+                    // Reset login form
                     form.reset()
+                    formData = {}
+
                     return;
                 }
 
@@ -110,6 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Reveal error on form and return
                 loginError.style.display = 'block';
                 form.reset()
+                formData = {}
                 return;
             }
         })

@@ -26,7 +26,8 @@ import {
   getPsgcName,
   updateDataStatus,
   getDataForReview,
-  getAllTypes
+  getAllTypes,
+  wrongPassword
 } from './database.js'
 
 // File Upload
@@ -239,7 +240,7 @@ app.get('/login', (req, res) => {
 })
 
 // Login success (called when user is ALREADY validated)
-app.post('/login', async (req, res) => {
+app.post('/api/login/success', async (req, res) => {
   const user = req.body;
 
   // Mark user as authenticated
@@ -270,6 +271,13 @@ app.post('/login', async (req, res) => {
     res.json({ success: true, message: "Login successful" });
   })
 });
+
+// Login failed (when the email is right but the password isn't)
+app.post('/api/login/wrong-pass', async (req, res) => {
+  const userId = Number(req.body.userId)
+  wrongPassword(userId)
+  res.json({ success: true, message: "Wrong password" })
+})
 
 // Log out current user
 app.delete('/logout', (req, res) => {
@@ -899,7 +907,6 @@ app.post("/api/data/submit-report", async (req, res) => {
     res.status(200).json({
         message: "Report submitted successfully",
         reportResult: result,
-        //updatedWasteData: wasteData
     });
 
   } catch (error) {

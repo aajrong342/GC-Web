@@ -12,6 +12,8 @@
                 Waste Composition - {{name}}
             </span>
         {{/each}}
+
+        <span class="label">Confirm Submission</span>
     </div>
 </fieldset>
 
@@ -125,6 +127,16 @@
             </fieldset>
         </div>
     {{/each}}
+
+    <div class="step waste-supertype" data-step="5">
+        <h3>Confirm Your Info</h3>
+        <p>
+            <strong>Name:</strong> <span id="confirmName"></span>
+        </p>
+        <p>
+            <strong>Email:</strong> <span id="confirmEmail"></span>
+        </p>
+    </div>
 
     <div>
         <button type="button" id="prevBtn" class="disabled">Previous</button>

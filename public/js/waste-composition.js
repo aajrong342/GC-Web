@@ -1,8 +1,11 @@
 
 document.addEventListener("DOMContentLoaded", function () {
 
+    // Initialize variables
+    const submissionForm = document.getElementById("waste-form")
+
     // Waste form submission process begins with clicking submit
-    document.getElementById("waste-form").addEventListener("submit", async function (event) {
+    submissionForm.addEventListener("submit", async function (event) {
         event.preventDefault();
 
         const formData = new FormData(this);
