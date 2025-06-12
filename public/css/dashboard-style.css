@@ -601,3 +601,12 @@ select {
     border-radius: 5px;
     font-size: 14px;
 }
+
+/* ------ Notif Badges ------ */
+.notif-badge {
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    padding: 3px 7px;
+    font-size: x-small;
+}

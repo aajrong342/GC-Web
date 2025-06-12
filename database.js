@@ -405,7 +405,7 @@ export async function getPendingApplicationCount() {
         FROM greencycle.user_applications
         WHERE status = 'Pending Review'    
     `)
-    return result
+    return result[0]['COUNT(application_id)']
 }
 
 // Get application by ID
@@ -601,7 +601,7 @@ export async function getDataForReviewCount(currentUser) {
         FROM greencycle.data_entry
         WHERE status = 'Pending Review' AND NOT user_id = ${currentUser}
     `)
-    return result
+    return result[0]['COUNT(data_entry_id)']
 }
 
 // Get all data by user and sort according to IDs in descending order (recent to oldest)

@@ -31,7 +31,9 @@ import {
   getEditHistory,
   getLatestEdit,
   createEditEntry,
-  getLatestDataEntry
+  getLatestDataEntry,
+  getPendingApplicationCount,
+  getDataForReviewCount
 } from './database.js'
 
 // File Upload
@@ -125,22 +127,46 @@ app.use((req, res, next) => {
   if (req.session && req.session.user) {
     res.locals.user = req.session.user;
   } else {
-      res.locals.user = null; // Avoid assigning an empty object
+    res.locals.user = null; // Avoid assigning an empty object
   }
   next()
 })
 
 // Session middleware
 // Check if session user exists (i.e., user is logged in)
-const requireAuth = (req, res, next) => {
-  if (!req.session || !req.session.user) {
-    return res.redirect('/login'); // Redirect to login if not authenticated
+// const requireAuth = (req, res, next) => {
+//   if (!req.session || !req.session.user) {
+//     return res.redirect('/login'); // Redirect to login if not authenticated
+//   }
+//   next(); // Proceed if authenticated
+// }
+
+// Set notifs for logged in users
+const loginSetup = async (req, res, next) => {
+  try {
+    // Ensure user is authenticated
+    if (!req.session || !req.session.user) {
+      return res.redirect('/login'); // Redirect to login if not authenticated
+    } else if (req.session && req.session.user) {
+      // Retrieve data from DB (replace with your DB query)
+      const pendingApplications = await getPendingApplicationCount()
+      const pendingData = await getDataForReviewCount(req.session.user.id)
+
+      console.log({ pendingApplications, pendingData })
+
+      // Make it available to views and routes
+      res.locals.pendingApplications = pendingApplications
+      res.locals.pendingData = pendingData
+    }
+
+    next();
+  } catch (err) {
+    next(err);
   }
-  next(); // Proceed if authenticated
-}
+};
 
 // Lock out dashboard AND its child routes for logged in users
-app.use('/dashboard', requireAuth)
+app.use('/dashboard', loginSetup)
 
 /* ---------------------------------------
     HANDLEBARS
@@ -1231,8 +1257,9 @@ app.get('*', function(req, res){
 })
 
 /* ---------------------------------------
-    APP LISTENER
+    APP LISTENER AND APP LOCALS FUNCTIONS
 --------------------------------------- */
+
 const port = 3000
 app.listen(port, () => {
   console.log(`App listening on port ${port}`)
