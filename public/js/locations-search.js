@@ -135,19 +135,29 @@ let wasteData
 form.addEventListener('submit', function(e) {
     e.preventDefault();
 
-    // Get location code submitted by user
+    // Get initial codes
+    const region = regionsDropdown.value
+    const province = provincesDropdown.value
+    const municipality = municipalitiesDropdown.value
+
+    // Get final location code submitted by user
     const locationCode = locationCodeDisplay.value
     
-    // Fetch users with role ID from server
-    fetch(`/api/waste-data/${locationCode}`)
-        .then(response => response.json())
-        .then((data) => {
-            wasteData = data
-            showWasteData(wasteData)
-        })
+    // Params to add on address
+    const params = new URLSearchParams()
+
+    // Add location codes to params
+    if (region) params.append('region', region);
+    if (province) params.append('province', province);
+    if (municipality) params.append('municipality', municipality)
+    params.append('location', locationCode)
+
+    // Redirect to results pages
+    window.location.replace(`/dashboard/search?${params.toString()}`)
 })
 
 // Display users of a certain role
+/*
 function showWasteData(wasteData) {
     console.log(wasteData)
 
@@ -199,3 +209,4 @@ function showWasteData(wasteData) {
     // Paste HTML output on waste data div
     divWasteData.innerHTML = output
 }
+*/

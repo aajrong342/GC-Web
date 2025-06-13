@@ -33,7 +33,8 @@ import {
   createEditEntry,
   getLatestDataEntry,
   getPendingApplicationCount,
-  getDataForReviewCount
+  getDataForReviewCount,
+  getAvgInfo
 } from './database.js'
 
 // File Upload
@@ -132,15 +133,6 @@ app.use((req, res, next) => {
   next()
 })
 
-// Session middleware
-// Check if session user exists (i.e., user is logged in)
-// const requireAuth = (req, res, next) => {
-//   if (!req.session || !req.session.user) {
-//     return res.redirect('/login'); // Redirect to login if not authenticated
-//   }
-//   next(); // Proceed if authenticated
-// }
-
 // Set notifs for logged in users
 const loginSetup = async (req, res, next) => {
   try {
@@ -151,8 +143,6 @@ const loginSetup = async (req, res, next) => {
       // Retrieve data from DB (replace with your DB query)
       const pendingApplications = await getPendingApplicationCount()
       const pendingData = await getDataForReviewCount(req.session.user.id)
-
-      console.log({ pendingApplications, pendingData })
 
       // Make it available to views and routes
       res.locals.pendingApplications = pendingApplications
@@ -237,8 +227,18 @@ Handlebars.registerHelper('textDateTime', function(date) {
 
 // Show number with commas
 Handlebars.registerHelper('commaNumber', function(num) {
-  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-})
+  if (typeof num !== "number") {
+    num = parseFloat(num);
+  }
+
+  if (isNaN(num)) return '';
+
+  const [integerPart, decimalPart] = num.toFixed(3).split('.');
+
+  const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  return decimalPart ? `${formattedInteger}.${decimalPart}` : formattedInteger;
+});
 
 // Return json object
 Handlebars.registerHelper('json', function(context) {
@@ -398,12 +398,63 @@ app.get('/test-chart', (req, res) => {
 
 // Dashboard home page
 app.get('/dashboard', (req, res) => {
-  // This would typically check for authentication
-  res.render('dashboard/view-data-search', {
+  res.render('dashboard/dashboard-home', {
     layout: 'dashboard',
     title: 'Main Dashboard | GC Dashboard',
     current_home: true
   })
+})
+
+// Data search
+app.get('/dashboard/search', async (req, res) => {
+  const locationCode = req.query.location;
+  const { region, province, municipality } = req.query
+
+  // If there's no location query, show just the search input page
+  if (!locationCode) {
+    res.render('dashboard/view-data-search', {
+      layout: 'dashboard',
+      title: 'Data Search | GC Dashboard',
+      current_search: true
+    })
+  } else {
+    // Otherwise, show the actual results page
+    try {
+      /* ------ LOCATION NAME ------ */
+      // Prepare PSGC data for location names
+      const psgcRegions = await PSGCResource.getRegions()
+      const psgcProvinces = await PSGCResource.getProvinces()
+      const psgcMunicipalities = await PSGCResource.getMunicipalities()
+      const psgcCities = await PSGCResource.getCities()
+
+      // Get location names
+      const regionName = getPsgcName(psgcRegions, region)
+      const provinceName = getPsgcName(psgcProvinces, province) || null
+      const municipalityName = getPsgcName(psgcMunicipalities, municipality) || getPsgcName(psgcCities, municipality) || null
+
+      // Set full location name
+      const parts = [municipalityName, provinceName, regionName].filter(Boolean)
+      const fullLocation = parts.join(', ')
+
+      /* ------ AVERAGE INFO ------ */
+      // Retrieve summary data of given location
+      const avgInfo = await getAvgInfo(locationCode);
+
+      /* ------ AVERAGE DATA ------ */
+      //const entries = await getDetailedEntries(locationCode);
+
+      res.render('dashboard/view-data-result', {
+        layout: 'dashboard',
+        title: 'Data Search Result | GC Dashboard',
+        current_search: true,
+        fullLocation,
+        avgInfo: avgInfo[0]
+        //entries
+      });
+    } catch (err) {
+      res.status(500).send('Error loading search results');
+    }
+  }
 })
 
 // Get all approved data entries

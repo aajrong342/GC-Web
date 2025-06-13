@@ -1,0 +1,36 @@
+<!-- Title card -->
+<fieldset style="width: 97.3%; margin-bottom: 10px; padding-top: 20px; padding-bottom: 20px">
+    <h1 style="margin:0">{{fullLocation}}</h1>
+</fieldset>
+
+<!-- Initial summary -->
+<div style="display: flex;">
+    <fieldset style="width: 100%;">
+        <legend>Average Waste Generation</legend>
+
+        <table class="user-profile">
+            <tr>
+                <td class="label">Waste Generation per Capita (Kg/cap-day)</td>
+                <td>{{commaNumber avgInfo.avg_per_capita}}</td>
+            </tr>
+            <tr>
+                <td class="label">Annual Waste Generation (kg/year)</td>
+                <td>{{commaNumber avgInfo.avg_annual}}</td>
+            </tr>
+        </table>
+    </fieldset>
+    
+    <fieldset style="width: 100%;">
+        <legend>Overall Collection Period</legend>
+        <table class="user-profile">
+            <tr>
+                <td class="label">Start Date</td>
+                <td>{{textDate avgInfo.earliest_collection_start}}</td>
+            </tr>
+            <tr>
+                <td class="label">End Date</td>
+                <td>{{textDate avgInfo.latest_collection_end}}</td>
+            </tr>
+        </table>
+    </fieldset>
+</div>
