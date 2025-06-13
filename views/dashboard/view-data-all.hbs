@@ -1,11 +1,3 @@
-{{#if current_datasubs}}
-    <h1 style="margin: 0;">Data Submissions for Review</h1>
-    <span style="font-size: larger;">Results: {{data.length}} entries</span>
-    <br><br>
-{{else}}
-    <h1>Results: {{data.length}} entries</h1>
-{{/if}}
-
 {{#ifEquals data.length 0}}
     No entries found.
 {{/ifEquals}}

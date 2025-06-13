@@ -34,7 +34,8 @@ import {
   getLatestDataEntry,
   getPendingApplicationCount,
   getDataForReviewCount,
-  getAvgInfo
+  getAvgInfo,
+  getAvgWasteComposition
 } from './database.js'
 
 // File Upload
@@ -436,21 +437,33 @@ app.get('/dashboard/search', async (req, res) => {
       const parts = [municipalityName, provinceName, regionName].filter(Boolean)
       const fullLocation = parts.join(', ')
 
-      /* ------ AVERAGE INFO ------ */
-      // Retrieve summary data of given location
-      const avgInfo = await getAvgInfo(locationCode);
-
       /* ------ AVERAGE DATA ------ */
-      //const entries = await getDetailedEntries(locationCode);
+      // Retrieve summary data of given location
+      const avgInfo = await getAvgInfo(locationCode)
+      const avgData = await getAvgWasteComposition(locationCode)
 
-      res.render('dashboard/view-data-result', {
-        layout: 'dashboard',
-        title: 'Data Search Result | GC Dashboard',
-        current_search: true,
-        fullLocation,
-        avgInfo: avgInfo[0]
-        //entries
-      });
+      /* ------ RAW DATA ENTRIES ------ */
+      const entries = await getDataByLocation(locationCode);
+
+      // If location query is given, but there are no results
+      if(entries.length === 0) {
+        res.render('dashboard/view-data-none', {
+          layout: 'dashboard',
+          title: 'Data Search Result | GC Dashboard',
+          current_search: true,
+          fullLocation,
+          avgInfo: avgInfo[0]
+        });
+      } else {
+        res.render('dashboard/view-data-result', {
+          layout: 'dashboard',
+          title: 'Data Search Result | GC Dashboard',
+          current_search: true,
+          fullLocation,
+          avgInfo: avgInfo[0],
+          entries
+        });
+      }
     } catch (err) {
       res.status(500).send('Error loading search results');
     }

@@ -34,3 +34,65 @@
         </table>
     </fieldset>
 </div>
+
+<!-- Data tabs -->
+<div class="tab">
+  <button class="tablinks" onclick="openTab(event, 'Chart')" id="defaultOpen">CHART</button>
+  <button class="tablinks" onclick="openTab(event, 'Table')">RAW DATA</button>
+</div>
+
+<!-- Display A: Chart -->
+<div id="Chart" class="tabcontent">
+    <!-- Supertype summary pie chart -->
+    {{!-- <div class="pie-chart">
+        <canvas id="supertypePieChart">
+            <!-- Populated by JS -->
+        </canvas>
+
+        <!-- Toggle showing summary or detailed pie -->
+        <button id="togglePieBtn">More Details</button>
+    </div>
+
+    <!-- Subtypes bar charts -->
+    <div id="bar-charts-container"></div> --}}
+</div>
+
+<!-- Display B: Raw Data -->
+<div id="Table" class="tabcontent">
+    {{#ifEquals entries.length 0}}
+        No entries found.
+    {{/ifEquals}}
+
+    {{#each entries}}
+        <a href="/dashboard/data{{#if ../current_datasubs}}/review{{/if}}/{{data_entry_id}}">
+            <button class='waste-data-btn'>
+                <div style="display: flex;">
+                    <!-- Title -->
+                    <h2 style="margin: 0">{{title}}</h2>
+
+                    <!-- Data entry status -->
+                    <span class="data-status {{#ifEquals status 'Pending Review'}}stat-pending{{/ifEquals}} {{#ifEquals status 'Approved'}}stat-approved{{/ifEquals}} {{#ifEquals status 'Rejected'}}stat-rejected{{/ifEquals}}">{{status}}</span>
+                </div>
+
+                <p>
+                    <b>Location: </b>{{location_name}} <br>
+                    <i>Submitted on {{textDate date_submitted}}</i>
+                </p>
+                
+                <p>
+                    <b>Submitted by:</b> {{uppercase lastname}}, {{firstname}}<br>
+                    <i>{{company_name}}</i>
+                </p>
+
+                <b>Collection Period:</b> {{textDate collection_start}} - {{textDate collection_end}}<br>
+            </button>
+        </a>
+    {{/each}}
+    
+</div>
+
+<!-- Access to chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- JS behind the tabs -->
+<script src="/js/tabs.js"></script>
