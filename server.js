@@ -525,12 +525,21 @@ app.get('/dashboard/search', async (req, res) => {
         summaryData.backgroundColor.push(baseColor);
 
         // Detailed entries (types under this supertype)
-        supertype.types.forEach((type, i) => {
+        // Calculate total weight per type
+        const typeWeights = supertype.types.map(type => {
           const weight = Object.values(type.amounts || {}).reduce((a, b) => a + Number(b), 0);
-          if (weight > 0) {
+          return { name: type.name, weight };
+        });
+
+        // Sort types descending by weight
+        typeWeights.sort((a, b) => b.weight - a.weight);
+
+        // Add sorted types to chart data
+        typeWeights.forEach((type, i) => {
+          if (type.weight > 0) {
             detailedData.labels.push(type.name);
-            detailedData.data.push(Number(weight.toFixed(3)));
-            detailedData.backgroundColor.push(shadeColor(baseColor, -0.3 + 0.15 * i));
+            detailedData.data.push(Number(type.weight.toFixed(3)));
+            detailedData.backgroundColor.push(shadeColor(baseColor, -0.17 + 0.15 * i));
           }
         });
       }
@@ -925,12 +934,21 @@ app.get('/dashboard/data/:id', async (req, res) => {
     summaryData.backgroundColor.push(baseColor);
 
     // Detailed entries (types under this supertype)
-    supertype.types.forEach((type, i) => {
+    // Calculate total weight per type
+    const typeWeights = supertype.types.map(type => {
       const weight = Object.values(type.amounts || {}).reduce((a, b) => a + Number(b), 0);
-      if (weight > 0) {
+      return { name: type.name, weight };
+    });
+
+    // Sort types descending by weight
+    typeWeights.sort((a, b) => b.weight - a.weight);
+
+    // Add sorted types to chart data
+    typeWeights.forEach((type, i) => {
+      if (type.weight > 0) {
         detailedData.labels.push(type.name);
-        detailedData.data.push(Number(weight.toFixed(3)));
-        detailedData.backgroundColor.push(shadeColor(baseColor, -0.3 + 0.15 * i));
+        detailedData.data.push(Number(type.weight.toFixed(3)));
+        detailedData.backgroundColor.push(shadeColor(baseColor, -0.17 + 0.15 * i));
       }
     });
   }
