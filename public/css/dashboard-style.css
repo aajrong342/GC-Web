@@ -659,3 +659,29 @@ select {
     cursor: pointer;
     margin-top: 20px;
 }
+
+.bar-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-left: 20px;
+  margin-top: 30px;
+}
+
+.bar-legend-name {
+    margin-top: auto;
+    margin-bottom: auto;
+    font-size: 21px;
+    display: flex;
+}
+
+.bar-legend-kg {
+    margin-left: auto;
+    font-size: small;
+    margin-top: 5px;
+}
+
+.bar-legend-perc {
+    margin-left: auto;
+    font-size: x-large;
+}

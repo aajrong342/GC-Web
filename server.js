@@ -937,6 +937,34 @@ app.get('/dashboard/data/:id', async (req, res) => {
     return `rgb(${Math.round((t-R)*p+R)}, ${Math.round((t-G)*p+G)}, ${Math.round((t-B)*p+B)})`;
   }
 
+  // Generate shades (for detailed pie chart)
+  function clamp(n) {
+    return Math.max(0, Math.min(255, Math.round(n)));
+  }
+
+  function shadeBarColor(baseColor, index, total) {
+    // Assume baseColor is in hex: "#4caf50"
+    const base = hexToRgb(baseColor); // Convert hex to RGB object
+
+    // Example: darken based on index
+    const factor = 0.75 + (index / (total * 1.5)); // Adjust factor to taste
+
+    const r = clamp(base.r * factor);
+    const g = clamp(base.g * factor);
+    const b = clamp(base.b * factor);
+
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+
+  function hexToRgb(hex) {
+    const bigint = parseInt(hex.replace("#", ""), 16);
+    return {
+      r: (bigint >> 16) & 255,
+      g: (bigint >> 8) & 255,
+      b: bigint & 255
+    };
+  }
+
   const baseHexMap = {
     'Biodegradable': '#4caf50',    // green
     'Recyclable': '#2196f3',       // blue
@@ -995,22 +1023,32 @@ app.get('/dashboard/data/:id', async (req, res) => {
   const barChartData = {}; // keyed by supertype name or ID
 
   for (const supertype of Object.values(supertypeMap)) {
-    const labels = [];
-    const data = [];
+    const baseColor = baseHexMap[supertype.name] || '#9e9e9e';
+    const legend = [];
 
-    for (const type of supertype.types) {
-      labels.push(type.name);
-
+    // Collect and sort types by weight
+    const sortedTypes = supertype.types.map(type => {
       const weight = Object.values(type.amounts || {}).reduce((a, b) => a + Number(b), 0);
-      data.push(Number(weight.toFixed(3)));
-    }
+      return {
+        label: type.name,
+        value: Number(weight.toFixed(3))
+      };
+    }).sort((a, b) => b.value - a.value);
+
+    // Assign shaded color to each
+    const total = sortedTypes.length;
+    sortedTypes.forEach((item, i) => {
+      item.color = shadeBarColor(baseColor, i, total); // example: lighter/darker shades per index
+    });
 
     barChartData[supertype.name] = {
-      color: baseHexMap[supertype.name] || '#9e9e9e',
-      labels,
-      data
+      labels: sortedTypes.map(item => item.label),
+      data: sortedTypes.map(item => item.value),
+      legend: sortedTypes
     };
   }
+
+  //res.json(barChartData)
 
   /* -------- RENDER PAGE -------- */
 
