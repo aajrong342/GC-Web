@@ -111,6 +111,14 @@ app.use('/uploads', express.static('uploads'));
     CHART DISPLAY FUNCTIONS
 --------------------------------------- */
 
+// Main category colors
+const baseHexMap = {
+  'Biodegradable': '#4caf50',    // green
+  'Recyclable': '#2196f3',       // blue
+  'Residual': '#ff9800',         // orange
+  'Special/Hazardous': '#f44336' // red
+};
+
 // Generate shades (for detailed pie chart)
 function shadeColor(hex, percent) {
   let f = parseInt(hex.slice(1),16),
@@ -514,15 +522,16 @@ app.get('/dashboard/search', async (req, res) => {
       /* ------ AVERAGE DATA ------ */
       // Retrieve summary data of given location
       const avgInfo = await getAvgInfo(locationCode)
+
+      // Initialize waste comp
+      //const sectors = await getSectors()
+      const supertypes = await getAllTypes()
       const avgData = await getAvgWasteComposition(locationCode)
 
       /* ------ RAW DATA ENTRIES ------ */
       const entries = await getDataByLocation(locationCode);
 
       /* -------- PIE CHART -------- */
-      const sectors = await getSectors()
-      const supertypes = await getAllTypes()
-
       // Create a lookup map for waste amounts
       const wasteMap = {};
       for (const row of avgData) {
@@ -559,13 +568,6 @@ app.get('/dashboard/search', async (req, res) => {
         labels: [],
         data: [],
         backgroundColor: []
-      };
-
-      const baseHexMap = {
-        'Biodegradable': '#4caf50',    // green
-        'Recyclable': '#2196f3',       // blue
-        'Residual': '#ff9800',         // orange
-        'Special/Hazardous': '#f44336' // red
       };
 
       const supertypeTotals = Object.values(supertypeMap).map(supertype => {
@@ -619,25 +621,35 @@ app.get('/dashboard/search', async (req, res) => {
       const barChartData = {}; // keyed by supertype name or ID
 
       for (const supertype of Object.values(supertypeMap)) {
-        const labels = [];
-        const data = [];
+        const baseColor = baseHexMap[supertype.name] || '#9e9e9e';
+        const legend = [];
 
-        for (const type of supertype.types) {
-          labels.push(type.name);
-
+        // Collect and sort types by weight
+        const sortedTypes = supertype.types.map(type => {
           const weight = Object.values(type.amounts || {}).reduce((a, b) => a + Number(b), 0);
-          data.push(Number(weight.toFixed(3)));
-        }
+          return {
+            label: type.name,
+            value: Number(weight.toFixed(3))
+          };
+        }).sort((a, b) => b.value - a.value);
+
+        // Assign shaded color to each
+        const total = sortedTypes.length;
+        sortedTypes.forEach((item, i) => {
+          item.color = shadeBarColor(baseColor, i, total); // example: lighter/darker shades per index
+        });
 
         barChartData[supertype.name] = {
-          color: baseHexMap[supertype.name] || '#9e9e9e',
-          labels,
-          data
+          labels: sortedTypes.map(item => item.label),
+          data: sortedTypes.map(item => item.value),
+          legend: sortedTypes
         };
       }
 
       // If location query is given and results do exist
       if(entries.length > 0) {
+        // res.json(supertypeMap)
+
         res.render('dashboard/view-data-result', {
           layout: 'dashboard',
           title: 'Data Search Result | GC Dashboard',
@@ -864,8 +876,6 @@ app.get('/dashboard/data/:id', async (req, res) => {
       wasteMap[row.type_id][row.sector_id] = row.waste_amount;
   }
 
-  /* -------- TABLE INITIALIZATION -------- */
-
   // Group types under supertypes
   const supertypeMap = {};
   for (const row of supertypes) {
@@ -882,6 +892,8 @@ app.get('/dashboard/data/:id', async (req, res) => {
           amounts: wasteMap[row.type_id] || {}
       });
   }
+
+  /* -------- TABLE INITIALIZATION -------- */
 
   // Grand total (for "percentage" column) for each type
   let grandTotal = 0;
@@ -965,13 +977,6 @@ app.get('/dashboard/data/:id', async (req, res) => {
     labels: [],
     data: [],
     backgroundColor: []
-  };
-
-  const baseHexMap = {
-    'Biodegradable': '#4caf50',    // green
-    'Recyclable': '#2196f3',       // blue
-    'Residual': '#ff9800',         // orange
-    'Special/Hazardous': '#f44336' // red
   };
 
   const supertypeTotals = Object.values(supertypeMap).map(supertype => {
