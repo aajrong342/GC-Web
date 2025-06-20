@@ -1055,6 +1055,30 @@ app.get('/dashboard/data/:id', async (req, res) => {
     };
   }
 
+  /* -------- SECTOR BAR CHART -------- */
+
+  // Combine sector names and totals into array
+  const sectorBarDataRaw = sectors.map(sector => ({
+    label: sector.name,
+    value: Number(sectorTotals[sector.id]?.toFixed(3)) || 0
+  }));
+
+  // Sort from highest to lowest
+  const sectorBarDataSorted = sectorBarDataRaw.sort((a, b) => b.value - a.value);
+
+  // Assign color per sector (basic gradient or fixed palette)
+  function sectorColor(index) {
+    const base = 210; // base blue hue
+    const step = 15;
+    return `hsl(${base + index * step}, 70%, 55%)`; // returns different shades
+  }
+
+  // Add color
+  const sectorBarData = sectorBarDataSorted.map((item, i) => ({
+    ...item,
+    color: sectorColor(i)
+  }));
+
   /* -------- RENDER PAGE -------- */
 
   res.render('dashboard/view-data-entry', {
@@ -1070,7 +1094,8 @@ app.get('/dashboard/data/:id', async (req, res) => {
     summaryPieData: JSON.stringify(summaryData),
     detailedPieData: JSON.stringify(detailedData),
     legendData,
-    latestEdit
+    latestEdit,
+    sectorBarData: JSON.stringify(sectorBarData)
   })
 })
 

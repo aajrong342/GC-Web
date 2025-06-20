@@ -100,8 +100,9 @@
         </div>
     </div>
 
-    <!-- Subtypes bar charts -->
     <hr>
+
+    <!-- Summary pie -->
     <br><center><h2>Top Waste Types by Category</h2></center>
     <div class="bar-tab">
         <button class="bar-tablinks" onclick="openBarTab(event, 'Biodegradable')" id="firstBar">BIODEGRADABLE</button>
@@ -110,7 +111,13 @@
         <button class="bar-tablinks" onclick="openBarTab(event, 'Special/Hazardous')">SPECIAL/HAZARDOUS</button>
     </div>
 
+    <!-- Subtypes bar charts -->
     <div id="bar-charts-container"></div>
+
+    <!-- Top sectors producing waste -->
+    <br><hr><br>
+    <center><h2>Top Sectors by Waste Output</h2></center>
+    <div id="sector-chart-container"></div>
 </div>
 
 <!-- Display B: Raw Data -->
@@ -258,7 +265,7 @@ document.getElementById('togglePieBtn').addEventListener('click', () => {
     }
 });
 
-/* --------- BAR CHART --------- */
+/* --------- BAR CHARTS BY WASTE TYPE --------- */
 
 // Build bar chart
 const barChartData = {{{barChartData}}};
@@ -369,6 +376,99 @@ for (const [supertype, chartData] of Object.entries(barChartData)) {
         }
     });
 }
+
+/* --------- SECTOR BAR CHART --------- */
+
+const sectorBarData = {{{sectorBarData}}}; // already a JSON array
+const tsContainer = document.getElementById('sector-chart-container');
+
+// Chart canvas
+const tsCanvas = document.createElement('canvas');
+tsCanvas.id = 'sectorBarChart';
+tsCanvas.style.maxWidth = '600px';
+tsCanvas.style.marginBottom = '20px';
+
+const tsWrapper = document.createElement('div');
+tsWrapper.classList.add('chart-wrapper');
+tsWrapper.style.display = 'flex';
+tsWrapper.style.gap = '24px';
+tsWrapper.style.alignItems = 'flex-start';
+
+tsWrapper.appendChild(tsCanvas);
+tsContainer.appendChild(tsWrapper);
+
+// Data prep
+const labels = sectorBarData.map(item => item.label);
+const values = sectorBarData.map(item => item.value);
+const colors = sectorBarData.map(item => item.color);
+
+// Chart.js
+new Chart(tsCanvas.getContext('2d'), {
+  type: 'bar',
+  data: {
+    labels,
+    datasets: [{
+      label: 'Waste by Sector',
+      data: values,
+      backgroundColor: colors
+    }]
+  },
+  options: {
+    responsive: true,
+    indexAxis: 'y',
+    plugins: {
+      title: {
+        display: false
+      },
+      tooltip: {
+        callbacks: {
+          label: context => `${context.parsed.y.toFixed(3)} kg`
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Weight (kg)'
+        }
+      },
+      x: {
+        ticks: {
+          autoSkip: false,
+          maxRotation: 45,
+          minRotation: 20
+        }
+      }
+    }
+  }
+});
+
+// Create legend title and div
+const tsLegendDiv = document.createElement('div');
+tsLegendDiv.classList.add('bar-legend');
+
+tsLegendDiv.innerHTML = sectorBarData
+  .filter(item => item.value > 0)
+  .map(item => {
+    const total = values.reduce((sum, v) => sum + v, 0);
+    const percent = total ? ((item.value / total) * 100).toFixed(3).replace(/\.?0+$/, '') : '0';
+    return `
+      <span class="legend-item" style="background-color: ${item.color}">
+        <span class="bar-legend-name">
+          ${item.label}
+          <span class="bar-legend-perc">${percent}%</span>
+        </span>
+        <span class="bar-legend-kg">
+          ${item.value.toFixed(3)} kg
+        </span>
+      </span>`;
+  }).join('');
+
+const tsLegendWrapper = document.createElement('div');
+tsLegendWrapper.appendChild(tsLegendDiv);
+tsWrapper.appendChild(tsLegendWrapper);
 
 </script>
 
