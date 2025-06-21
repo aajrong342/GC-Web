@@ -240,6 +240,67 @@
 </div>
 </div>
 
+<br>
+<h1><i class="fas fa-industry"></i> Economic Sectors</h1>
+<section class="sectors-section">
+  <div class="sectors-grid">
+    <div class="sector-card sector-residential">
+      <div class="sector-header">
+        <i class="fas fa-home"></i> Residential
+      </div>
+      <div class="sector-desc">
+        Households and private residences; generates daily domestic waste like food scraps, wrappers, and packaging.
+      </div>
+    </div>
+
+    <div class="sector-card sector-commercial">
+      <div class="sector-header">
+        <i class="fas fa-store"></i> Commercial
+      </div>
+      <div class="sector-desc">
+        Businesses, shops, and markets; waste from packaging, paper, plastics, and customer activity.
+      </div>
+    </div>
+
+    <div class="sector-card sector-institutional">
+      <div class="sector-header">
+        <i class="fas fa-university"></i> Institutional
+      </div>
+      <div class="sector-desc">
+        Schools, offices, government buildings; waste includes paper, office supplies, and cafeteria leftovers.
+      </div>
+    </div>
+
+    <div class="sector-card sector-industrial">
+      <div class="sector-header">
+        <i class="fas fa-industry"></i> Industrial
+      </div>
+      <div class="sector-desc">
+        Factories and manufacturing plants; produces waste such as packaging, residual materials, and byproducts.
+      </div>
+    </div>
+
+    <div class="sector-card sector-health">
+      <div class="sector-header">
+        <i class="fas fa-hospital"></i> Health
+      </div>
+      <div class="sector-desc">
+        Hospitals, clinics, and health centers; includes biomedical and hazardous waste like syringes or dressings.
+      </div>
+    </div>
+
+    <div class="sector-card sector-agriculture">
+      <div class="sector-header">
+        <i class="fas fa-tractor"></i> Agriculture & Livestock
+      </div>
+      <div class="sector-desc">
+        Farms and animal facilities; waste includes crop residues, manure, and animal byproducts.
+      </div>
+    </div>
+
+  </div>
+</section>
+
 <script>
 function toggleCategory(header) {
     const category = header.parentElement;
@@ -319,4 +380,42 @@ function toggleCategory(header) {
     .category.open .toggle-icon {
         transform: rotate(90deg);
     }
+
+  .sectors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .sector-card {
+    border-radius: 12px;
+    padding: 1rem;
+    color: white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+
+  .sector-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+
+  .sector-header i {
+    font-size: 1.5rem;
+  }
+
+  .sector-desc {
+    font-size: 0.95rem;
+  }
+
+  /* Colors per sector */
+  .sector-residential { background-color: #3f51b5; }  /* Indigo */
+  .sector-commercial { background-color: #009688; }    /* Teal */
+  .sector-institutional { background-color: #673ab7; } /* Deep Purple */
+  .sector-industrial { background-color: #607d8b; }    /* Blue Grey */
+  .sector-health { background-color: #e91e63; }        /* Pink */
+  .sector-agriculture { background-color: #8bc34a; }   /* Light Green */
 </style>
