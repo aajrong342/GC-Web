@@ -42,6 +42,7 @@ import {
 import multer from 'multer'
 import path from 'path'
 import fs from 'fs'
+import { fileURLToPath } from 'url'
 
 // Philippine Standard Geographic Code
 import { PSGCResource } from 'psgc-areas'
@@ -69,6 +70,10 @@ app.use(favicon('./favicon.ico'))
 // Use the public folder for assets
 app.use(express.static('public'))
 app.use('/pictures', express.static('pictures'));
+
+// File paths
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 // Setup file uploads directory
 const uploadDir = './uploads';
@@ -103,6 +108,8 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
     fileFilter: fileFilter
 });
+
+const xlsxUpload = multer({ dest: 'uploads/' })
 
 // Serve files from uploads directory
 app.use('/uploads', express.static('uploads'));
@@ -1214,6 +1221,60 @@ app.get('/dashboard/submit-report/form', async (req, res) => {
   })
 })
 
+// API path after user uploads filled spreadsheet
+app.post("/dashboard/submit-report/upload/confirm", xlsxUpload.single('spreadsheet'), async (req, res) => {
+  try {
+    // Set up worksheet for reading
+    const fileBuffer = fs.readFileSync(req.file.path);
+    const workbook = XLSX.read(fileBuffer, { type: 'buffer' })
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+    // Manual data
+    const population = json[0]?.[1] || '';
+    const perCapita = json[1]?.[1] || '';
+    const annual = json[2]?.[1] || '';
+
+    // Sector names are in row 6, from column 2 onward
+    const sectorHeaderRow = 6;
+    const sectors = json[sectorHeaderRow]?.slice(2) || [];
+
+    // Waste data starts at row 7
+    const matrixStartRow = 7;
+    const wasteMatrix = [];
+
+    let currentSupertype = '';
+
+    for (let i = matrixStartRow; i < json.length; i++) {
+      const row = json[i];
+      if (!row || !row[1]) continue; // skip empty or invalid rows
+
+      // Update supertype if column 0 is not null
+      if (row[0]) currentSupertype = row[0];
+
+      const type = row[1];
+      const values = row.slice(2);
+
+      wasteMatrix.push({ supertype: currentSupertype, type, values });
+    }
+
+    fs.unlinkSync(req.file.path) // Delete uploaded file after parsing
+
+    res.render('dashboard/data-upload-confirm', {
+      layout: 'dashboard',
+      population,
+      perCapita,
+      annual,
+      sectors,
+      wasteMatrix
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error processing the spreadsheet.');
+  }
+})
+
 // Submit data by uploading a spreadsheet
 app.get('/dashboard/submit-report/upload', async (req, res) => {
   res.render('dashboard/data-upload', {
@@ -1223,7 +1284,7 @@ app.get('/dashboard/submit-report/upload', async (req, res) => {
   })
 })
 
-app.post("/api/data/submit-report", async (req, res) => {
+app.post("/api/data/submit-report/manual", async (req, res) => {
   // Request body
   const {
     title, region, province, municipality, population, per_capita, annual, date_start, date_end, wasteComposition
@@ -1278,7 +1339,6 @@ app.post("/api/data/submit-report", async (req, res) => {
     res.status(500).json({ error: "Failed to submit report" });
   }
 });
-
 
 
 // API: Get locations from json

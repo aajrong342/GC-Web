@@ -1,0 +1,24 @@
+<h2>Manual Entry Summary</h2>
+<ul>
+  <li><strong>Population:</strong> {{population}}</li>
+  <li><strong>Per Capita Waste:</strong> {{perCapita}} kg/cap/day</li>
+  <li><strong>Annual Waste:</strong> {{annual}} kg/year</li>
+</ul>
+
+<h2>Waste Composition Table</h2>
+<table border="1">
+  <thead>
+    <tr>
+      <th>Type</th>
+      {{#each sectors}}<th>{{this}}</th>{{/each}}
+    </tr>
+  </thead>
+  <tbody>
+    {{#each wasteMatrix}}
+    <tr>
+      <td>{{type}}</td>
+      {{#each values}}<td>{{this}}</td>{{/each}}
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
