@@ -1227,6 +1227,23 @@ app.post("/dashboard/submit-report/upload/confirm", xlsxUpload.single('spreadshe
     // Form data
     const formData = req.body
 
+    /* ------- LOCATION NAME ------- */
+    // Prepare PSGC data for location names
+    const psgcRegions = await PSGCResource.getRegions()
+    const psgcProvinces = await PSGCResource.getProvinces()
+    const psgcMunicipalities = await PSGCResource.getMunicipalities()
+    const psgcCities = await PSGCResource.getCities()
+
+    // Get location names
+    const regionName = getPsgcName(psgcRegions, formData.region)
+    const provinceName = getPsgcName(psgcProvinces, formData.province) || null
+    const municipalityName = getPsgcName(psgcMunicipalities, formData.municipality) || getPsgcName(psgcCities, formData.municipality) || null
+
+    // Set full location name
+    const parts = [municipalityName, provinceName, regionName].filter(Boolean)
+    const fullLocation = parts.join(', ')
+
+    /* ------- XLSX DATA EXTRACTION ------- */
     // Set up worksheet for reading
     const fileBuffer = fs.readFileSync(req.file.path);
     const workbook = XLSX.read(fileBuffer, { type: 'buffer' })
@@ -1266,6 +1283,7 @@ app.post("/dashboard/submit-report/upload/confirm", xlsxUpload.single('spreadshe
 
     res.render('dashboard/data-upload-confirm', {
       layout: 'dashboard',
+      fullLocation,
       population,
       perCapita,
       annual,
@@ -1273,6 +1291,7 @@ app.post("/dashboard/submit-report/upload/confirm", xlsxUpload.single('spreadshe
       wasteMatrix,
       wasteMatrixJson: JSON.stringify(wasteMatrix),
       formData: JSON.stringify(formData),
+      formDataRaw: formData,
       sectorsJson: JSON.stringify(sectors)
     });
   } catch (err) {

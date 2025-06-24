@@ -1,11 +1,73 @@
-<h2>Manual Entry Summary</h2>
-<ul>
-  <li><strong>Population:</strong> {{population}}</li>
-  <li><strong>Per Capita Waste:</strong> {{perCapita}} kg/cap/day</li>
-  <li><strong>Annual Waste:</strong> {{annual}} kg/year</li>
-</ul>
+<!-- Confirm window -->
+<fieldset class="review-window" style="width: 97.3%">
+    <h1>Confirm Submission</h1>
+</fieldset>
 
-<h2>Waste Composition Table</h2>
+<!-- Title card -->
+<fieldset style="width: 97.3%; margin-bottom: 10px; padding-top: 20px; padding-bottom: 20px">
+    <h1 style="margin:0">{{formDataRaw.title}}</h1>
+    <h3 style="margin:0; font-weight:normal;">
+      <i class="fa-solid fa-location-dot"></i>&nbsp; {{fullLocation}}
+    </h3>
+</fieldset>
+
+<!-- Data entry info -->
+<div style="display: flex;">
+  <fieldset style="width: 100%;">
+      <legend>Collection Info</legend>
+      <table class="user-profile">
+          <tr>
+              <td class="label">Start Date</td>
+              <td>{{formDataRaw.date_start}}</td>
+          </tr>
+          <tr>
+              <td class="label">End Date</td>
+              <td>{{formDataRaw.date_end}}</td>
+          </tr>
+      </table>
+  </fieldset>
+
+  <fieldset style="width: 95%;">
+      <legend>Waste Generation</legend>
+      <table class="user-profile">
+          <tr>
+              <td class="label">Population (based on Census)</td>
+              <td>{{commaNumber population}}</td>
+          </tr>
+          <tr>
+              <td class="label">Waste Generation per Capita (Kg/cap-day)</td>
+              <td>{{commaNumber perCapita}}</td>
+          </tr>
+          <tr>
+              <td class="label">Annual Waste Generation (kg/year)</td>
+              <td>{{commaNumber annual}}</td>
+          </tr>
+      </table>
+      </fieldset>
+</div>
+
+<!-- Waste Composition -->
+<fieldset style="width: 97.3%; margin-bottom: 10px; padding-top: 20px; padding-bottom: 20px">
+  <legend>Spreadsheet Data</legend>
+  <table class="data-table" id="waste-comp-table">
+      <thead>
+        <tr class="tb-header">
+            <th style="padding-top: 10px !important; padding-bottom: 10px !important;">Waste Type</th>
+            {{#each sectors}}<th>{{this}}</th>{{/each}}
+        </tr>
+      </thead>
+      <tbody>
+        {{#each wasteMatrix}}
+        <tr>
+          <td>{{type}}</td>
+          {{#each values}}<td>{{this}}</td>{{/each}}
+        </tr>
+        {{/each}}
+    </tbody>
+  </table>
+</fieldset>
+
+{{!-- <h2>Waste Composition Table</h2>
 <table border="1">
   <thead>
     <tr>
@@ -21,7 +83,7 @@
     </tr>
     {{/each}}
   </tbody>
-</table>
+</table> --}}
 
 <button type="submit" id="submitBtn" class="btn-submit">Confirm Submission</button>
 
