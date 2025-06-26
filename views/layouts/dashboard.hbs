@@ -54,93 +54,138 @@
     </header>
     
     <!-- Navigation bar -->
-    <nav>
-        <div class="nav-btn-container">
-            <a href="/dashboard" class="{{#if current_home}}current{{/if}}">
-                <i class="fa-solid fa-house nav-icon"></i> Home
-            </a>
+    <div class="layout-wrapper">
+        <nav id="sidebar" class="sidebar open">
+            <div class="nav-btn-container">
+                <button id="collapse-sidebar-btn" class="collapse-sidebar-btn">
+                    <i class="fa-solid fa-angles-left"></i> Collapse Sidebar
+                </button>
 
-            <a href="/dashboard/search" class="{{#if current_search}}current{{/if}}">
-                <i class="fa-solid fa-magnifying-glass nav-icon"></i> Data Search
-            </a>
-
-            <a href="/dashboard/data/all" class="{{#if current_all}}current{{/if}}">
-                <i class="fa-solid fa-chart-simple nav-icon"></i> Data Entries
-            </a>
-
-            <a href="/dashboard/data/map" class="{{#if current_test}}current{{/if}}">
-                <i class="fa-solid fa-compass nav-icon"></i></i> Waste Map
-            </a>
-
-            <a href="/dashboard/guide" class="{{#if current_guide}}current{{/if}}">
-                <i class="fa-solid fa-book nav-icon"></i></i> Waste Type Guide
-            </a>
-
-            <!-- Report Functions -->
-            <div class="nav-divider">DATA REPORTS</div>
-            <a href="/dashboard/submit-report" class="{{#if current_report}}current{{/if}}">
-                <i class="fa-solid fa-file-medical nav-icon"></i>&nbsp; Submit Report
-            </a>
-
-            <a href="/dashboard/data/user/{{user.id}}" class="{{#if current_user_report}}current{{/if}}">
-                <i class="fa-solid fa-folder nav-icon"></i>&nbsp; Your Reports
-            </a>
-            
-            <!-- Only show functions if current user is NOT a client -->
-            {{#ifNotEquals user.supertype 2}}
-                <div class="nav-divider">STAFF FUNCTIONS</div>
-
-                <a href="/dashboard/data/submissions" class="{{#if current_datasubs}}current{{/if}}">
-                    <i class="fa-solid fa-file-pen"></i>&nbsp; Review Data Submissions
-                    {{#ifNotEquals pendingData 0}}
-                        <span class="notif-badge">{{pendingData}}</span>
-                    {{/ifNotEquals}}
+                <a href="/dashboard" class="{{#if current_home}}current{{/if}}">
+                    <i class="fa-solid fa-house nav-icon"></i> Home
                 </a>
 
-                <a href="/dashboard/user-applications" class="{{#if current_userapp}}current{{/if}}">
-                    <i class="fa-solid fa-clipboard-list nav-icon"></i> User Applications
-                    {{#ifNotEquals pendingApplications 0}}
-                        <span class="notif-badge">{{pendingApplications}}</span>
-                    {{/ifNotEquals}}
+                <a href="/dashboard/search" class="{{#if current_search}}current{{/if}}">
+                    <i class="fa-solid fa-magnifying-glass nav-icon"></i> Data Search
                 </a>
 
-                <a href="/dashboard/partners" class="{{#if current_partners}}current{{/if}}">
-                    <i class="fa-solid fa-handshake nav-icon"></i> Partners
-                </a>
-            {{/ifNotEquals}}
-
-            <!-- Only show functions if current user is admin -->
-            {{#ifEquals user.supertype 0}}
-                <div class="nav-divider">ADMIN FUNCTIONS</div>
-
-                <a href="/dashboard/users" class="{{#if current_users}}current{{/if}}">
-                    <i class="fa-solid fa-users nav-icon"></i> Users
+                <a href="/dashboard/data/all" class="{{#if current_all}}current{{/if}}">
+                    <i class="fa-solid fa-chart-simple nav-icon"></i> Data Entries
                 </a>
 
-                <a href="/dashboard/roles" class="{{#if current_roles}}current{{/if}}">
-                    <i class="fa-solid fa-helmet-safety nav-icon"></i> Roles
+                <a href="/dashboard/data/map" class="{{#if current_test}}current{{/if}}">
+                    <i class="fa-solid fa-compass nav-icon"></i></i> Waste Map
                 </a>
-            {{/ifEquals}}
-        </div>
-    </nav>
-    
-    <main>
-        {{{ body }}}
-    </main>
+
+                <a href="/dashboard/guide" class="{{#if current_guide}}current{{/if}}">
+                    <i class="fa-solid fa-book nav-icon"></i></i> Waste Type Guide
+                </a>
+
+                <!-- Report Functions -->
+                <div class="nav-divider">DATA REPORTS</div>
+                <a href="/dashboard/submit-report" class="{{#if current_report}}current{{/if}}">
+                    <i class="fa-solid fa-file-medical nav-icon"></i>&nbsp; Submit Report
+                </a>
+
+                <a href="/dashboard/data/user/{{user.id}}" class="{{#if current_user_report}}current{{/if}}">
+                    <i class="fa-solid fa-folder nav-icon"></i>&nbsp; Your Reports
+                </a>
+                
+                <!-- Only show functions if current user is NOT a client -->
+                {{#ifNotEquals user.supertype 2}}
+                    <div class="nav-divider">STAFF FUNCTIONS</div>
+
+                    <a href="/dashboard/data/submissions" class="{{#if current_datasubs}}current{{/if}}">
+                        <i class="fa-solid fa-file-pen"></i>&nbsp; Review Data Submissions
+                        {{#ifNotEquals pendingData 0}}
+                            <span class="notif-badge">{{pendingData}}</span>
+                        {{/ifNotEquals}}
+                    </a>
+
+                    <a href="/dashboard/user-applications" class="{{#if current_userapp}}current{{/if}}">
+                        <i class="fa-solid fa-clipboard-list nav-icon"></i> User Applications
+                        {{#ifNotEquals pendingApplications 0}}
+                            <span class="notif-badge">{{pendingApplications}}</span>
+                        {{/ifNotEquals}}
+                    </a>
+
+                    <a href="/dashboard/partners" class="{{#if current_partners}}current{{/if}}">
+                        <i class="fa-solid fa-handshake nav-icon"></i> Partners
+                    </a>
+                {{/ifNotEquals}}
+
+                <!-- Only show functions if current user is admin -->
+                {{#ifEquals user.supertype 0}}
+                    <div class="nav-divider">ADMIN FUNCTIONS</div>
+
+                    <a href="/dashboard/users" class="{{#if current_users}}current{{/if}}">
+                        <i class="fa-solid fa-users nav-icon"></i> Users
+                    </a>
+
+                    <a href="/dashboard/roles" class="{{#if current_roles}}current{{/if}}">
+                        <i class="fa-solid fa-helmet-safety nav-icon"></i> Roles
+                    </a>
+                {{/ifEquals}}
+            </div>
+        </nav>
+        
+        <main id="main-content">
+            <button id="open-sidebar-btn">
+                <i class="fa-solid fa-bars"></i> Open Sidebar
+            </button>
+            {{{ body }}}
+        </main>
+    </div>
 
 <script>
 
-document.getElementById('logout').addEventListener('click', function (event) {
-    event.preventDefault(); // Prevent default navigation
+document.addEventListener('DOMContentLoaded', function () {
+    const sidebar = document.getElementById('sidebar');
+    const openBtn = document.getElementById('open-sidebar-btn');
+    const collapseBtn = document.getElementById('collapse-sidebar-btn');
 
-    fetch('/logout', { method: 'DELETE', credentials: 'include' })
-      .then(response => {
-        if (response.ok) {
-          window.location.href = "/"; // Redirect to login after logout
-        }
-      })
-      .catch(err => console.error("Logout failed", err));
-  })
+    sidebar.classList.add('open');
+    openBtn.classList.add('hidden');
+
+    // Open sidebar
+    openBtn.addEventListener('click', () => {
+        sidebar.classList.remove('closed');
+        sidebar.classList.add('open');
+
+        // Gradual fade-out
+        openBtn.classList.add('hidden');
+
+        // Fully remove after transition (optional for accessibility)
+        setTimeout(() => {
+            openBtn.style.display = 'none';
+        }, 300); // match CSS transition duration
+    });
+
+    // Collapse sidebar
+    collapseBtn.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        sidebar.classList.add('closed');
+
+        // Reset button visibility (immediately visible)
+        openBtn.style.display = 'flex';
+        setTimeout(() => {
+            openBtn.classList.remove('hidden');
+        }, 10); // allow next paint before fade-in
+    });
+
+    // Logout code
+    document.getElementById('logout').addEventListener('click', function (event) {
+        event.preventDefault(); // Prevent default navigation
+
+        fetch('/logout', { method: 'DELETE', credentials: 'include' })
+        .then(response => {
+            if (response.ok) {
+            window.location.href = "/"; // Redirect to login after logout
+            }
+        })
+        .catch(err => console.error("Logout failed", err));
+    })
+});
 
 </script>
 </body>
