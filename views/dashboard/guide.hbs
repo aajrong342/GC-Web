@@ -305,6 +305,7 @@
 function toggleCategory(header) {
     const category = header.parentElement;
     category.classList.toggle('open');
+
     const content = category.querySelector('.category-content');
     content.style.display = content.style.display === 'block' ? 'none' : 'block';
 }
@@ -329,7 +330,7 @@ function toggleCategory(header) {
 
     .category-content {
         margin-top: 1rem;
-        display: block;
+        display: none;
     }
 
     .card-grid {
