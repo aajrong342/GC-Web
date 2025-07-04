@@ -1,68 +1,73 @@
 
 <!-- Actual Data Display -->
 
-<!-- Title card -->
-<fieldset style="width: 97.3%; margin-bottom: 10px; padding-top: 20px; padding-bottom: 20px">
-    <h1 style="margin:0">{{wasteGen.title}}</h1>
-    <h3 style="margin:0; font-weight:normal;">
-        <i class="fa-solid fa-location-dot"></i>&nbsp; {{wasteGen.location_name}}
+<!-- Title Card -->
+<div class="form-section title-card" style="text-align: center;">
+  <h1 style="margin-bottom: 0.25rem;">{{wasteGen.title}}</h1>
+  <center>
+    <h3 style="margin: 0; font-weight: normal; color: #555;">
+        <i class="fa-solid fa-location-dot" style="color: #127009;"></i>&nbsp; {{wasteGen.location_name}}
     </h3>
-</fieldset>
-
-<!-- Data entry info -->
-<div style="display: flex;">
-    <fieldset style="width: 100%;">
-        <legend>Submission Info</legend>
-        <table class="user-profile">
-            <tr>
-                <td class="label">Submitted by</td>
-                <td>{{uppercase wasteGen.lastname}}, {{wasteGen.firstname}}</td>
-            </tr>
-            <tr>
-                <td class="label">Organization Name</td>
-                <td>{{wasteGen.company_name}}</td>
-            </tr>
-            <tr>
-                <td class="label">Date Submitted</td>
-                <td>{{textDate wasteGen.date_submitted}}</td>
-            </tr>
-        </table>
-    </fieldset>
-
-    <fieldset style="width: 100%;">
-        <legend>Collection Info</legend>
-        <table class="user-profile">
-            <tr>
-                <td class="label">Start Date</td>
-                <td>{{textDate wasteGen.collection_start}}</td>
-            </tr>
-            <tr>
-                <td class="label">End Date</td>
-                <td>{{textDate wasteGen.collection_end}}</td>
-            </tr>
-        </table>
-    </fieldset>
-
-    <fieldset style="width: 95%;">
-        <legend>Waste Generation</legend>
-        <table class="user-profile">
-            <tr>
-                <td class="label">Population (based on Census)</td>
-                <td>{{commaNumber wasteGen.population}}</td>
-            </tr>
-            <tr>
-                <td class="label">Waste Generation per Capita (Kg/cap-day)</td>
-                <td>{{commaNumber wasteGen.per_capita}}</td>
-            </tr>
-            <tr>
-                <td class="label">Annual Waste Generation (kg/year)</td>
-                <td>{{commaNumber wasteGen.annual}}</td>
-            </tr>
-        </table>
-        </fieldset>
+  </center>
 </div>
 
-<!-- Data tabs -->
+<!-- Info Blocks -->
+<div class="info-grid">
+  <!-- Submission Info -->
+  <div class="form-section">
+    <h3><i class="fas fa-user"></i> Submission Info</h3>
+    <table class="user-profile">
+      <tr>
+        <td class="label">Submitted by</td>
+        <td>{{uppercase wasteGen.lastname}}, {{wasteGen.firstname}}</td>
+      </tr>
+      <tr>
+        <td class="label">Organization Name</td>
+        <td>{{wasteGen.company_name}}</td>
+      </tr>
+      <tr>
+        <td class="label">Date Submitted</td>
+        <td>{{textDate wasteGen.date_submitted}}</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Collection Info -->
+  <div class="form-section">
+    <h3><i class="fas fa-calendar-alt"></i> Collection Info</h3>
+    <table class="user-profile">
+      <tr>
+        <td class="label">Start Date</td>
+        <td>{{textDate wasteGen.collection_start}}</td>
+      </tr>
+      <tr>
+        <td class="label">End Date</td>
+        <td>{{textDate wasteGen.collection_end}}</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Waste Generation Info -->
+  <div class="form-section">
+    <h3><i class="fas fa-dumpster"></i> Waste Generation</h3>
+    <table class="user-profile">
+      <tr>
+        <td class="label">Population (based on Census)</td>
+        <td>{{commaNumber wasteGen.population}}</td>
+      </tr>
+      <tr>
+        <td class="label">Waste Generation per Capita (Kg/cap-day)</td>
+        <td>{{commaNumber wasteGen.per_capita}}</td>
+      </tr>
+      <tr>
+        <td class="label">Annual Waste Generation (kg/year)</td>
+        <td>{{commaNumber wasteGen.annual}}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<!-- Data Tabs -->
 <div class="tab">
   <button class="tablinks" onclick="openTab(event, 'Chart')" id="defaultOpen">CHART</button>
   <button class="tablinks" onclick="openTab(event, 'Table')">RAW DATA</button>
@@ -210,13 +215,15 @@
     </div>
 </div>
 
-<!-- Footer: Link to edit history -->
-<fieldset style="width: 97.3%; margin-bottom: 10px; margin-top: 10px; padding-top: 20px; padding-bottom: 20px">
-    This page was last edited on <b>{{latestEdit}}</b><br><br>
-    <a href="/dashboard/data/{{wasteGen.data_entry_id}}/history">
-        <button class="btn-submit"><i class="fa-solid fa-clock-rotate-left"></i> View Edit History</button>
-    </a>
-</fieldset>
+<!-- Footer -->
+<div class="form-section" style="text-align: center; margin-top: 1rem;">
+  <p>This page was last edited on <b>{{latestEdit}}</b></p>
+  <a href="/dashboard/data/{{wasteGen.data_entry_id}}/history">
+    <button class="btn-submit">
+      <i class="fa-solid fa-clock-rotate-left"></i> View Edit History
+    </button>
+  </a>
+</div>
 
 <!-- Table filtering script -->
 <script>
@@ -554,3 +561,119 @@ function exportTableToExcel() {
 <!-- JS behind the tabs -->
 <script src="/js/tabs.js"></script>
 <script src="/js/tabs-bar.js"></script>
+
+<style>
+
+.info-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.info-grid .form-section {
+  flex: 1 1 280px;
+  min-width: 280px;
+}
+
+.user-profile {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+.user-profile td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #eee;
+}
+
+.user-profile .label {
+  font-weight: 600;
+  color: #444;
+  width: 50%;
+}
+
+.title-card h1 {
+  font-size: 1.75rem;
+}
+
+.btn-submit {
+  background-color: #28a745;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  color: white;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.btn-submit:hover {
+  background-color: #28a745;
+}
+
+.tab-new {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.tab-new button {
+  background-color: #f1f1f1;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  margin: 0 5px;
+  cursor: pointer;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.tab-new button:hover,
+.tab-new button.active {
+  background-color: #d0e6ff;
+}
+
+.form-section {
+  background-color: #fdfdfd;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  margin: 1.5rem auto;
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
+}
+
+.form-section h3 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+  
+  align-items: center;
+}
+
+.form-section h3 i {
+  margin-right: 0.6rem;
+  color: #127009;;
+}
+
+.form-section label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.form-section input[type="text"],
+.form-section input[type="date"],
+.form-section input[type="number"],
+.form-section select {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.3rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+</style>
