@@ -2,7 +2,7 @@
 <form id="data-search" method="GET" action="/dashboard/data/all">
     <!-- Search Bar and Filter Toggle -->
     <div class="search-bar-container">
-        <input type="text" name="title" class="search-input-main" placeholder="Search data entry title...">
+        <input type="text" name="title" value="{{query.title}}" class="search-input-main" placeholder="Search data entry title...">
         
         <button class="search-btn" type="submit">
             <i class="fas fa-search"></i> Search
@@ -44,18 +44,22 @@
             <!-- Author & Date Filters -->
             <div class="filter-column">
               <label for="filter-author">Author</label>
-              <input type="text" id="filter-author" name="author" placeholder="Enter author's name">
+              <input type="text" id="filter-author" name="author" value="{{query.author}}" placeholder="Enter author's name">
 
               <label for="filter-org">Organization Name</label>
-              <input type="text" id="filter-org" name="company" placeholder="Enter organization name">
+              <input type="text" id="filter-org" name="company" value="{{query.company}}" placeholder="Enter organization name">
 
               <label>Collection Date Range</label>
               <div class="date-range">
-                  <input type="date" id="filter-date-start" name="startDate"> to
-                  <input type="date" id="filter-date-end" name="endDate">
+                  <input type="date" id="filter-date-start" name="startDate" value="{{query.startDate}}"> to
+                  <input type="date" id="filter-date-end" name="endDate" value="{{query.endDate}}">
               </div>
-            </div>
 
+              <!-- Reset button -->
+              <button type="button" id="reset-filters" class="reset-btn">
+                <i class="fa-solid fa-rotate-left"></i> Reset Filters
+              </button>
+            </div>
         </div>
     </div>
 </form>
@@ -65,6 +69,11 @@
     <span style="font-size: large;">No entries found.</span>
   </div>
 {{/ifEquals}}
+
+<!-- Entry counter -->
+<p class="entry-count-text">
+    Showing <b>{{startEntry}}–{{endEntry}}</b> of <b>{{totalCount}}</b> entries
+</p>
 
 {{#each data}}
     <a href="/dashboard/data{{#if ../current_datasubs}}/review{{/if}}/{{data_entry_id}}" class="waste-data-btn-link">
@@ -103,23 +112,33 @@
 <div class="pagination">
     {{#if totalPages}}
         {{#unless (eq currentPage 1)}}
-            <a href="?page=1" class="pagination-btn arrow"><i class="fa-solid fa-angles-left"></i></a>
+            <a href="{{queryString query page=1}}" class="pagination-btn arrow">
+              <i class="fa-solid fa-angles-left"></i>
+            </a>
         {{/unless}}
 
         {{#if (gt currentPage 1)}}
-            <a href="?page={{subtract currentPage 1}}" class="pagination-btn arrow"><i class="fa-solid fa-chevron-left"></i></a>
+            <a href="{{queryString query page=(subtract currentPage 1)}}" class="pagination-btn arrow">
+              <i class="fa-solid fa-chevron-left"></i>
+            </a>
         {{/if}}
 
         {{#each (paginationRange currentPage totalPages)}}
-            <a href="?page={{this}}" class="pagination-btn {{#ifEquals this ../currentPage}}active{{/ifEquals}}">{{this}}</a>
+          <a href="{{queryString ../query page=this}}" class="pagination-btn {{#ifEquals this ../currentPage}}active{{/ifEquals}}">
+            {{this}}
+          </a>
         {{/each}}
 
         {{#if (lt currentPage totalPages)}}
-            <a href="?page={{add currentPage 1}}" class="pagination-btn arrow"><i class="fa-solid fa-chevron-right"></i></a>
+            <a href="{{queryString query page=(add currentPage 1)}}" class="pagination-btn arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </a>
         {{/if}}
 
         {{#unless (eq currentPage totalPages)}}
-            <a href="?page={{totalPages}}" class="pagination-btn arrow"><i class="fa-solid fa-angles-right"></i></a>
+            <a href="{{queryString query page=totalPages}}" class="pagination-btn arrow">
+              <i class="fa-solid fa-angles-right"></i>
+            </a>
         {{/unless}}
     {{/if}}
 </div>
@@ -127,9 +146,10 @@
 <!-- Location search script -->
 <script src="../../js/locations-search.js"></script>
 
-<!-- Toggle filter script -->
+<!-- Javascript -->
 <script>
 
+// Toggle search filters
 function toggleFilters() {
     const filterSection = document.getElementById('filter-section');
     const toggleText = document.getElementById('filter-toggle');
@@ -141,6 +161,22 @@ function toggleFilters() {
       <i class="fas fa-sliders-h"></i> ${isHidden ? 'Show Filters' : 'Hide Filters'}
     `;
   }
+
+// Clean query when form is submitted
+document.getElementById('data-search').addEventListener('submit', function (e) {
+    const form = e.target;
+    const inputs = form.querySelectorAll('input, select');
+    inputs.forEach(input => {
+      if (!input.value) {
+        input.name = ''; // Remove name so it won't be submitted
+      }
+    });
+  });
+
+// Reset filters when reset button is clicked
+document.getElementById('reset-filters').addEventListener('click', () => {
+    window.location.href = window.location.pathname;
+  });
 
 </script>
 
@@ -279,6 +315,32 @@ function toggleFilters() {
   margin-top: 1rem;
   font-weight: 600;
   font-size: 0.95rem;
+}
+
+.reset-btn {
+  background-color: orange;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  width: fit-content;
+  transition: background-color 0.3s ease;
+  display: block;
+  margin-left: auto;
+  margin-top: 2rem;
+  font-size: medium;
+}
+
+.reset-btn:hover {
+  background-color: darkorange;
+}
+
+.entry-count-text {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 10px;
+  font-size: large;
 }
 
 </style>

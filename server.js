@@ -357,6 +357,17 @@ Handlebars.registerHelper('paginationRange', (currentPage, totalPages) => {
 
 Handlebars.registerHelper('eq', (a, b) => a === b);
 
+Handlebars.registerHelper('queryString', function (query, overrides) {
+  const merged = Object.assign({}, query, overrides.hash);
+
+  const params = Object.entries(merged)
+    .filter(([_, value]) => value !== undefined && value !== null && value !== '')
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    .join('&');
+
+  return params ? `?${params}` : '';
+});
+
 /* ---------------------------------------
     ROUTES (PUBLIC)
 --------------------------------------- */
@@ -765,7 +776,21 @@ app.get('/dashboard/search', async (req, res) => {
 })
 
 // Get all approved data entries
-app.get('/dashboard/data/all', async (req, res) => {
+app.get('/dashboard/data/all', async (req, res, next) => {
+  // Clean query before proceeding
+  const cleanedQuery = {};
+  for (const [key, value] of Object.entries(req.query)) {
+    if (value !== '') cleanedQuery[key] = value;
+  }
+
+  if (Object.keys(cleanedQuery).length !== Object.keys(req.query).length) {
+    // Redirect to cleaned URL if any empty values were found
+    const queryString = new URLSearchParams(cleanedQuery).toString();
+    return res.redirect(`/dashboard/data/all?${queryString}`);
+  }
+
+  next();
+}, async (req, res) => { // Actual route content
   const page = parseInt(req.query.page) || 1;
   const limit = 10;
   const offset = (page - 1) * limit;
@@ -783,6 +808,8 @@ app.get('/dashboard/data/all', async (req, res) => {
   ]);
 
   const totalPages = Math.ceil(totalCount / limit);
+  const startEntry = totalCount === 0 ? 0 : offset + 1;
+  const endEntry = Math.min(offset + limit, totalCount);
 
   res.render('dashboard/view-data-all', {
     layout: 'dashboard',
@@ -790,6 +817,9 @@ app.get('/dashboard/data/all', async (req, res) => {
     data,
     currentPage: page,
     totalPages,
+    totalCount,
+    startEntry,
+    endEntry,
     current_all: true,
     query: req.query // Pass current query so you can preserve form values
   });
