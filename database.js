@@ -1013,3 +1013,37 @@ export async function getTopReportingRegions(limit) {
 
     return resultWithNames;
 }
+
+// Get monthly submissions and convert to Chart.js format
+export async function getMonthlySubmissions() {
+    const [result] = await sql.query(`
+        WITH RECURSIVE months AS (
+            SELECT DATE_FORMAT(DATE_FORMAT(NOW(), '%Y-01-01'), '%Y-%m-01') AS month_start
+            UNION ALL
+            SELECT DATE_ADD(month_start, INTERVAL 1 MONTH)
+            FROM months
+            WHERE month_start < DATE_FORMAT(DATE_FORMAT(NOW(), '%Y-12-01'), '%Y-%m-01')
+        )
+        SELECT 
+            DATE_FORMAT(m.month_start, '%b %Y') AS month_label,
+            COUNT(d.data_entry_id) AS entry_count
+        FROM months m
+        LEFT JOIN greencycle.data_entry d
+            ON DATE_FORMAT(d.date_submitted, '%Y-%m') = DATE_FORMAT(m.month_start, '%Y-%m')
+            AND YEAR(d.date_submitted) = YEAR(CURDATE())
+        GROUP BY m.month_start
+        ORDER BY m.month_start;
+    `);
+
+    return {
+        labels: result.map(row => row.month_label), // ['Jan 2025', 'Feb 2025', ...]
+        datasets: [{
+            label: 'Monthly Submissions',
+            data: result.map(row => row.entry_count), // [12, 5, 0, ...]
+            backgroundColor: '#127009',
+            borderColor: '#127009',
+            fill: false,
+            tension: 0,
+        }]
+    };
+}

@@ -70,8 +70,48 @@
 <!-- Submission History (Line Graph) -->
 <fieldset style="width: 95%">
     <h3>Submission History</h3>
-
+    <canvas id="monthlySubmissionsChart" width="600" height="300"></canvas>
 </fieldset>
+
+<!-- Script for monthly submissions -->
+<script>
+
+const monthlySubmissions = {{{monthlySubmissions}}}
+
+const ctx = document.getElementById('monthlySubmissionsChart').getContext('2d');
+  new Chart(ctx, {
+  type: 'line',
+  data: monthlySubmissions,
+  options: {
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: 'Monthly Data Submissions'
+      },
+      legend: {
+        display: false
+      }
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Month'
+        }
+      },
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Entries'
+        }
+      }
+    }
+  }
+});
+
+</script>
 
 <style>
 

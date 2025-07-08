@@ -42,7 +42,8 @@ import {
   getFilteredDataCount,
   getTopContributors,
   getLatestSubmissions,
-  getTopReportingRegions
+  getTopReportingRegions,
+  getMonthlySubmissions
 } from './database.js'
 
 // File Upload
@@ -1655,6 +1656,7 @@ app.get('/control-panel', async (req, res) => {
   const contributors = await getTopContributors(5)
   const latestSubmissions = await getLatestSubmissions(5)
   const topRegions = await getTopReportingRegions(5)
+  const monthlySubmissions = await getMonthlySubmissions()
 
   res.render('control-panel/cp-home', {
     layout: 'control-panel',
@@ -1663,7 +1665,8 @@ app.get('/control-panel', async (req, res) => {
     entryCount,
     contributors,
     latestSubmissions,
-    topRegions
+    topRegions,
+    monthlySubmissions: JSON.stringify(monthlySubmissions)
   })
 })
 
