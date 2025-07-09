@@ -64,16 +64,24 @@
     </div>
 </form>
 
+<!-- Entry counter -->
+<div class="form-section">
+  <div style="display: flex;">
+    <p class="entry-count-text">
+      Showing <b>{{startEntry}}–{{endEntry}}</b> of <b>{{totalCount}}</b> entries
+    </p>
+
+    <button class="summary-btn">
+      <i class="fa-solid fa-chart-simple"></i> View Data Summary
+    </button>
+  </div>
+</div>
+
 {{#ifEquals data.length 0}}
   <div class="form-section">
     <span style="font-size: large;">No entries found.</span>
   </div>
 {{/ifEquals}}
-
-<!-- Entry counter -->
-<p class="entry-count-text">
-    Showing <b>{{startEntry}}–{{endEntry}}</b> of <b>{{totalCount}}</b> entries
-</p>
 
 {{#each data}}
     <a href="/dashboard/data{{#if ../current_datasubs}}/review{{/if}}/{{data_entry_id}}" class="waste-data-btn-link">
@@ -337,10 +345,25 @@ document.getElementById('reset-filters').addEventListener('click', () => {
 }
 
 .entry-count-text {
-  font-size: 0.9rem;
   color: #555;
-  margin-bottom: 10px;
+  margin: 0;
   font-size: large;
+}
+
+.summary-btn {
+  margin-left: auto;
+  padding: 0.6rem 1rem;
+  background-color: #28a745;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: medium;
+}
+
+.summary-btn:hover {
+  background-color: #34b452;
 }
 
 </style>

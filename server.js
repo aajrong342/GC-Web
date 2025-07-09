@@ -1240,18 +1240,6 @@ app.get('/dashboard/data/:id', async (req, res) => {
   })
 })
 
-// User routes
-// Get all users
-app.get('/control-panel/users', async (req, res) => {
-  const users = await getUsers()
-  res.render('dashboard/users', {
-    layout: 'control-panel',
-    title: 'Users | GC Dashboard',
-    users,
-    current_users: true
-  })
-})
-
 // Get one user from ID (user profile)
 app.get('/dashboard/profile', async (req, res) => {
   res.render('dashboard/user-profile', {
@@ -1286,43 +1274,6 @@ app.post('/roles/client', async (req, res) => {
   const { roleName } = req.body
   const role = await createClientRole(roleName)
   res.send(role)
-})
-
-app.get('/control-panel/roles', async (req, res) => {
-  const adminRoles = await getRolesOfSupertype(0)
-  const gcRoles = await getRolesOfSupertype(1)
-  const clientRoles = await getRolesOfSupertype(2)
-
-  res.render('dashboard/roles', {
-    layout: 'control-panel',
-    title: 'Roles | GC Dashboard',
-    adminRoles,
-    gcRoles,
-    clientRoles,
-    current_roles: true
-  })
-})
-
-// User applications page
-app.get('/control-panel/user-applications', async (req, res) => {
-  const applications = await getApplications()
-
-  res.render('dashboard/user-applications', { 
-    layout: 'control-panel',
-    title: 'User Applications | GC Dashboard',
-    current_userapp: true,
-    applications
-  })
-})
-
-app.get('/control-panel/partners', async (req, res) => {
-  const partners = await getPartners()
-  res.render('dashboard/partners', {
-    layout: 'control-panel',
-    title: 'Partner Organizations | GC Dashboard',
-    partners,
-    current_partners: true
-  })
 })
 
 // Data submission menu
@@ -1667,6 +1618,55 @@ app.get('/control-panel', async (req, res) => {
     latestSubmissions,
     topRegions,
     monthlySubmissions: JSON.stringify(monthlySubmissions)
+  })
+})
+
+// User routes
+// Get all users
+app.get('/control-panel/users', async (req, res) => {
+  const users = await getUsers()
+  res.render('control-panel/users', {
+    layout: 'control-panel',
+    title: 'Users | GC Dashboard',
+    users,
+    current_users: true
+  })
+})
+
+app.get('/control-panel/roles', async (req, res) => {
+  const adminRoles = await getRolesOfSupertype(0)
+  const gcRoles = await getRolesOfSupertype(1)
+  const clientRoles = await getRolesOfSupertype(2)
+
+  res.render('control-panel/roles', {
+    layout: 'control-panel',
+    title: 'Roles | GC Dashboard',
+    adminRoles,
+    gcRoles,
+    clientRoles,
+    current_roles: true
+  })
+})
+
+// User applications page
+app.get('/control-panel/user-applications', async (req, res) => {
+  const applications = await getApplications()
+
+  res.render('control-panel/user-applications', { 
+    layout: 'control-panel',
+    title: 'User Applications | GC Dashboard',
+    current_userapp: true,
+    applications
+  })
+})
+
+app.get('/control-panel/partners', async (req, res) => {
+  const partners = await getPartners()
+  res.render('control-panel/partners', {
+    layout: 'control-panel',
+    title: 'Partner Organizations | GC Dashboard',
+    partners,
+    current_partners: true
   })
 })
 

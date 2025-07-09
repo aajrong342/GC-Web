@@ -76,13 +76,6 @@
                 {{#ifNotEquals user.supertype 2}}
                     <div class="nav-divider">STAFF FUNCTIONS</div>
 
-                    <a href="/dashboard/data/submissions" class="{{#if current_datasubs}}current{{/if}}">
-                        <i class="fa-solid fa-file-pen"></i>&nbsp; Review Data Submissions
-                        {{#ifNotEquals pendingData 0}}
-                            <span class="notif-badge">{{pendingData}}</span>
-                        {{/ifNotEquals}}
-                    </a>
-
                     <a href="/control-panel/user-applications" class="{{#if current_userapp}}current{{/if}}">
                         <i class="fa-solid fa-clipboard-list nav-icon"></i> User Applications
                         {{#ifNotEquals pendingApplications 0}}
