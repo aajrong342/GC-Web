@@ -163,173 +163,246 @@
 <!-- Pie chart script -->
 <script>
 
-/* --------- PIE CHART --------- */
-const summaryData = {{{summaryPieData}}};
-const detailedData = {{{detailedPieData}}};
-
+// ========== PIE CHART SETUP ========== //
+const summaryData = {{{summaryPieData}}},
+      detailedData = {{{detailedPieData}}};
 let currentMode = 'summary';
 const ctx = document.getElementById('supertypePieChart').getContext('2d');
 
-const createPieChart = (data) => {
-    return new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: data.labels,
-            datasets: [{
-                data: data.data,
-                backgroundColor: data.backgroundColor,
-                hoverOffset: 20
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                tooltip: {
-                callbacks: {
-                    label: function (context) {
-                        const value = Number(context.raw).toFixed(3);
-                        const total = context.chart._metasets[0].total || 1;
-                        const percent = ((context.raw / total) * 100).toFixed(3);
-                        return `${context.label}: ${value} kg (${percent}%)`;
-                    }
-                }
-                },
-                title: {
-                    display: false
-                },
-                legend: {
-                    position: 'right'
-                }
-            }
+const createPieChart = data => new Chart(ctx, {
+  type: 'pie',
+  data: {
+    labels: data.labels,
+    datasets: [{
+      data: data.data,
+      backgroundColor: data.backgroundColor,
+      hoverOffset: 20
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: ({ raw, label, chart }) => {
+            const total = chart._metasets[0].total || 1;
+            const percent = ((raw / total) * 100).toFixed(3);
+            return `${label}: ${Number(raw).toFixed(3)} kg (${percent}%)`;
+          }
         }
-    });
-};
-
-let chart = createPieChart(summaryData, "Waste by Supertype");
-
-document.getElementById('togglePieBtn').addEventListener('click', () => {
-    chart.destroy();
-    if (currentMode === 'summary') {
-        chart = createPieChart(detailedData, "Detailed Waste by Type");
-        currentMode = 'detailed';
-        togglePieBtn.innerHTML = '<i class="fa-solid fa-chart-pie"></i>&nbsp; Back to Summary Pie Chart';
-    } else {
-        chart = createPieChart(summaryData, "Waste by Supertype");
-        currentMode = 'summary';
-        togglePieBtn.innerHTML = '<i class="fa-solid fa-circle-info"></i>&nbsp; Show Detailed Pie Chart';
+      },
+      legend: { position: 'right' },
+      title: { display: false }
     }
+  }
 });
 
-/* --------- BAR CHART --------- */
+let chart = createPieChart(summaryData);
 
-// Build bar chart
-const barChartData = {{{barChartData}}};
-const container = document.getElementById('bar-charts-container');
+document.getElementById('togglePieBtn').addEventListener('click', () => {
+  chart.destroy();
+  currentMode = currentMode === 'summary' ? 'detailed' : 'summary';
+  chart = createPieChart(currentMode === 'summary' ? summaryData : detailedData);
+  togglePieBtn.innerHTML = currentMode === 'summary'
+    ? '<i class="fa-solid fa-circle-info"></i>&nbsp; Show Detailed Pie Chart'
+    : '<i class="fa-solid fa-chart-pie"></i>&nbsp; Back to Summary Pie Chart';
+});
 
-for (const [supertype, chartData] of Object.entries(barChartData)) {
-    // Create the wrapper tabcontent div
-    const tabContentDiv = document.createElement('div');
-    tabContentDiv.id = supertype.replace(/\s+/g, '');
-    tabContentDiv.classList.add('bar-tabcontent');
 
-    // Create canvas
-    const canvas = document.createElement('canvas');
-    canvas.id = `barChart-${supertype.replace(/\s+/g, '-')}`;
-    canvas.style.maxWidth = '560px';
-    canvas.style.marginBottom = '20px';
-    tabContentDiv.appendChild(canvas);
-
-    // Create chart wrapper
-    const wrapper = document.createElement('div');
-    wrapper.classList.add('chart-wrapper');
-    wrapper.style.display = 'flex';
-    wrapper.style.gap = '24px';
-    wrapper.style.alignItems = 'flex-start';
-    container.appendChild(wrapper);
-
-    wrapper.appendChild(canvas);
-
-    // Create legend div
-    const legendDiv = document.createElement('div');
-    legendDiv.classList.add('bar-legend');
-
-    // Create title <h2>
-    const legendTitle = document.createElement('h2');
-    legendTitle.classList.add('bar-legend-title');
-    legendTitle.textContent = `Top ${supertype} Waste Types`;
-    legendDiv.appendChild(legendTitle);
-
-    // Generate legend HTML
-    legendDiv.innerHTML += chartData.legend
+// ========== SHARED BAR CHART LEGEND FUNCTION ========== //
+const createLegendHTML = (legendData, dataset) => {
+  const total = dataset.reduce((a, b) => a + b, 0);
+  return legendData
     .filter(item => item.value > 0)
     .map(item => {
-        const total = chartData.data.reduce((sum, val) => sum + val, 0);
-        const percent = total ? ((item.value / total) * 100).toFixed(3).replace(/\.?0+$/, '') : '0';
-
-        return `<span class="legend-item" style="background-color: ${item.color}">
-            <span class="bar-legend-name">
-                ${item.label}
-                <span class="bar-legend-perc">${percent}%</span>
-            </span>
-            <span class="bar-legend-kg">
-                ${item.value.toFixed(3)} kg
-            </span>
-        </span>`;
+      const pct = total ? ((item.value / total) * 100).toFixed(3).replace(/\.0+$/, '') : '0';
+      return `<span class="legend-item" style="background-color: ${item.color}">
+        <span class="bar-legend-name">
+          ${item.label}
+          <span class="bar-legend-perc">${pct}%</span>
+        </span>
+        <span class="bar-legend-kg">
+          ${item.value.toFixed(3)} kg
+        </span>
+      </span>`;
     }).join('');
+};
 
-    // Append title and legend to tab content
-    wrapper.appendChild(legendDiv);
 
-    // Append wrapper to tabcontent
-    tabContentDiv.appendChild(wrapper);
+// ========== BAR CHARTS BY WASTE TYPE ========== //
+const barChartData = {{{barChartData}}},
+      container = document.getElementById('bar-charts-container');
 
-    // Append everything to main container
-    container.appendChild(tabContentDiv);
+for (const [supertype, chartData] of Object.entries(barChartData)) {
+  const tabDiv = document.createElement('div');
+  tabDiv.id = supertype.replace(/\s+/g, '');
+  tabDiv.classList.add('bar-tabcontent');
 
-    // Chart.js setup
-    new Chart(canvas.getContext('2d'), {
-        type: 'bar',
-        data: {
-            labels: chartData.labels,
-            datasets: [{
-            label: `${supertype} Waste Types`,
-            data: chartData.data,
-            backgroundColor: chartData.legend.map(item => item.color)
-            }]
+  const canvas = document.createElement('canvas');
+  canvas.id = `barChart-${supertype.replace(/\s+/g, '-')}`;
+  canvas.style.maxWidth = '560px';
+  canvas.style.marginBottom = '20px';
+
+  const wrapper = document.createElement('div');
+  wrapper.classList.add('chart-wrapper');
+  wrapper.style.cssText = 'display:flex;gap:24px;align-items:flex-start';
+
+  const legendDiv = document.createElement('div');
+  legendDiv.classList.add('bar-legend');
+  legendDiv.innerHTML = `<h2 class="bar-legend-title">Top ${supertype} Waste Types</h2>` +
+    createLegendHTML(chartData.legend, chartData.data);
+
+  wrapper.append(canvas, legendDiv);
+  tabDiv.appendChild(wrapper);
+  container.appendChild(tabDiv);
+
+  new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: chartData.labels,
+      datasets: [{
+        label: `${supertype} Waste Types`,
+        data: chartData.data,
+        backgroundColor: chartData.legend.map(i => i.color)
+      }]
+    },
+    options: {
+      responsive: true,
+      indexAxis: 'x',
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: ({ parsed }) => `${parsed.y.toFixed(3)} kg`
+          }
         },
-        options: {
-            responsive: true,
-            indexAxis: 'x',
-            plugins: {
-            title: {
-                display: false
-            },
-            tooltip: {
-                callbacks: {
-                label: function(context) {
-                    return `${context.parsed.y.toFixed(3)} kg`;
-                }
-                }
-            }
-            },
-            scales: {
-            y: {
-                beginAtZero: true,
-                title: {
-                display: true,
-                text: 'Weight (kg)'
-                }
-            },
-            x: {
-                ticks: {
-                autoSkip: false,
-                maxRotation: 45,
-                minRotation: 20
-                }
-            }
-            }
+        title: { display: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Weight (kg)' }
+        },
+        x: {
+          ticks: { autoSkip: false, maxRotation: 45, minRotation: 20 }
         }
-    });
+      }
+    }
+  });
+}
+
+
+// ========== SECTOR BAR CHART ========== //
+const sectorBarData = {{{sectorBarData}}},
+      tsContainer = document.getElementById('sector-chart-container');
+
+const tsCanvas = document.createElement('canvas');
+tsCanvas.id = 'sectorBarChart';
+tsCanvas.style.maxWidth = '600px';
+tsCanvas.style.marginBottom = '20px';
+
+const tsWrapper = document.createElement('div');
+tsWrapper.classList.add('chart-wrapper');
+tsWrapper.style.cssText = 'display:flex;gap:24px;align-items:flex-start';
+tsWrapper.appendChild(tsCanvas);
+tsContainer.appendChild(tsWrapper);
+
+const sectorLabels = sectorBarData.map(i => i.label),
+      sectorValues = sectorBarData.map(i => i.value),
+      sectorColors = sectorBarData.map(i => i.color);
+
+new Chart(tsCanvas.getContext('2d'), {
+  type: 'bar',
+  data: {
+    labels: sectorLabels,
+    datasets: [{
+      label: 'Waste by Sector',
+      data: sectorValues,
+      backgroundColor: sectorColors
+    }]
+  },
+  options: {
+    responsive: true,
+    indexAxis: 'y',
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: ({ parsed }) => `${parsed.y.toFixed(3)} kg`
+        }
+      },
+      title: { display: false }
+    },
+    scales: {
+      y: { beginAtZero: true, title: { display: true, text: 'Weight (kg)' } },
+      x: { ticks: { autoSkip: false, maxRotation: 45, minRotation: 20 } }
+    }
+  }
+});
+
+const tsLegendDiv = document.createElement('div');
+tsLegendDiv.classList.add('bar-legend');
+tsLegendDiv.innerHTML = createLegendHTML(sectorBarData, sectorValues);
+const tsLegendWrapper = document.createElement('div');
+tsLegendWrapper.appendChild(tsLegendDiv);
+tsWrapper.appendChild(tsLegendWrapper);
+
+
+// ========== SECTOR PIE CHARTS ========== //
+const sectorPieData = {{{sectorPieData}}},
+      sectorContainer = document.getElementById('sector-pies-container');
+
+for (const [sectorName, pieData] of Object.entries(sectorPieData)) {
+  const tabDiv = document.createElement('div');
+  tabDiv.id = sectorName.replace(/\s+/g, '');
+  tabDiv.classList.add('sector-tabcontent');
+
+  const canvas = document.createElement('canvas');
+  canvas.id = `pieChart-${sectorName.replace(/\s+/g, '-')}`;
+  canvas.style.cssText = 'max-width:600px;max-height:600px;margin-bottom:20px';
+
+  const wrapper = document.createElement('div');
+  wrapper.classList.add('chart-wrapper');
+  wrapper.style.cssText = 'display:flex;gap:24px;align-items:flex-start';
+
+  const legendDiv = document.createElement('div');
+  legendDiv.classList.add('bar-legend');
+  legendDiv.innerHTML = `<h2 class="bar-legend-title">${sectorName} Sector</h2>` +
+    createLegendHTML(pieData.labels.map((label, i) => ({
+      label,
+      value: pieData.data[i],
+      color: pieData.backgroundColor[i]
+    })), pieData.data);
+
+  wrapper.append(canvas, legendDiv);
+  tabDiv.appendChild(wrapper);
+  sectorContainer.appendChild(tabDiv);
+
+  new Chart(canvas.getContext('2d'), {
+    type: 'pie',
+    data: {
+      labels: pieData.labels,
+      datasets: [{
+        data: pieData.data,
+        backgroundColor: pieData.backgroundColor,
+        hoverOffset: 20
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: ({ raw }) => {
+              const total = pieData.data.reduce((a, b) => a + b, 0);
+              const pct = total ? ((raw / total) * 100).toFixed(3).replace(/\.0+$/, '') : '0';
+              return `${raw.toFixed(3)} kg (${pct}%)`;
+            }
+          }
+        },
+        legend: { position: 'right' },
+        title: { display: false }
+      }
+    }
+  });
 }
 
 </script>
