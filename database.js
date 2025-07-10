@@ -898,47 +898,6 @@ export async function getLatestDataEntry() {
 }
 
 /* ---------------------------------------
-    DATA AGGREGATION BY LOCATION (OLD VERSION)
---------------------------------------- */
-export async function getAvgInfo(locationCode) {
-    const [result] = await sql.query(`
-        SELECT
-            AVG(de.per_capita) AS avg_per_capita,
-            AVG(de.annual) AS avg_annual,
-            MIN(de.collection_start) AS earliest_collection_start,
-            MAX(de.collection_end) AS latest_collection_end
-        FROM data_entry de
-        JOIN data_waste_composition dwc ON de.data_entry_id = dwc.data_entry_id
-        WHERE de.status = 'Approved'
-            AND (
-                de.region_id = ${locationCode}
-                OR de.province_id = ${locationCode}
-                OR de.municipality_id = ${locationCode}
-            )
-    `)
-    return result // important, to not return an array
-}
-
-export async function getAvgWasteComposition(locationCode) {
-    const [result] = await sql.query(`
-        SELECT
-            dwc.sector_id,
-            dwc.type_id,
-            AVG(dwc.waste_amount) AS avg_waste_amount
-        FROM data_entry de
-        JOIN data_waste_composition dwc ON de.data_entry_id = dwc.data_entry_id
-        WHERE de.status = 'Approved'
-            AND (
-                de.region_id = ${locationCode}
-                OR de.province_id = ${locationCode}
-                OR de.municipality_id = ${locationCode}
-            )
-        GROUP BY dwc.sector_id, dwc.type_id
-    `)
-    return result // important, to not return an array
-}
-
-/* ---------------------------------------
     DATA AGGREGATION (NEW VERSION)
 --------------------------------------- */
 export async function getAvgInfoWithFilters(title, locationCode, name, companyName, startDate, endDate) {

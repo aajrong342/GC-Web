@@ -33,8 +33,6 @@ import {
   getLatestDataEntry,
   getPendingApplicationCount,
   getDataForReviewCount,
-  getAvgInfo,
-  getAvgWasteComposition,
   hashPassword,
   getDataByStatusPaginated,
   getTotalDataCountByStatus,
@@ -637,150 +635,142 @@ app.get('/dashboard/data/summary', async (req, res, next) => {
       const avgInfo = await getAvgInfoWithFilters(title, locationCode, author, company, startDate, endDate)
 
       // Initialize waste comp
-      //const sectors = await getSectors()
+      const sectors = await getSectors()
       const supertypes = await getAllTypes()
       const avgData = await getAvgWasteCompositionWithFilters(title, locationCode, author, company, startDate, endDate)
 
-      /* ------ RAW DATA ENTRY COUNT ------ */
-      const count = await getFilteredDataCount(title, locationCode, author, company, startDate, endDate)
-
-      /* -------- PIE CHART -------- */
+      /* -------- CHART BUILDER -------- */
       // Create a lookup map for waste amounts
-      const wasteMap = {};
+      const wasteMap = {}; // type_id -> { sector_id -> avg_waste_amount }
       for (const row of avgData) {
-          if (!wasteMap[row.type_id]) wasteMap[row.type_id] = {};
-          wasteMap[row.type_id][row.sector_id] = row.avg_waste_amount;
+        if (!wasteMap[row.type_id]) wasteMap[row.type_id] = {};
+        wasteMap[row.type_id][row.sector_id] = Number(row.avg_waste_amount);
       }
 
-      // Group types under supertypes
       const supertypeMap = {};
+      let grandTotal = 0;
+
       for (const row of supertypes) {
-          if (!supertypeMap[row.supertype_id]) {
-              supertypeMap[row.supertype_id] = {
-                  id: row.supertype_id,
-                  name: row.supertype_name,
-                  types: []
-              };
-          }
-          supertypeMap[row.supertype_id].types.push({
-              id: row.type_id,
-              name: row.type_name,
-              amounts: wasteMap[row.type_id] || {}
-          });
+        if (!supertypeMap[row.supertype_id]) {
+          supertypeMap[row.supertype_id] = {
+            id: row.supertype_id,
+            name: row.supertype_name,
+            types: []
+          };
+        }
+
+        const amounts = wasteMap[row.type_id] || {};
+        const total = Object.values(amounts).reduce((a, b) => a + b, 0);
+        grandTotal += total;
+
+        supertypeMap[row.supertype_id].types.push({
+          id: row.type_id,
+          name: row.type_name,
+          amounts,
+          weight: total
+        });
       }
 
-      // Generate summary pie
-      const summaryData = {
-        labels: [],
-        data: [],
-        backgroundColor: []
-      };
+      const summaryData = { labels: [], data: [], backgroundColor: [] };
+      const detailedData = { labels: [], data: [], backgroundColor: [] };
+      const legendData = [];
+      const barChartData = {};
+      const sectorTotals = {};
+      sectors.forEach(s => sectorTotals[s.id] = 0);
 
-      // Generate detailed pie
-      const detailedData = {
-        labels: [],
-        data: [],
-        backgroundColor: []
-      };
+      for (const supertype of Object.values(supertypeMap)) {
+        const baseColor = baseHexMap[supertype.name] || '#9e9e9e';
+        const sectorSubtotals = {};
+        sectors.forEach(s => sectorSubtotals[s.id] = 0);
 
-      const supertypeTotals = Object.values(supertypeMap).map(supertype => {
-      const total = supertype.types.reduce((sum, t) => {
-        return sum + Object.values(t.amounts || {}).reduce((a, b) => a + Number(b), 0);
-      }, 0);
-        return { supertype, total };
-      });
+        let supertypeTotal = 0;
 
-      // Sort descending by total
-      supertypeTotals.sort((a, b) => b.total - a.total);
+        const sortedTypes = supertype.types.map(type => {
+          const weight = type.weight;
+          const amounts = type.amounts;
 
-      for (const { supertype, total } of supertypeTotals) {
-        const supertypeName = supertype.name;
-        const baseColor = baseHexMap[supertypeName];
+          for (const [sid, val] of Object.entries(amounts)) {
+            const sidNum = Number(sid);
+            sectorSubtotals[sidNum] += val;
+            sectorTotals[sidNum] += val;
+          }
 
-        // Summary pie entry
-        summaryData.labels.push(supertypeName);
-        summaryData.data.push(Number(total.toFixed(3)));
-        summaryData.backgroundColor.push(baseColor);
+          supertypeTotal += weight;
 
-        // Detailed entries (types under this supertype)
-        // Calculate total weight per type
-        const typeWeights = supertype.types.map(type => {
-          const weight = Object.values(type.amounts || {}).reduce((a, b) => a + Number(b), 0);
-          return { name: type.name, weight };
+          return { label: type.name, value: weight };
+        }).sort((a, b) => b.value - a.value);
+
+        const totalTypes = sortedTypes.length;
+        sortedTypes.forEach((item, i) => {
+          item.color = shadeBarColor(baseColor, i, totalTypes);
         });
 
-        // Sort types descending by weight
-        typeWeights.sort((a, b) => b.weight - a.weight);
+        barChartData[supertype.name] = {
+          labels: sortedTypes.map(t => t.label),
+          data: sortedTypes.map(t => t.value),
+          legend: sortedTypes
+        };
 
-        // Add sorted types to chart data
-        typeWeights.forEach((type, i) => {
-          if (type.weight > 0) {
-            detailedData.labels.push(type.name);
-            detailedData.data.push(Number(type.weight.toFixed(3)));
+        summaryData.labels.push(supertype.name);
+        summaryData.data.push(Number(supertypeTotal.toFixed(3)));
+        summaryData.backgroundColor.push(baseColor);
+        legendData.push({
+          label: supertype.name,
+          value: Number(supertypeTotal.toFixed(3)),
+          color: baseColor
+        });
+
+        sortedTypes.forEach((t, i) => {
+          if (t.value > 0) {
+            detailedData.labels.push(t.label);
+            detailedData.data.push(Number(t.value.toFixed(3)));
             detailedData.backgroundColor.push(shadeColor(baseColor, -0.17 + 0.15 * i));
           }
         });
       }
 
-      // Combine them for easier rendering
-      const legendData = summaryData.labels.map((label, i) => ({
-        label,
-        value: summaryData.data[i],
-        color: summaryData.backgroundColor[i]
-      }));
+      const sectorBarData = sectors.map((sector, i) => ({
+        label: sector.name,
+        value: Number(sectorTotals[sector.id]?.toFixed(3)) || 0,
+        color: `hsl(${210 + i * 15}, 70%, 55%)`
+      })).sort((a, b) => b.value - a.value);
 
-      /* -------- BAR CHART -------- */
-
-      const barChartData = {}; // keyed by supertype name or ID
-
-      for (const supertype of Object.values(supertypeMap)) {
-        const baseColor = baseHexMap[supertype.name] || '#9e9e9e';
-        const legend = [];
-
-        // Collect and sort types by weight
-        const sortedTypes = supertype.types.map(type => {
-          const weight = Object.values(type.amounts || {}).reduce((a, b) => a + Number(b), 0);
+      const sectorPieData = {};
+      for (const sector of sectors) {
+        const sectorId = sector.id;
+        const rawTotals = Object.values(supertypeMap).map(supertype => {
+          let subtotal = 0;
+          for (const type of supertype.types) {
+            subtotal += Number(type.amounts?.[sectorId] || 0);
+          }
           return {
-            label: type.name,
-            value: Number(weight.toFixed(3))
+            label: supertype.name,
+            value: Number(subtotal.toFixed(3)),
+            color: baseHexMap[supertype.name] || '#9E9E9E'
           };
         }).sort((a, b) => b.value - a.value);
 
-        // Assign shaded color to each
-        const total = sortedTypes.length;
-        sortedTypes.forEach((item, i) => {
-          item.color = shadeBarColor(baseColor, i, total); // example: lighter/darker shades per index
-        });
-
-        barChartData[supertype.name] = {
-          labels: sortedTypes.map(item => item.label),
-          data: sortedTypes.map(item => item.value),
-          legend: sortedTypes
+        sectorPieData[sector.name] = {
+          labels: rawTotals.map(r => r.label),
+          data: rawTotals.map(r => r.value),
+          backgroundColor: rawTotals.map(r => r.color)
         };
       }
 
-      // If location query is given and results do exist
-      if(count > 0) {
-        res.render('dashboard/view-data-summary', {
-          layout: 'dashboard',
-          title: 'Data Summary | GC Dashboard',
-          current_all: true,
-          query: req.query, // Pass current query so you can preserve form values
-          fullLocation,
-          avgInfo: avgInfo[0],
-          barChartData: JSON.stringify(barChartData),
-          summaryPieData: JSON.stringify(summaryData),
-          detailedPieData: JSON.stringify(detailedData),
-          legendData
-        })
-      } else { // If location query is given, but there are no results
-        res.render('dashboard/view-data-none', {
-          layout: 'dashboard',
-          title: 'Data Summary | GC Dashboard',
-          current_all: true,
-          fullLocation
-        });
-      }
+      res.render('dashboard/view-data-summary', {
+        layout: 'dashboard',
+        title: 'Data Summary | GC Dashboard',
+        current_all: true,
+        query: req.query, // Pass current query
+        fullLocation,
+        avgInfo: avgInfo[0],
+        barChartData: JSON.stringify(barChartData),
+        summaryPieData: JSON.stringify(summaryData),
+        detailedPieData: JSON.stringify(detailedData),
+        legendData,
+        sectorBarData: JSON.stringify(sectorBarData),
+        sectorPieData: JSON.stringify(sectorPieData)
+      })
     } catch (err) {
       console.error('Summary Error:', err);  // Log the actual error
       res.status(500).send('Error loading search results');

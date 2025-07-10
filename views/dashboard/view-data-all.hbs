@@ -71,9 +71,11 @@
       Showing <b>{{startEntry}}–{{endEntry}}</b> of <b>{{totalCount}}</b> entries
     </p>
 
+    {{#ifNotEquals totalCount 0}}
     <button class="summary-btn" id="summaryBtn">
       <i class="fa-solid fa-chart-simple"></i> View Data Summary
     </button>
+    {{/ifNotEquals}}
   </div>
 </div>
 
