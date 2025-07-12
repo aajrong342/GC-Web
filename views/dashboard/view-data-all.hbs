@@ -1,3 +1,4 @@
+{{#if current_all}}
 <!-- Search form -->
 <form id="data-search" method="GET" action="/dashboard/data/all">
     <!-- Search Bar and Filter Toggle -->
@@ -63,6 +64,7 @@
         </div>
     </div>
 </form>
+{{/if}}
 
 <!-- Entry counter -->
 <div class="form-section">
@@ -71,11 +73,14 @@
       Showing <b>{{startEntry}}–{{endEntry}}</b> of <b>{{totalCount}}</b> entries
     </p>
 
-    {{#ifNotEquals totalCount 0}}
-    <button class="summary-btn" id="summaryBtn">
-      <i class="fa-solid fa-chart-simple"></i> View Data Summary
-    </button>
-    {{/ifNotEquals}}
+    <!-- If current page is data search AND entries aren't zero -->
+    {{#if current_all}}
+      {{#ifNotEquals totalCount 0}}
+      <button class="summary-btn" id="summaryBtn">
+        <i class="fa-solid fa-chart-simple"></i> View Data Summary
+      </button>
+      {{/ifNotEquals}}
+    {{/if}}
   </div>
 </div>
 

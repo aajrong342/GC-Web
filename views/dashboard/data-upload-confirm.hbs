@@ -1,54 +1,58 @@
 <!-- Confirm window -->
-<fieldset class="review-window" style="width: 97.3%">
-    <h1>Confirm Submission</h1>
-</fieldset>
+<section class="welcome-card">
+  <h1>Confirm Submission</h1>
+</section>
 
-<!-- Title card -->
-<fieldset style="width: 97.3%; margin-bottom: 10px; padding-top: 20px; padding-bottom: 20px">
-    <h1 style="margin:0">{{formDataRaw.title}}</h1>
-    <h3 style="margin:0; font-weight:normal;">
-      <i class="fa-solid fa-location-dot"></i>&nbsp; {{fullLocation}}
+<!-- Title Card -->
+<div class="form-section title-card" style="text-align: center;">
+  <h1 style="margin-bottom: 0.25rem;">{{formDataRaw.title}}</h1>
+  <center>
+    <h3 style="margin: 0; font-weight: normal; color: #555;">
+        <i class="fa-solid fa-location-dot" style="color: #127009;"></i>&nbsp; {{fullLocation}}
     </h3>
-</fieldset>
+  </center>
+</div>
 
-<!-- Data entry info -->
-<div style="display: flex;">
-  <fieldset style="width: 100%;">
-      <legend>Collection Info</legend>
-      <table class="user-profile">
-          <tr>
-              <td class="label">Start Date</td>
-              <td>{{formDataRaw.date_start}}</td>
-          </tr>
-          <tr>
-              <td class="label">End Date</td>
-              <td>{{formDataRaw.date_end}}</td>
-          </tr>
-      </table>
-  </fieldset>
+<!-- Info Blocks -->
+<div class="info-grid">
+  <!-- Collection Info -->
+  <div class="form-section">
+    <h3><i class="fas fa-calendar-alt"></i> Collection Info</h3>
+    <table class="user-profile">
+      <tr>
+        <td class="label">Start Date</td>
+        <td>{{ formDataRaw.date_start}}</td>
+      </tr>
+      <tr>
+        <td class="label">End Date</td>
+        <td>{{ formDataRaw.date_end}}</td>
+      </tr>
+    </table>
+  </div>
 
-  <fieldset style="width: 95%;">
-      <legend>Waste Generation</legend>
-      <table class="user-profile">
-          <tr>
-              <td class="label">Population (based on Census)</td>
-              <td>{{commaNumber population}}</td>
-          </tr>
-          <tr>
-              <td class="label">Waste Generation per Capita (Kg/cap-day)</td>
-              <td>{{commaNumber perCapita}}</td>
-          </tr>
-          <tr>
-              <td class="label">Annual Waste Generation (kg/year)</td>
-              <td>{{commaNumber annual}}</td>
-          </tr>
-      </table>
-      </fieldset>
+  <!-- Waste Generation Info -->
+  <div class="form-section">
+    <h3><i class="fas fa-dumpster"></i> Waste Generation</h3>
+    <table class="user-profile">
+      <tr>
+        <td class="label">Population (based on Census)</td>
+        <td>{{commaNumber population}}</td>
+      </tr>
+      <tr>
+        <td class="label">Waste Generation per Capita (Kg/cap-day)</td>
+        <td>{{commaNumber perCapita}}</td>
+      </tr>
+      <tr>
+        <td class="label">Annual Waste Generation (kg/year)</td>
+        <td>{{commaNumber annual}}</td>
+      </tr>
+    </table>
+  </div>
 </div>
 
 <!-- Waste Composition -->
-<fieldset style="width: 97.3%; margin-bottom: 10px; padding-top: 20px; padding-bottom: 20px">
-  <legend>Spreadsheet Data</legend>
+<div class="form-section">
+  <h3><i class="fa-solid fa-table"></i> Spreadsheet Data</h3>
   <table class="data-table" id="waste-comp-table">
       <thead>
         <tr class="tb-header">
@@ -65,27 +69,11 @@
         {{/each}}
     </tbody>
   </table>
-</fieldset>
+</div>
 
-{{!-- <h2>Waste Composition Table</h2>
-<table border="1">
-  <thead>
-    <tr>
-      <th>Type</th>
-      {{#each sectors}}<th>{{this}}</th>{{/each}}
-    </tr>
-  </thead>
-  <tbody>
-    {{#each wasteMatrix}}
-    <tr>
-      <td>{{type}}</td>
-      {{#each values}}<td>{{this}}</td>{{/each}}
-    </tr>
-    {{/each}}
-  </tbody>
-</table> --}}
-
-<button type="submit" id="submitBtn" class="btn-submit">Confirm Submission</button>
+<center>
+  <button type="submit" id="submitBtn" class="upload-btn">Confirm Submission</button>
+</center>
 
 <!-- POST request script -->
 <script>
@@ -138,3 +126,107 @@ document.addEventListener("DOMContentLoaded", function () {
 })
 
 </script>
+
+<style>
+
+.form-section {
+  background-color: #fdfdfd;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  margin: 1.5rem auto;
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
+}
+
+.form-section h3 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+  align-items: center;
+}
+
+.form-section h3 i {
+  margin-right: 0.6rem;
+  color: #127009;;
+}
+
+.form-section label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.title-card h1 {
+  font-size: 1.75rem;
+}
+
+/* Welcome Card */
+.welcome-card {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.welcome-card h1 {
+  font-size: 2rem;
+  margin: 0;
+}
+
+.info-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.info-grid .form-section {
+  flex: 1 1 280px;
+  min-width: 280px;
+}
+
+.user-profile {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+.user-profile td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #eee;
+}
+
+.user-profile .label {
+  font-weight: 600;
+  color: #444;
+  width: 50%;
+}
+
+.upload-btn {
+  display: inline-block;
+  margin-top: 1rem;
+  background-color: #28a745;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.upload-btn:hover {
+  background-color: #218838;
+}
+
+.upload-btn i {
+  margin-right: 0.5rem;
+}
+
+</style>
