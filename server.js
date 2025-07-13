@@ -43,7 +43,8 @@ import {
   getTopReportingRegions,
   getMonthlySubmissions,
   getAvgWasteCompositionWithFilters,
-  getAvgInfoWithFilters
+  getAvgInfoWithFilters,
+  getDataByUserCount
 } from './database.js'
 
 // File Upload
@@ -834,16 +835,36 @@ app.get('/dashboard/data/submissions', async (req, res) => {
   })
 })
 
-// Get all data entries by one user
+// Get all data entries by one user (Your Submissions)
 app.get('/dashboard/data/user/:id', async (req, res) => {
   const user = Number(req.session.user.id)
-  const data = await getDataByUser(user)
+
+  // Pagination
+  const page = parseInt(req.query.page) || 1;
+  const limit = 10;
+  const offset = (page - 1) * limit;
+
+  // Retrieve data and count
+  const [data, totalCount] = await Promise.all([
+    getDataByUser(user, limit, offset),
+    getDataByUserCount(user)
+  ]);
+
+  // Pagination button variables
+  const totalPages = Math.ceil(totalCount / limit);
+  const startEntry = totalCount === 0 ? 0 : offset + 1;
+  const endEntry = Math.min(offset + limit, totalCount);
 
   res.render('dashboard/view-data-all', {
     layout: 'dashboard',
     title: 'Your Reports | GC Dashboard',
     data,
-    current_user_report: true
+    current_user_report: true,
+    currentPage: page,
+    totalPages,
+    totalCount,
+    startEntry,
+    endEntry
   })
 })
 

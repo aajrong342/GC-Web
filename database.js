@@ -606,6 +606,7 @@ export async function getDataByStatusPaginated(status, limit, offset) {
     return result;
 }
 
+// Get data with filters
 export async function getDataWithFilters(limit, offset, title, locationCode, name, companyName, startDate, endDate) {
     // Unmodified query
     let query = `
@@ -670,6 +671,7 @@ export async function getDataWithFilters(limit, offset, title, locationCode, nam
     return result;
 }
 
+// Get count of data with filters
 export async function getFilteredDataCount(title, locationCode, name, companyName, startDate, endDate) {
   let query = `
     SELECT COUNT(*) as count
@@ -761,7 +763,7 @@ export async function getDataForReviewCount(currentUser) {
 }
 
 // Get all data by user and sort according to IDs in descending order (recent to oldest)
-export async function getDataByUser(userId) {
+export async function getDataByUser(userId, limit, offset) {
     const [result] = await sql.query(`
         SELECT
             dat.data_entry_id, dat.title, dat.location_name,
@@ -773,9 +775,22 @@ export async function getDataByUser(userId) {
         JOIN user u ON u.user_id = dat.user_id
         WHERE u.user_id = ${userId}
         ORDER BY dat.data_entry_id DESC
+        LIMIT ${limit} OFFSET ${offset}
     `)
 
     return result
+}
+
+// Count data made by user
+export async function getDataByUserCount(userId) {
+    const [[{ count }]] = await sql.query(`
+        SELECT COUNT(*) as count
+        FROM data_entry dat
+        JOIN user u ON u.user_id = dat.user_id
+        WHERE u.user_id = ?
+    `, [userId]);
+
+    return count;
 }
 
 // Get approved data entries from a location
