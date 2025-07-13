@@ -1,5 +1,5 @@
+<!-- Show search form if current page is data search -->
 {{#if current_all}}
-<!-- Search form -->
 <form id="data-search" method="GET" action="/dashboard/data/all">
     <!-- Search Bar and Filter Toggle -->
     <div class="search-bar-container">
@@ -66,6 +66,19 @@
 </form>
 {{/if}}
 
+<!-- Show tabs if current page is review list -->
+{{#if current_datasubs}}
+<div class="tab">
+  <a href="/dashboard/data/submissions/pending">
+    <button class="tablinks {{#if pending}}active{{/if}}">PENDING</button>
+  </a>
+  
+  <a href="/dashboard/data/submissions/revision">
+    <button class="tablinks {{#if revision}}active{{/if}}">NEEDS REVISION</button>
+  </a>
+</div>
+{{/if}}
+
 <!-- Entry counter -->
 <div class="form-section">
   <div style="display: flex;">
@@ -100,7 +113,7 @@
             <span class="data-status 
                 {{#ifEquals status 'Pending Review'}}stat-pending{{/ifEquals}} 
                 {{#ifEquals status 'Approved'}}stat-approved{{/ifEquals}} 
-                {{#ifEquals status 'Rejected'}}stat-rejected{{/ifEquals}}">
+                {{#ifEquals status 'Needs Revision'}}stat-revision{{/ifEquals}}">
                 {{status}}
             </span>
             </div>

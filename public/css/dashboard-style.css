@@ -475,14 +475,14 @@ select {
   background-color: #e9ffeb;
 }
 
-.stat-rejected {
-    background-color: red;
+.stat-revision {
+    background-color: orange;
 }
 .stat-approved {
     background-color: #18A50C;
 }
 .stat-pending {
-    background-color: orange;
+    background-color: rgb(255, 106, 0);
 }
 
 .data-entry-header {
@@ -603,7 +603,7 @@ select {
 }
 
 .review-reject {
-    background-color: red;
+    background-color: orange;
     color: white;
     border: none;
     border-radius: 10px;
@@ -613,7 +613,7 @@ select {
 }
 .review-reject:hover {
     cursor: pointer;
-    background-color: rgb(255, 78, 78);
+    background-color: rgb(255, 186, 57);
 }
 
 .review-cancel {

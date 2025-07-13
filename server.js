@@ -847,6 +847,7 @@ app.get('/dashboard/data/submissions/pending', async (req, res) => {
     title: 'Data Submissions for Review | GC Dashboard',
     data,
     current_datasubs: true,
+    pending: true,
     totalPages,
     totalCount,
     startEntry,
@@ -1550,7 +1551,7 @@ app.get('/control-panel', async (req, res) => {
   const entryCount = {
     approved: await getTotalDataCountByStatus('Approved'),
     pending: await getTotalDataCountByStatus('Pending Review'),
-    rejected: await getTotalDataCountByStatus('Rejected')
+    rejected: await getTotalDataCountByStatus('Needs Revision')
   }
   const contributors = await getTopContributors(5)
   const latestSubmissions = await getLatestSubmissions(5)
@@ -1813,8 +1814,8 @@ app.patch('/api/data/:id/status', async (req, res) => {
     
     if(status === 'Approved')
       await createEditEntry(id, reviewedBy, 'Approved data entry')
-    else if(status === 'Rejected')
-      await createEditEntry(id, reviewedBy, `Rejected data entry | ${rejectionReason}`)
+    else if(status === 'Needs Revision')
+      await createEditEntry(id, reviewedBy, `Needs Revision: ${rejectionReason}`)
 
     res.json({ 
       success: true,

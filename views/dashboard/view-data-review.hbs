@@ -8,7 +8,7 @@
         </button>&emsp;
 
         <button type="button" class="review-reject" onclick="showReject()">
-            <i class="fa-solid fa-thumbs-down"></i>&nbsp; Reject
+            <i class="fa-solid fa-pencil"></i>&nbsp; Suggest Edits
         </button>
     </center>
 </div>
@@ -193,13 +193,13 @@
 <div id="reject-modal" class="modal">
     <div class="modal-content">
         <span id="reject-close" class="close">&times;</span>
-        <h3 style="font-weight: normal;">Reject data entry?</h3>
+        <h3 style="font-weight: normal;">Entry Comments</h3>
 
         <div>
             <!-- Reasons for rejection -->
-            <h3 style="text-align: left; margin-left: 5%;">Reasons for rejection:</h3>
+            <h3 style="text-align: left; margin-left: 5%;">Comments:</h3>
 
-            <textarea id="reject-notes" placeholder="State reasons for rejection... (up to 300 characters only)"></textarea>
+            <textarea id="reject-notes" placeholder="Suggestions to improve this entry... (up to 300 characters only)"></textarea>
         </div><br>
 
         <!-- Modal buttons -->
@@ -207,8 +207,8 @@
             <i class="fa-solid fa-think"></i>&nbsp; Cancel
         </button>&emsp;
 
-        <button type="button" class="review-reject" onclick="updateEntry('Rejected')">
-            <i class="fa-solid fa-thumbs-down"></i>&nbsp; Reject
+        <button type="button" class="review-reject" onclick="updateEntry('Needs Revision')">
+            <i class="fa-solid fa-pencil"></i>&nbsp; Suggest Edits
         </button>
     </div>
 </div>
@@ -219,7 +219,7 @@
         <h3>Success</h3>
         Data entry has been approved.<br><br>
 
-        <a href="/dashboard/data/submissions">
+        <a href="/dashboard/data/submissions/pending">
             <button type="button" class="review-approve">
                 Return to Submissions List
             </button>
@@ -230,9 +230,9 @@
 <div id="success-reject" class="modal">
     <div class="modal-content">
         <h3>Success</h3>
-        Data entry has been rejected.<br><br>
+        Data entry has been put on hold.<br><br>
 
-        <a href="/dashboard/data/submissions">
+        <a href="/dashboard/data/submissions/pending">
             <button type="button" class="review-approve">
                 Return to Submissions List
             </button>
@@ -328,14 +328,14 @@ function updateEntry(status) {
         const rejectionReason = document.getElementById('reject-notes').value
 
         // Send request to server
-        reviewApi('Rejected', rejectionReason, reviewedBy)
+        reviewApi('Needs Revision', rejectionReason, reviewedBy)
             .then(response => {
                 if (response.success) {                
                     // Pop up to show success
                     document.getElementById('reject-modal').style.display = 'none'
                     document.getElementById('success-reject').style.display = 'block'
                 } else {
-                    throw new Error(response.message || 'Failed to reject application')
+                    throw new Error(response.message || 'Failed to put entry on hold')
                 }
             })
     }

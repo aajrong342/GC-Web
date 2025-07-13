@@ -12,7 +12,7 @@
 
   <div class="form-section stat-box text-center">
         <div class="stat-value">{{entryCount.rejected}}</div>
-        <span>Total Rejected Entries</span>
+        <span>Total Entries Needing Revision</span>
   </div>
 
   <div class="form-section stat-box text-center top-region">
@@ -36,7 +36,7 @@
           <span class="data-status 
             {{#ifEquals status 'Pending Review'}}stat-pending{{/ifEquals}} 
             {{#ifEquals status 'Approved'}}stat-approved{{/ifEquals}} 
-            {{#ifEquals status 'Rejected'}}stat-rejected{{/ifEquals}}">
+            {{#ifEquals status 'Needs Revision'}}stat-revision{{/ifEquals}}">
             {{status}}
           </span><br>
           <i>{{textDate date_submitted}}</i>
