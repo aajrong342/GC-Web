@@ -217,7 +217,7 @@
                         <tr class="tb-subtotal" supertype="{{name}}">
                             <td style="text-align: left;"><strong>{{name}} Subtotal</strong></td>
                             {{#each ../sectors}}
-                                <td><strong>{{lookup ../this.sectorTotals this.id}}</strong></td>
+                                <td><strong>{{toFixed (lookup ../this.sectorTotals this.id) 3}}</strong></td>
                             {{/each}}
                             <td><strong>{{this.totalWeight}}</strong></td>
                             <td><strong>{{this.percentage}}%</strong></td>
@@ -226,12 +226,12 @@
                 </tbody>
                 <tfoot>
                     <tr class="tb-total">
-                        <td style="text-align:left">TOTAL</td>
-                        {{#each sectors}}
-                        <td>{{lookup ../sectorTotals this.id}}</td>
-                        {{/each}}
-                        <td>{{grandTotal}}</td>
-                        <td>100%</td>
+                      <td style="text-align:left">TOTAL</td>
+                      {{#each sectors}}
+                      <td>{{toFixed (lookup ../sectorTotals this.id) 3}}</td>
+                      {{/each}}
+                      <td>{{grandTotal}}</td>
+                      <td>100%</td>
                     </tr>
                 </tfoot>
             </table>
