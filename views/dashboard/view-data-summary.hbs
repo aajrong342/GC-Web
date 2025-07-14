@@ -1,44 +1,44 @@
 <!-- Display search parameters if current route has query -->    
-{{#if (hasQuery query)}}
-  <div id="filter-section" class="filter-section">
-      <center>
-          <h2 style="margin: 0;">Search Parameters</h2>
-      </center>
-      <div class="filter-columns">
-          <h3>{{query.title}}</h3>
+<div id="filter-section" class="filter-section">
+    <center>
+        <h2 style="margin: 0;">Search Parameters</h2>
+    </center>
+    <div class="filter-columns">
 
-          <!-- Location Filters -->
-          <div class="filter-column">
-              <label for="region">Region</label>
-              {{query.region}}
+        <!-- Location Filters -->
+        <div class="filter-column">
+            <label for="region">Region</label>
+            {{query.region}} {{#ifEquals query.region undefined}}ALL{{/ifEquals}}
 
-              <label for="province">Province</label>
-              {{query.province}}
+            <label for="province">Province</label>
+            {{query.province}} {{#ifEquals query.province undefined}}ALL{{/ifEquals}}
 
-              <label for="municipality">City/Municipality</label>
-              {{query.municipality}}
+            <label for="municipality">City/Municipality</label>
+            {{query.municipality}} {{#ifEquals query.municipality undefined}}ALL{{/ifEquals}}
 
-              <label for="barangay">Barangay</label>
-              --
-          </div>
+            <label for="barangay">Barangay</label>
+            {{query.barangay}} {{#ifEquals query.barangay undefined}}ALL{{/ifEquals}}
+        </div>
 
-          <!-- Author & Date Filters -->
-          <div class="filter-column">
-              <label for="filter-author">Author</label>
-              {{query.author}}
+        <!-- Author & Date Filters -->
+        <div class="filter-column">
+            <label>Title</label>
+            {{query.title}} {{#ifEquals query.title undefined}}ALL{{/ifEquals}}
 
-              <label for="filter-org">Organization Name</label>
-              {{query.company}}
+            <label for="filter-author">Author</label>
+            {{query.author}} {{#ifEquals query.author undefined}}ALL{{/ifEquals}}
 
-              <label>Collection Date Range</label>
-              <div class="date-range">
-                  {{query.startDate}} to
-                  {{query.endDate}}
-              </div>
-          </div>
-      </div>
-  </div>
-{{/if}}
+            <label for="filter-org">Organization Name</label>
+            {{query.company}} {{#ifEquals query.company undefined}}ALL{{/ifEquals}}
+
+            <label>Collection Date Range</label>
+            <div class="date-range">
+                {{query.startDate}} {{#ifEquals query.startDate undefined}}--{{/ifEquals}} to
+                {{query.endDate}} {{#ifEquals query.endDate undefined}}--{{/ifEquals}}
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Display charts for aggregated data (UPDATE UI FOR THIS) -->
 <!-- Title Card -->
@@ -329,7 +329,7 @@ new Chart(tsCanvas.getContext('2d'), {
     plugins: {
       tooltip: {
         callbacks: {
-          label: ({ parsed }) => `${parsed.y.toFixed(3)} kg`
+          label: ({ parsed }) => `${parsed.x.toFixed(3)} kg`
         }
       },
       title: { display: false }

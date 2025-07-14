@@ -53,7 +53,7 @@
     <table class="user-profile">
       <tr>
         <td class="label">Population (based on Census)</td>
-        <td>{{commaNumber wasteGen.population}}</td>
+        <td>{{commaInt wasteGen.population}}</td>
       </tr>
       <tr>
         <td class="label">Waste Generation per Capita (Kg/cap-day)</td>
@@ -418,7 +418,7 @@ tsCanvas.style.marginBottom = '20px';
 
 const tsWrapper = document.createElement('div');
 tsWrapper.classList.add('chart-wrapper');
-tsWrapper.style.cssText = 'display:flex;gap:24px;align-items:flex-start';
+tsWrapper.style.cssText = 'display:flex; gap:24px; align-items:flex-start';
 tsWrapper.appendChild(tsCanvas);
 tsContainer.appendChild(tsWrapper);
 
@@ -442,7 +442,7 @@ new Chart(tsCanvas.getContext('2d'), {
     plugins: {
       tooltip: {
         callbacks: {
-          label: ({ parsed }) => `${parsed.y.toFixed(3)} kg`
+          label: ({ parsed }) => `${parsed.x.toFixed(3)} kg`
         }
       },
       title: { display: false }

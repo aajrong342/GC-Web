@@ -298,7 +298,7 @@ Handlebars.registerHelper('textDateTime', function(date) {
   return `${dateString} ${timeString}` 
 })
 
-// Show number with commas
+// Show number with commas and decimal point
 Handlebars.registerHelper('commaNumber', function(num) {
   if (typeof num !== "number") {
     num = parseFloat(num);
@@ -311,6 +311,21 @@ Handlebars.registerHelper('commaNumber', function(num) {
   const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
   return decimalPart ? `${formattedInteger}.${decimalPart}` : formattedInteger;
+});
+
+// Show integer with commas (for population)
+Handlebars.registerHelper('commaInt', function(num) {
+  if (typeof num !== "number") {
+    num = parseFloat(num);
+  }
+
+  if (isNaN(num)) return '';
+
+  const integerPart = Math.floor(num).toString();
+
+  const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  return formattedInteger;
 });
 
 // Return json object
