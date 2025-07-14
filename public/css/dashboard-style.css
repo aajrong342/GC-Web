@@ -959,3 +959,10 @@ select {
 .pagination-btn.arrow {
     color: #aaa;
 }
+
+#map {
+    height: 550px;
+    width: 40%;
+    border-radius: 10px;
+    margin-left: 10px;
+}

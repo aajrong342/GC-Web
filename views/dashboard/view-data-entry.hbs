@@ -11,60 +11,67 @@
   </center>
 </div>
 
-<!-- Info Blocks -->
-<div class="info-grid">
-  <!-- Submission Info -->
-  <div class="form-section">
-    <h3><i class="fas fa-user"></i> Submission Info</h3>
-    <table class="user-profile">
-      <tr>
-        <td class="label">Submitted by</td>
-        <td>{{uppercase wasteGen.lastname}}, {{wasteGen.firstname}}</td>
-      </tr>
-      <tr>
-        <td class="label">Organization Name</td>
-        <td>{{wasteGen.company_name}}</td>
-      </tr>
-      <tr>
-        <td class="label">Date Submitted</td>
-        <td>{{textDate wasteGen.date_submitted}}</td>
-      </tr>
-    </table>
+<div style="display: flex">
+    <div>
+    <!-- Info Blocks -->
+    <div class="info-grid">
+      <!-- Submission Info -->
+      <div class="form-section">
+        <h3><i class="fas fa-user"></i> Submission Info</h3>
+        <table class="user-profile">
+          <tr>
+            <td class="label">Submitted by</td>
+            <td>{{uppercase wasteGen.lastname}}, {{wasteGen.firstname}}</td>
+          </tr>
+          <tr>
+            <td class="label">Organization Name</td>
+            <td>{{wasteGen.company_name}}</td>
+          </tr>
+          <tr>
+            <td class="label">Date Submitted</td>
+            <td>{{textDate wasteGen.date_submitted}}</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Collection Info -->
+      <div class="form-section">
+        <h3><i class="fas fa-calendar-alt"></i> Collection Info</h3>
+        <table class="user-profile">
+          <tr>
+            <td class="label">Start Date</td>
+            <td>{{textDate wasteGen.collection_start}}</td>
+          </tr>
+          <tr>
+            <td class="label">End Date</td>
+            <td>{{textDate wasteGen.collection_end}}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Waste Generation Info -->
+    <div class="form-section">
+      <h3><i class="fas fa-dumpster"></i> Waste Generation</h3>
+      <table class="user-profile">
+        <tr>
+          <td class="label">Population (based on Census)</td>
+          <td>{{commaInt wasteGen.population}}</td>
+        </tr>
+        <tr>
+          <td class="label">Waste Generation per Capita (Kg/cap-day)</td>
+          <td>{{commaNumber wasteGen.per_capita}}</td>
+        </tr>
+        <tr>
+          <td class="label">Annual Waste Generation (kg/year)</td>
+          <td>{{commaNumber wasteGen.annual}}</td>
+        </tr>
+      </table>
+    </div>
   </div>
 
-  <!-- Collection Info -->
-  <div class="form-section">
-    <h3><i class="fas fa-calendar-alt"></i> Collection Info</h3>
-    <table class="user-profile">
-      <tr>
-        <td class="label">Start Date</td>
-        <td>{{textDate wasteGen.collection_start}}</td>
-      </tr>
-      <tr>
-        <td class="label">End Date</td>
-        <td>{{textDate wasteGen.collection_end}}</td>
-      </tr>
-    </table>
-  </div>
-
-  <!-- Waste Generation Info -->
-  <div class="form-section">
-    <h3><i class="fas fa-dumpster"></i> Waste Generation</h3>
-    <table class="user-profile">
-      <tr>
-        <td class="label">Population (based on Census)</td>
-        <td>{{commaInt wasteGen.population}}</td>
-      </tr>
-      <tr>
-        <td class="label">Waste Generation per Capita (Kg/cap-day)</td>
-        <td>{{commaNumber wasteGen.per_capita}}</td>
-      </tr>
-      <tr>
-        <td class="label">Annual Waste Generation (kg/year)</td>
-        <td>{{commaNumber wasteGen.annual}}</td>
-      </tr>
-    </table>
-  </div>
+  <!-- Map Display -->
+  <div id="map"></div>
 </div>
 
 <!-- Data Tabs -->
@@ -556,11 +563,33 @@ function exportTableToExcel() {
 
 </script>
 
+<!-- Map view script-->
+<script>
+
+const coords = {{{coords}}};
+const lat = coords.latitude;
+const lng = coords.longitude;
+
+const map = L.map('map').setView([lat, lng], 6); // zoom 13 for city-level
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+L.marker([lat, lng]).addTo(map);
+
+</script>
+
 <!-- Access to chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <!-- SheetsJS (for Excel export) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- Leaflet.js (for map view) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <!-- JS behind the tabs -->
 <script src="/js/tabs.js"></script>
@@ -579,6 +608,7 @@ function exportTableToExcel() {
 .info-grid .form-section {
   flex: 1 1 280px;
   min-width: 280px;
+  overflow-x: scroll;
 }
 
 .user-profile {

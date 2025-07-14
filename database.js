@@ -250,6 +250,7 @@ async function getLocationName(regionCode, provinceCode, municipalityCode, exist
 }
 
 // Function to fetch coordinates using OpenStreetMap API
+/*
 async function getCoordinates(locationName) {
     const locationParts = locationName.split(",").map(part => part.trim());
 
@@ -287,6 +288,7 @@ async function getCoordinates(locationName) {
         return null;
     }
 }
+*/
 
 export async function getWasteDataWithCoordinates() {
     const [rows] = await sql.query(`
@@ -839,6 +841,15 @@ export async function getWasteCompById(entryId) {
         WHERE data_entry_id = ?
     `, [entryId])
     return result // important, to not return an array
+}
+
+// Get coordinates by location name
+export async function getCoordinates(locationName) {
+    const [rows] = await sql.query(`
+        SELECT latitude, longitude 
+        FROM greencycle.coordinate
+        WHERE location_name = ?`, [locationName]);
+    return rows[0]; // Only one match since location_name is unique
 }
 
 /* ---------------------------------------

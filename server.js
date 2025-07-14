@@ -43,7 +43,8 @@ import {
   getMonthlySubmissions,
   getAvgWasteCompositionWithFilters,
   getAvgInfoWithFilters,
-  getDataByUserCount
+  getDataByUserCount,
+  getCoordinates
 } from './database.js'
 
 // File Upload
@@ -938,6 +939,13 @@ app.get('/dashboard/data/:id', async (req, res) => {
   const supertypes = await getAllTypes();
   const wasteComp = await getWasteCompById(id);
 
+  // Retrieve location coordinates
+  const coords = await getCoordinates(wasteGen.location_name)
+  if (!coords) {
+    console.log('ERROR: Location not found.');
+  }
+
+  // Latest edit entry
   let latestEdit = await getLatestEdit(id);
   latestEdit = latestEdit.length > 0 ? latestEdit[0].datetime : '';
 
@@ -1093,7 +1101,8 @@ app.get('/dashboard/data/:id', async (req, res) => {
     legendData,
     latestEdit,
     sectorBarData: JSON.stringify(sectorBarData),
-    sectorPieData: JSON.stringify(sectorPieData)
+    sectorPieData: JSON.stringify(sectorPieData),
+    coords: JSON.stringify(coords)
   });
 });
 
