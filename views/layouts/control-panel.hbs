@@ -68,9 +68,9 @@
                     <i class="fa-solid fa-house nav-icon"></i> Home
                 </a>
 
-                <a href="/dashboard">
+                {{!-- <a href="/dashboard">
                     <i class="fa-solid fa-chart-simple"></i>&nbsp; Return to Dashboard
-                </a>
+                </a> --}}
                 
                 <!-- Only show functions if current user is NOT a client -->
                 {{#ifNotEquals user.supertype 2}}
@@ -100,6 +100,12 @@
                         <i class="fa-solid fa-helmet-safety nav-icon"></i> Manage Roles
                     </a>
                 {{/ifEquals}}
+
+                <a href="/dashboard" style="background: none !important;">
+                    <button id="collapse-sidebar-btn" class="collapse-sidebar-btn" style="margin-top: 5px !important;">
+                        <i class="fa-solid fa-chart-simple"></i> RETURN TO DASHBOARD
+                    </button>
+                </a>
             </div>
         </nav>
         
