@@ -68,9 +68,9 @@
                     <i class="fa-solid fa-house nav-icon"></i> Home
                 </a>
 
-                {{!-- <a href="/dashboard">
-                    <i class="fa-solid fa-chart-simple"></i>&nbsp; Return to Dashboard
-                </a> --}}
+                <a href="/control-panel/entry-statistics" class="{{#if current_stats}}current{{/if}}">
+                    <i class="fa-solid fa-chart-line"></i>&nbsp; Data Entry Statistics
+                </a>
                 
                 <!-- Only show functions if current user is NOT a client -->
                 {{#ifNotEquals user.supertype 2}}

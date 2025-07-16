@@ -72,7 +72,7 @@
   </div>
 
   <!-- Map Display -->
-  <div id="map" style="width: 49%"></div>
+  <div id="map" style="width: 49%; background-color: #f0f0f0;"></div>
 </div>
 
 <!-- Data Tabs -->
@@ -566,20 +566,20 @@ function exportTableToExcel() {
 
 <!-- Map view script-->
 <script>
+  const coords = {{{coords}}}; // Assumes JSON.stringify was used in server
+  const lat = coords?.latitude;
+  const lng = coords?.longitude;
 
-const coords = {{{coords}}};
-const lat = coords.latitude;
-const lng = coords.longitude;
+  if (coords !== undefined) {
+    const map = L.map('map').setView([lat, lng], 6);
 
-const map = L.map('map').setView([lat, lng], 6); // zoom 13 for city-level
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors'
-}).addTo(map);
-
-L.marker([lat, lng]).addTo(map);
-
+    L.marker([lat, lng]).addTo(map);
+  }
 </script>
 
 <!-- Access to chart.js -->

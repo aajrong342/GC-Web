@@ -1468,6 +1468,15 @@ app.delete('/users/:id', async (req, res) => {
 --------------------------------------- */
 // Dashboard home page
 app.get('/control-panel', async (req, res) => {
+  res.render('control-panel/cp-home', {
+    layout: 'control-panel',
+    title: 'Home | GC Control Panel',
+    current_home: true
+  })
+})
+
+// Data entry statistics
+app.get('/control-panel/entry-statistics', async (req, res) => {
   const entryCount = {
     approved: await getTotalDataCountByStatus('Approved'),
     pending: await getTotalDataCountByStatus('Pending Review'),
@@ -1478,10 +1487,10 @@ app.get('/control-panel', async (req, res) => {
   const topRegions = await getTopReportingRegions(5)
   const monthlySubmissions = await getMonthlySubmissions()
 
-  res.render('control-panel/cp-home', {
+  res.render('control-panel/entry-stats', {
     layout: 'control-panel',
-    title: 'Main Dashboard | GC Dashboard',
-    current_home: true,
+    title: 'Data Entry Statistics | GC Control Panel',
+    current_stats: true,
     entryCount,
     contributors,
     latestSubmissions,
@@ -1496,7 +1505,7 @@ app.get('/control-panel/users', async (req, res) => {
   const users = await getUsers()
   res.render('control-panel/users', {
     layout: 'control-panel',
-    title: 'Users | GC Dashboard',
+    title: 'Users | GC Control Panel',
     users,
     current_users: true
   })
@@ -1509,7 +1518,7 @@ app.get('/control-panel/roles', async (req, res) => {
 
   res.render('control-panel/roles', {
     layout: 'control-panel',
-    title: 'Roles | GC Dashboard',
+    title: 'Roles | GC Control Panel',
     adminRoles,
     gcRoles,
     clientRoles,
@@ -1523,7 +1532,7 @@ app.get('/control-panel/user-applications', async (req, res) => {
 
   res.render('control-panel/user-applications', { 
     layout: 'control-panel',
-    title: 'User Applications | GC Dashboard',
+    title: 'User Applications | GC Control Panel',
     current_userapp: true,
     applications
   })
@@ -1533,7 +1542,7 @@ app.get('/control-panel/partners', async (req, res) => {
   const partners = await getPartners()
   res.render('control-panel/partners', {
     layout: 'control-panel',
-    title: 'Partner Organizations | GC Dashboard',
+    title: 'Partner Organizations | GC Control Panel',
     partners,
     current_partners: true
   })
@@ -1715,8 +1724,9 @@ app.patch('/api/data/:id/status', async (req, res) => {
     // Update data entry edit history
     let result
     
-    if(status === 'Approved')
+    if(status === 'Approved') {
       await createEditEntry(id, reviewedBy, 'Approved data entry')
+    }
     else if(status === 'Needs Revision')
       await createEditEntry(id, reviewedBy, `Needs Revision: ${rejectionReason}`)
 

@@ -6,25 +6,57 @@
     <section class="section">
       <h2>General Features</h2>
       <div class="card-grid">
-        <a href="/dashboard/data/all" class="feature-card"><i class="fas fa-table"></i> View Data Entries</a>
-        <a href="/dashboard/guide" class="feature-card"><i class="fas fa-book-open"></i> Waste Type Guide</a>
+        <a href="/dashboard/data/all" class="feature-card">
+          <div class="feature-icon"><i class="fas fa-table"></i></div>
+          <div class="feature-text">
+            <h3>View Data Entries</h3>
+            <p>Browse all approved data entries submitted to the system.</p>
+          </div>
+        </a>
+
+        <a href="/dashboard/guide" class="feature-card">
+          <div class="feature-icon"><i class="fas fa-book-open"></i></div>
+          <div class="feature-text">
+            <h3>Waste Type Guide</h3>
+            <p>Learn about waste classifications with examples.</p>
+          </div>
+        </a>
       </div>
     </section>
 
     <section class="section">
       <h2>Data Reports</h2>
       <div class="card-grid">
-        <a href="/dashboard/submit-report" class="feature-card"><i class="fas fa-file-upload"></i> Submit Data Entry</a>
-        <a href="/dashboard/data/user/{{user.id}}" class="feature-card"><i class="fas fa-chart-line"></i> Your Submissions</a>
+        <a href="/dashboard/submit-report" class="feature-card">
+          <div class="feature-icon"><i class="fas fa-file-upload"></i></div>
+          <div class="feature-text">
+            <h3>Submit Data Entry</h3>
+            <p>Upload your waste composition data for review.</p>
+          </div>
+        </a>
+
+        <a href="/dashboard/data/user/{{user.id}}" class="feature-card">
+          <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+          <div class="feature-text">
+            <h3>Your Submissions</h3>
+            <p>View and track your previously submitted reports.</p>
+          </div>
+        </a>
       </div>
     </section>
 
     {{#ifNotEquals user.supertype 2}}
         <section class="section">
-        <h2>Staff Functions</h2>
-        <div class="card-grid">
-            <a href="/control-panel" class="feature-card"><i class="fa-solid fa-screwdriver-wrench"></i> Control Panel</a>
-        </div>
+          <h2>Staff Functions</h2>
+          <div class="card-grid">
+            <a href="/control-panel" class="feature-card admin-card">
+              <div class="feature-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+              <div class="feature-text">
+                <h3>Control Panel</h3>
+                <p>Access administrative settings, system controls, and oversight tools.</p>
+              </div>
+            </a>
+          </div>
         </section>
     {{/ifNotEquals}}
   </main>
@@ -71,30 +103,62 @@ a {
 /* Feature Cards */
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: 1fr; /* full width cards */
   gap: 20px;
 }
 
 .feature-card {
+  display: flex;
+  align-items: center;
   background-color: #fff;
   padding: 20px;
   border-radius: 10px;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 1rem;
-  text-align: center;
+  text-align: left;
   transition: background-color 0.2s, transform 0.2s;
   box-shadow: 0 2px 6px rgba(0,0,0,0.04);
   border: 2px solid #127009;
+  gap: 15px;
 }
 
-.feature-card i {
-  display: block;
-  font-size: 1.5rem;
-  margin-bottom: 8px;
+.feature-icon i {
+  font-size: 2rem;
+  color: #127009;
+  min-width: 30px;
+}
+
+.feature-text h3 {
+  font-size: 1.1rem;
+  margin: 0;
+  color: #127009;
+}
+
+.feature-text p {
+  font-size: 0.95rem;
+  margin: 4px 0 0;
+  color: #444;
 }
 
 .feature-card:hover {
   background-color: #d4f5d2;
   transform: translateY(-3px);
+}
+
+.admin-card {
+  background-color: #f9f0e6; /* light tan/orange tint */
+  border-color: #c95f00; /* stronger orange for border */
+}
+
+.admin-card .feature-icon i {
+  color: #c95f00;
+}
+
+.admin-card .feature-text h3 {
+  color: #c95f00;
+}
+
+.admin-card:hover {
+  background-color: #fbe3cd;
 }
   </style>
