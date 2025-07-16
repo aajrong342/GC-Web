@@ -3,16 +3,34 @@
   <div class="form-section stat-box text-center">
     <div class="stat-value">{{entryCount.approved}}</div>
     <span>Total Approved Entries</span>
+
+    <a href="/dashboard/data/all">
+      <button class="btn-submit" style="margin-top: 15px;">
+        <i class="fa-solid fa-eye"></i> View Approved
+      </button>
+    </a>
   </div>
 
   <div class="form-section stat-box text-center">
-    <div class="stat-value">{{entryCount.pending}}</div>
+    <div class="stat-value" style="color: rgb(255, 106, 0);">{{entryCount.pending}}</div>
     <span>Total Pending Entries</span>
+
+    <a href="/dashboard/data/submissions/pending">
+      <button class="btn-submit" style="margin-top: 15px; background-color: rgb(255, 106, 0);">
+        <i class="fa-solid fa-eye"></i> View Pending
+      </button>
+    </a>
   </div>
 
   <div class="form-section stat-box text-center">
-    <div class="stat-value">{{entryCount.rejected}}</div>
+    <div class="stat-value" style="color: orange;">{{entryCount.rejected}}</div>
     <span>Total Entries Needing Revision</span>
+
+    <a href="/dashboard/data/submissions/revision">
+      <button class="btn-submit" style="margin-top: 15px; background-color: orange;">
+        <i class="fa-solid fa-eye"></i> View Queue
+      </button>
+    </a>
   </div>
 
   <div class="form-section stat-box text-center top-region">
