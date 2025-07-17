@@ -81,7 +81,7 @@
             <input type="date" id="date_start" name="date_start">
 
             <label for="date_end">Data Collection End Date</label>
-            <input type="date" id="date_end" name="date_end">
+            <input type="date" id="date_end" name="date_end" disabled>
         </div>
     </div>
 
@@ -146,6 +146,22 @@
 <script src="/../js/form-step.js" type="text/javascript"></script>
 <script src="/../js/locations.js" type="text/javascript"></script>
 <script src="/../js/waste-composition.js" type="text/javascript"></script>
+
+<!-- Date picker control -->
+<script>
+  const startDateInput = document.getElementById('date_start');
+  const endDateInput = document.getElementById('date_end');
+
+  startDateInput.addEventListener('input', function () {
+    if (startDateInput.value) {
+      endDateInput.disabled = false;
+      endDateInput.min = startDateInput.value; // Optional: prevent selecting end date before start date
+    } else {
+      endDateInput.disabled = true;
+      endDateInput.value = '';
+    }
+  });
+</script>
 
 <style>
 .instructions-tab {

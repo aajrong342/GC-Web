@@ -71,7 +71,7 @@
             <input type="date" id="date_start" name="date_start" required>
 
             <label for="date_end">Data Collection End Date</label>
-            <input type="date" id="date_end" name="date_end" required>
+            <input type="date" id="date_end" name="date_end" required disabled>
         </div>
 
         <!-- File Upload -->
@@ -104,6 +104,22 @@
 <script src="/../js/locations.js" type="text/javascript"></script>
 <script src="/../js/file-drop.js" type="text/javascript"></script>
 <script src="/../js/date-picker.js" type="text/javascript"></script>
+
+<!-- Date picker control -->
+<script>
+  const startDateInput = document.getElementById('date_start');
+  const endDateInput = document.getElementById('date_end');
+
+  startDateInput.addEventListener('input', function () {
+    if (startDateInput.value) {
+      endDateInput.disabled = false;
+      endDateInput.min = startDateInput.value; // Optional: prevent selecting end date before start date
+    } else {
+      endDateInput.disabled = true;
+      endDateInput.value = '';
+    }
+  });
+</script>
 
 <style>
 .instructions-tab {
