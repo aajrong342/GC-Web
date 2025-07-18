@@ -43,10 +43,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show modal
             userManagementModal.style.display = 'flex';
 
-            const addUserButton = document.querySelector('.add-user-btn');
+const addUserButton = document.querySelector('.add-user-btn');
 if (addUserButton) {
     addUserButton.addEventListener('click', async function () {
-        // Prompt user for User ID
         const userId = prompt("Enter the User ID to add to this role:");
 
         if (!userId || isNaN(userId)) {
@@ -59,11 +58,20 @@ if (addUserButton) {
             return;
         }
 
-        const confirmed = confirm(`Are you sure you want to assign User ID ${userId} to this role? This will replace their current role.`);
-
-        if (!confirmed) return;
-
         try {
+            // 🔍 Fetch user data first to get name
+            const userRes = await fetch(`/users/${userId}`);
+            if (!userRes.ok) {
+                throw new Error(`❌ User with ID ${userId} not found.`);
+            }
+
+            const userData = await userRes.json();
+            const fullName = `${userData.firstname} ${userData.lastname}`;
+
+            const confirmed = confirm(`Are you sure you want to assign ${fullName} to this role? This will replace their current role.`);
+            if (!confirmed) return;
+
+            // 📨 Proceed to update role
             const response = await fetch(`/users/update-role`, {
                 method: 'PUT',
                 headers: {
@@ -77,10 +85,10 @@ if (addUserButton) {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(`❌ Failed to update role. Server responded with: ${errorData.error || 'Unknown error'}`);
+                throw new Error(`❌ Failed to update role: ${errorData.error || 'Unknown error'}`);
             }
 
-            alert(`✅ User ${userId} has been added to this role.`);
+            alert(`✅ ${fullName} has been added to this role.`);
             location.reload();
 
         } catch (error) {

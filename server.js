@@ -8,7 +8,7 @@ const store = new session.MemoryStore();
 
 // Import database functions
 import {
-  getUsers, getUserByEmail, createUser, getUsersOfRole,
+  getUsers, getUserByEmail, createUser, getUsersOfRole, getUserById,
   getPartners,
   getRolesOfSupertype, createClientRole,
   getApplications, getApplicationById, getApplicationsByEmail,
@@ -1687,17 +1687,40 @@ app.get('/control-panel/roles', async (req, res) => {
   })
 })
 // In your users route file or main server file
+app.get('/users/:user_id', async (req, res) => {
+    const userId = req.params.user_id;
+
+    try {
+        const result = await getUserById(userId);
+
+        if (result.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const user = result[0]; // your query returns an array
+
+        res.status(200).json(user);
+    } catch (err) {
+        console.error('Error fetching user by ID:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 app.put('/users/remove-role/:user_id', async (req, res) => {
   const userId = req.params.user_id;
+  console.log(`Removing role for user: ${userId}`);
+
   try {
-    // Call the DB function to remove the role
     await removeUserRole(userId);
+    console.log('Role removed successfully');
     res.status(200).json({ message: 'Role removed successfully' });
   } catch (error) {
     console.error('Error removing role:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
 
 // User applications page
 app.get('/control-panel/user-applications', async (req, res) => {
