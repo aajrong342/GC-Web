@@ -979,7 +979,8 @@ export async function getTopContributors(limit) {
 export async function getLatestSubmissions(limit) {
     let query = `
         SELECT
-            dat.title, u.lastname, u.firstname, dat.date_submitted, dat.status
+            dat.data_entry_id, dat.title, dat.date_submitted, dat.status, dat.location_name,
+            u.lastname, u.firstname, u.company_name
         FROM data_entry dat
         JOIN user u ON u.user_id = dat.user_id
         ORDER BY dat.date_submitted DESC

@@ -42,27 +42,38 @@
 <!-- Latest Submissions + Top Contributors -->
 <div class="info-grid">
   <!-- Latest Submissions -->
-  <div class="form-section" style="flex: 2;">
+  <div class="form-section" style="width: 60%;">
     <h3><i class="fas fa-clock"></i> Latest Submissions</h3>
     {{#each latestSubmissions}}
-      <div class="submission-card">
-        <div>
-          <span class="submission-title">{{title}}</span><br>
-          {{uppercase lastname}}, {{firstname}}
+      <a href="/dashboard/data{{#ifNotEquals status 'Approved'}}/review{{/ifNotEquals}}/{{data_entry_id}}" style="color: black; text-decoration: none;">
+        <div class="form-section waste-data-btn" style="cursor: pointer;">
+            <div class="waste-data-btn">
+            <!-- Header: Title and Status -->
+                <div class="data-entry-header">
+                <h2>{{title}}</h2>
+                <span class="data-status 
+                    {{#ifEquals status 'Pending Review'}}stat-pending{{/ifEquals}} 
+                    {{#ifEquals status 'Approved'}}stat-approved{{/ifEquals}} 
+                    {{#ifEquals status 'Needs Revision'}}stat-revision{{/ifEquals}}"
+                    style="font-size: small !important;">
+                    {{status}}
+                </span>
+                </div>
+
+                <!-- Main Info -->
+                <p>
+                <strong>Location:</strong> {{location_name}}<br>
+                <i>Submitted on {{textDate date_submitted}}</i>
+                </p>
+
+                <p>
+                <strong>Submitted by:</strong> {{uppercase lastname}}, {{firstname}}<br>
+                <i>{{company_name}}</i>
+                </p>
+          </div>
         </div>
-        <div class="submission-status">
-          <span class="data-status 
-            {{#ifEquals status 'Pending Review'}}stat-pending{{/ifEquals}} 
-            {{#ifEquals status 'Approved'}}stat-approved{{/ifEquals}} 
-            {{#ifEquals status 'Needs Revision'}}stat-revision{{/ifEquals}}">
-            {{status}}
-          </span><br><br>
-          <i>{{textDate date_submitted}}</i>
-        </div>
-      </div>
+      </a>
     {{/each}}
-    <br>
-    <button class="btn-submit">See all submissions</button>
   </div>
 
   <!-- Top Contributors + Regions -->
@@ -94,7 +105,8 @@
 
 <!-- Submission History (Chart) -->
 <div class="form-section">
-  <h3><i class="fas fa-chart-line"></i> Submission History</h3>
+  <h3><i class="fas fa-chart-line"></i> Submissions This Year</h3>
+  <p>Mouse over the line graph points for more details.</p>
   <canvas id="monthlySubmissionsChart" width="600" height="300"></canvas>
 </div>
 
@@ -264,10 +276,14 @@ function closeRegionModal() {
 
 /* Submission entries list */
 .submission-card {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.8rem 0;
-  border-bottom: 1px solid #eee;
+  background-color: #fdfdfd;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  margin: 1rem auto;
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
+  width: 100%;
 }
 
 .submission-title {
@@ -345,7 +361,7 @@ function closeRegionModal() {
 
 .modal-content {
   background-color: #fff;
-  padding: 20px;
+  padding: 30px;
   width: 80%;
   max-height: 80%;
   overflow-y: auto;

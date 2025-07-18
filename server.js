@@ -1630,7 +1630,7 @@ app.get('/control-panel/entry-statistics', async (req, res) => {
     rejected: await getTotalDataCountByStatus('Needs Revision')
   }
   const contributors = await getTopContributors(5)
-  const latestSubmissions = await getLatestSubmissions(5)
+  const latestSubmissions = await getLatestSubmissions(3)
   const topRegions = await getTopReportingRegions(5)
   const monthlySubmissions = await getMonthlySubmissions()
 
