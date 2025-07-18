@@ -772,6 +772,124 @@ app.get('/dashboard/data/submissions/revision', async (req, res) => {
   })
 })
 
+// Data WIP view (for Your Submissions tab)
+app.get('/dashboard/data/wip/:id', async (req, res) => {
+  const entryId = req.params.id
+  const reviewer = req.session.user.id
+  const wasteGen = await getWasteGenById(entryId)
+
+  // Initialize waste comp
+  const sectors = await getSectors()
+  const supertypes = await getAllTypes()
+  const wasteComp = await getWasteCompById(entryId)
+
+  // Create a lookup map for waste amounts
+  const wasteMap = {};
+  for (const row of wasteComp) {
+      if (!wasteMap[row.type_id]) wasteMap[row.type_id] = {};
+      wasteMap[row.type_id][row.sector_id] = row.waste_amount;
+  }
+
+  /* -------- TABLE INITIALIZATION -------- */
+
+  // Group types under supertypes
+  const supertypeMap = {};
+  for (const row of supertypes) {
+      if (!supertypeMap[row.supertype_id]) {
+          supertypeMap[row.supertype_id] = {
+              id: row.supertype_id,
+              name: row.supertype_name,
+              types: []
+          };
+      }
+      supertypeMap[row.supertype_id].types.push({
+          id: row.type_id,
+          name: row.type_name,
+          amounts: wasteMap[row.type_id] || {}
+      });
+  }
+
+  // Grand total (for "percentage" column) for each type
+  let grandTotal = 0;
+
+  for (const supertype of Object.values(supertypeMap)) {
+    for (const type of supertype.types) {
+      const amounts = type.amounts || {};
+      const total = Object.values(amounts).reduce((a, b) => a + Number(b), 0);
+      type.totalWeight = total.toFixed(3);
+      grandTotal += total;
+    }
+  }
+
+  // Compute percentage for each type's total weight
+  for (const supertype of Object.values(supertypeMap)) {
+    for (const type of supertype.types) {
+      type.percentage = grandTotal > 0
+        ? ((type.totalWeight / grandTotal) * 100).toFixed(3)
+        : '0.000';
+    }
+  }
+
+  // Grand total of all sectors
+  // -- Initialize sector totals
+  const sectorTotals = {}; // { sector_id: total }
+  for (const sector of sectors) {
+    sectorTotals[sector.id] = 0;
+  }
+
+  // -- Sum up sector values
+  for (const supertype of Object.values(supertypeMap)) {
+    for (const type of supertype.types) {
+      for (const [sectorIdStr, value] of Object.entries(type.amounts || {})) {
+        const sectorId = Number(sectorIdStr);
+        sectorTotals[sectorId] += Number(value);
+      }
+    }
+  }
+
+  // Set up subtotal rows
+  for (const supertype of Object.values(supertypeMap)) {
+    const sectorTotals = {};
+    let totalWeight = 0;
+
+    for (const sector of sectors) {
+      sectorTotals[sector.id] = 0;
+    }
+
+    for (const type of supertype.types) {
+      for (const [sectorIdStr, val] of Object.entries(type.amounts || {})) {
+        const sectorId = Number(sectorIdStr);
+        const amount = Number(val);
+        sectorTotals[sectorId] += amount;
+        totalWeight += amount;
+      }
+    }
+
+    // Format each value to 3 decimal places
+    for (const id in sectorTotals) {
+      sectorTotals[id] = sectorTotals[id].toFixed(3);
+    }
+
+    supertype.sectorTotals = sectorTotals;      // { sector_id: subtotal }
+    supertype.totalWeight = totalWeight.toFixed(3);        // e.g., 250
+    supertype.percentage = grandTotal > 0
+      ? ((totalWeight / grandTotal) * 100).toFixed(3)
+      : '0.000';
+  }
+
+  res.render('dashboard/view-data-wip', {
+    layout: 'dashboard',
+    title: `${wasteGen.title} | GC Dashboard`,
+    wasteGen,
+    current_user_report: true,
+    sectors,
+    supertypes: Object.values(supertypeMap),
+    sectorTotals,
+    grandTotal: grandTotal.toFixed(3),
+    entryId
+  })
+})
+
 // Get all data entries by one user (Your Submissions)
 app.get('/dashboard/data/user/:id', async (req, res) => {
   const user = Number(req.session.user.id)
@@ -792,7 +910,7 @@ app.get('/dashboard/data/user/:id', async (req, res) => {
   const startEntry = totalCount === 0 ? 0 : offset + 1;
   const endEntry = Math.min(offset + limit, totalCount);
 
-  res.render('dashboard/list-data-all', {
+  res.render('dashboard/list-data-user', {
     layout: 'dashboard',
     title: 'Your Reports | GC Dashboard',
     data,
