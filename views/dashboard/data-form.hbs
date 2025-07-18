@@ -114,6 +114,7 @@
                             class="waste-entry"
                             min="0"
                             step="0.01"
+                            value="0"
                         >
                         </td>
                     {{/each}}
@@ -162,6 +163,30 @@
       endDateInput.value = '';
     }
   });
+</script>
+
+<!-- Table value null guard -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const wasteInputs = document.querySelectorAll("input.waste-entry");
+
+    wasteInputs.forEach(input => {
+        // Allow user to type freely (even erase)
+        input.addEventListener("input", () => {
+            const value = parseFloat(input.value);
+            if (!isNaN(value) && value < 0) {
+                input.value = 0; // Clamp negatives to 0
+            }
+        });
+
+        // On blur, restore to 0 if left blank or invalid
+        input.addEventListener("blur", () => {
+            if (input.value.trim() === "" || isNaN(parseFloat(input.value))) {
+                input.value = 0;
+            }
+        });
+    });
+});
 </script>
 
 <style>
