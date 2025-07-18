@@ -47,7 +47,8 @@ import {
   getFilteredDataCoords,
   getEntryLocationName,
   fetchCoordinates,
-  createLocationEntry
+  createLocationEntry,
+  removeUserRole
 } from './database.js'
 
 // File Upload
@@ -1684,6 +1685,18 @@ app.get('/control-panel/roles', async (req, res) => {
     current_roles: true
   })
 })
+// In your users route file or main server file
+app.put('/users/remove-role/:user_id', async (req, res) => {
+  const userId = req.params.user_id;
+  try {
+    // Call the DB function to remove the role
+    await removeUserRole(userId);
+    res.status(200).json({ message: 'Role removed successfully' });
+  } catch (error) {
+    console.error('Error removing role:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 // User applications page
 app.get('/control-panel/user-applications', async (req, res) => {

@@ -220,6 +220,10 @@ export async function createClientRole(roleName) {
     const id = result[0].insertId
     return getRoleById(id)
 }
+export async function removeUserRole(userId) {
+  const [result] = await sql.query('UPDATE user SET role_id = 9 WHERE user_id = ?', [userId]);
+  return result;
+}
 
 // Get role by ID
 export async function getRoleById(id) {

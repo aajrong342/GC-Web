@@ -175,6 +175,33 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Paste HTML output on users of role table
-        tblUsersOfRole.innerHTML = output
+        tblUsersOfRole.innerHTML = output;
+
+// Add event listeners to remove buttons
+const removeButtons = document.querySelectorAll('.remove-btn');
+removeButtons.forEach((btn, index) => {
+    const user = usersOfRole[index];
+    btn.addEventListener('click', () => {
+        const confirmed = confirm(`Are you sure you want to remove ${user.firstname} ${user.lastname} from this role?`);
+        if (!confirmed) return;
+
+        fetch(`/users/remove-role/${user.user_id}`, {
+            method: 'PUT'
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to remove user');
+
+            // Show success message
+            alert(`${user.firstname} ${user.lastname} has been removed from this role.`);
+
+            // Refresh the page
+            location.reload();
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Failed to remove user from role');
+        });
+    });
+});
     }
 });
