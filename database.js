@@ -309,6 +309,11 @@ export async function deleteRole(role_id) {
         [role_id]
     );
 }
+// In database.js
+export async function getAllUsers() {
+    const [users] = await sql.query('SELECT * FROM user');
+    return users;
+}
 
 // Create new application (no application_id needed as trigger handles it)
 export async function createApplication(role_id, lastName,firstName, email, contactNo, companyName, verificationDoc) {

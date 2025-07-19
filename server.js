@@ -9,8 +9,8 @@ const store = new session.MemoryStore();
 // Import database functions
 import {
   getUsers, getUserByEmail, createUser, getUsersOfRole, getUserById,
-    deleteRole,
-    updateRoleName,
+  deleteRole, getAllUsers,
+  updateRoleName,
   getPartners, getOrgRoles,
   getRolesOfSupertype, createClientRole,
   getApplications, getApplicationById, getApplicationsByEmail,
@@ -1613,6 +1613,25 @@ app.delete('/users/:id', async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Error deleting user" });
   }
+});
+app.get('/users/all', async (req, res) => {
+    try {
+        const users = await getAllUsers(); // ✅ Use the helper function
+        res.json(users);
+    } catch (error) {
+        console.error('Error fetching all users:', error);
+        res.status(500).json({ error: 'Failed to fetch users' });
+    }
+});
+
+app.get('/your-route', async (req, res) => {
+    try {
+        const users = await getAllUsers();
+        res.json(users);
+    } catch (err) {
+        console.error('Error fetching all users:', err);
+        res.status(500).send('Error fetching users');
+    }
 });
 
 /* ---------------------------------------
