@@ -165,27 +165,48 @@
   });
 </script>
 
-<!-- Table value null guard -->
+<!-- Form scripts -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    const wasteInputs = document.querySelectorAll("input.waste-entry");
+  // Null guard for waste comp table
+  const wasteInputs = document.querySelectorAll("input.waste-entry");
 
-    wasteInputs.forEach(input => {
-        // Allow user to type freely (even erase)
-        input.addEventListener("input", () => {
-            const value = parseFloat(input.value);
-            if (!isNaN(value) && value < 0) {
-                input.value = 0; // Clamp negatives to 0
-            }
-        });
+  wasteInputs.forEach(input => {
+      // Allow user to type freely (even erase)
+      input.addEventListener("input", () => {
+          const value = parseFloat(input.value);
+          if (!isNaN(value) && value < 0) {
+              input.value = 0; // Clamp negatives
+          }
+      });
 
-        // On blur, restore to 0 if left blank or invalid
-        input.addEventListener("blur", () => {
-            if (input.value.trim() === "" || isNaN(parseFloat(input.value))) {
-                input.value = 0;
-            }
-        });
-    });
+      // NEW: On focus, if value is exactly 0, clear it temporarily
+      input.addEventListener("focus", () => {
+          if (parseFloat(input.value) === 0) {
+              input.dataset.wasZero = "true"; // track that we cleared a zero
+              input.value = "";
+          } else {
+              input.dataset.wasZero = "false";
+          }
+      });
+
+      // On blur, restore 0 if left blank or invalid
+      input.addEventListener("blur", () => {
+          if (input.value.trim() === "" || isNaN(parseFloat(input.value))) {
+              input.value = 0;
+          }
+          delete input.dataset.wasZero;
+      });
+  });
+
+  // Prevent accidental submission by pressing Enter
+  const form = document.getElementById("waste-form"); // Or use a specific ID if needed
+
+  form.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && e.target.tagName !== "TEXTAREA") {
+        e.preventDefault();
+    }
+  });
 });
 </script>
 
