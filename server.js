@@ -9,6 +9,8 @@ const store = new session.MemoryStore();
 // Import database functions
 import {
   getUsers, getUserByEmail, createUser, getUsersOfRole, getUserById,
+    deleteRole,
+    updateRoleName,
   getPartners, getOrgRoles,
   getRolesOfSupertype, createClientRole,
   getApplications, getApplicationById, getApplicationsByEmail,
@@ -1774,6 +1776,45 @@ app.get('/control-panel/partners', async (req, res) => {
     current_partners: true
   })
 })
+// Update role name
+app.put('/update-role-name/:role_id', async (req, res) => {
+    const { role_id } = req.params;
+    const { newName } = req.body;
+    try {
+        await updateRoleName(role_id, newName); // in database.js
+        res.sendStatus(200);
+    } catch (err) {
+        console.error("Error updating role name:", err);
+        res.status(500).send("Error updating role name");
+    }
+});
+
+// Delete role
+app.delete('/delete-role/:role_id', async (req, res) => {
+    const { role_id } = req.params;
+    try {
+        await deleteRole(role_id); // in database.js
+        res.sendStatus(200);
+    } catch (err) {
+        console.error("Error deleting role:", err);
+        res.status(500).send("Error deleting role");
+    }
+});
+
+// app.get('/get-users-by-role/:roleId', async (req, res) => {
+//     const { roleId } = req.params;
+//     try {
+//         const [users] = await sql.query(`
+//             SELECT u.user_id, u.username, u.full_name
+//             FROM user u
+//             WHERE u.role_id = ?
+//         `, [roleId]);
+//         res.json(users);
+//     } catch (err) {
+//         console.error('Error fetching users by role:', err);
+//         res.status(500).json({ error: 'Internal server error' });
+//     }
+// });
 
 /* ---------------------------------------
     USER APPLICATION API ENDPOINTS

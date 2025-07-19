@@ -262,5 +262,81 @@ removeButtons.forEach((btn, index) => {
         });
     });
 });
+// Handle Edit Button
+    document.querySelectorAll(".tb-button-action.edit").forEach(button => {
+        button.addEventListener("click", async () => {
+            const roleId = button.dataset.roleId;
+            const oldName = button.dataset.roleName;
+
+            const newName = prompt(`Edit Role Name for ${oldName}:`, oldName);
+            if (newName && newName !== oldName) {
+                try {
+                    const res = await fetch(`/update-role-name/${roleId}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ newName })
+                    });
+
+                    if (!res.ok) throw new Error("Failed to update role name.");
+
+                    alert("Role name updated!");
+                    location.reload();
+                } catch (err) {
+                    console.error(err);
+                    alert("Error updating role name.");
+                }
+            }
+        });
+    });
+
+    // Handle Delete Button
+    document.querySelectorAll(".tb-button-action.delete").forEach(button => {
+        button.addEventListener("click", async () => {
+            const roleId = button.dataset.roleId;
+
+            const confirmed = confirm(`Are you sure you want to delete Role ID ${roleId}?`);
+            if (confirmed) {
+                try {
+                    const res = await fetch(`/delete-role/${roleId}`, {
+                        method: "DELETE"
+                    });
+
+                    if (!res.ok) throw new Error("Failed to delete role.");
+
+                    alert("Role deleted successfully.");
+                    location.reload();
+                } catch (err) {
+                    console.error(err);
+                    alert("Error deleting role.");
+                }
+            }
+        });
+    });
+
+//     document.querySelectorAll('.manage-users-btn').forEach(btn => {
+//     btn.addEventListener('click', async () => {
+//         const roleId = btn.dataset.roleId;
+//         const roleName = btn.dataset.roleName;
+
+//         try {
+//             const res = await fetch(`/get-users-by-role/${roleId}`);
+//             const users = await res.json();
+
+//             const modalBody = document.querySelector('#modal-body');
+//             modalBody.innerHTML = `
+//                 <h2>Users in role: ${roleName}</h2>
+//                 <ul>
+//                     ${users.map(user => `<li>${user.full_name} (${user.username})</li>`).join('')}
+//                 </ul>
+//             `;
+
+//             openModal(); // Your function to open modal
+//         } catch (err) {
+//             console.error('Error loading users:', err);
+//             alert('Failed to load users for this role.');
+//         }
+//     });
+// });
+
     }
 });

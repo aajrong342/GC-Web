@@ -55,8 +55,13 @@ User roles assigned to clients.
         {{#each clientRoles}}
             <tr class="tb-gray-row">
                 <td>
-                    <button class="tb-button-action edit"><i class="fa-solid fa-pencil"></i></button>
-                    <button class="tb-button-action delete"><i class="fa-solid fa-trash"></i></button>
+                    <button class="tb-button-action edit" data-role-id="{{role_id}}" data-role-name="{{role_name}}">
+                        <i class="fa-solid fa-pencil"></i>
+                    </button>
+                    <button class="tb-button-action delete" data-role-id="{{role_id}}">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+
                 </td>
                 <td>{{role_id}}</td>
                 <td>{{role_name}}</td>

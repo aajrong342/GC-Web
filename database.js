@@ -296,9 +296,22 @@ export async function getOrgRoles() {
     `);
     return rows;
 }
+export async function updateRoleName(role_id, newName) {
+    await sql.query(
+        `UPDATE user_roles SET role_name = ? WHERE role_id = ?`,
+        [newName, role_id]
+    );
+}
+
+export async function deleteRole(role_id) {
+    await sql.query(
+        `DELETE FROM user_roles WHERE role_id = ?`,
+        [role_id]
+    );
+}
 
 // Create new application (no application_id needed as trigger handles it)
-export async function createApplication(role_id, lastName, firstName, email, contactNo, companyName, verificationDoc) {
+export async function createApplication(role_id, lastName,firstName, email, contactNo, companyName, verificationDoc) {
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     
     // Insert new application with pending status
