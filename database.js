@@ -846,6 +846,29 @@ export async function createEditEntry(entryId, editorId, remarks) {
     DATA EDITING (NEW VERSION)
 --------------------------------------- */
 
+// Create revision log
+export async function createRevisionEntry(data_entry_id, user_id, action, comment) {
+    const result = await sql.query(`
+        INSERT INTO greencycle.data_entry_revision_log (data_entry_id, user_id, action, comment)
+        VALUES (?, ?, ?, ?)
+    `, [data_entry_id, user_id, action, comment])
+    
+    // Return new object if successful
+    const id = result[0].insertId
+    return id
+}
+
+// Update current log ID for data entry
+export async function updateCurrentLog(dataId, newLogId) {
+    await sql.query(`
+        UPDATE greencycle.data_entry
+        SET current_log_id = ?
+        WHERE data_entry_id = ?
+    `, [newLogId, dataId], function (err, result) {
+        if (err) throw err;
+        console.log(result.affectedRows + " record(s) updated");
+    })
+}
 
 /* ---------------------------------------
     DATA AGGREGATION (NEW VERSION)

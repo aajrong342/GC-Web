@@ -48,7 +48,9 @@ import {
   fetchCoordinates,
   createLocationEntry,
   removeUserRole,
-  updateUserRole
+  updateUserRole,
+  createRevisionEntry,
+  updateCurrentLog
 } from './database.js'
 
 // File Upload
@@ -2061,7 +2063,11 @@ app.patch('/api/data/:id/status', async (req, res) => {
 
     }
     else if(status === 'Needs Revision') {
-      await createEditEntry(id, reviewedBy, `Needs Revision: ${rejectionReason}`)
+      // Insert into data revision log
+      const revisionId = await createRevisionEntry(id, reviewedBy, 'Marked for Revision', rejectionReason)
+
+      // Update current revision
+      await updateCurrentLog(id, revisionId)
     }
 
     res.json({ 
