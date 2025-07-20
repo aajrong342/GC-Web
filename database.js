@@ -842,37 +842,10 @@ export async function createEditEntry(entryId, editorId, remarks) {
     return getUserById(id)
 }
 
-export async function getEditHistory(entryId) {
-    const [result] = await sql.query(`
-        SELECT u.lastname, u.firstname, eh.datetime, eh.remarks
-        FROM greencycle.data_edit_history eh
-        JOIN greencycle.user u ON u.user_id = eh.user_id
-        WHERE eh.data_entry_id = ?
-        ORDER BY eh.datetime DESC
-    `, [entryId])
-    return result // important, to not return an array
-}
+/* ---------------------------------------
+    DATA EDITING (NEW VERSION)
+--------------------------------------- */
 
-export async function getLatestEdit(entryId) {
-    const [result] = await sql.query(`
-        SELECT datetime
-        FROM greencycle.data_edit_history
-        WHERE data_entry_id = ?
-        ORDER BY datetime DESC
-        LIMIT 1
-    `, [entryId])
-    return result // important, to not return an array
-}
-
-// Retrieve newest data entry (upon creation)
-export async function getLatestDataEntry() {
-    const [result] = await sql.query(`
-        SELECT data_entry_id FROM data_entry 
-        ORDER BY data_entry_id DESC 
-        LIMIT 1
-    `)
-    return result // important, to not return an array
-}
 
 /* ---------------------------------------
     DATA AGGREGATION (NEW VERSION)

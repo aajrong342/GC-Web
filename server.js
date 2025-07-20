@@ -27,10 +27,7 @@ import {
   getDataForReview,
   getAllTypes,
   wrongPassword,
-  getEditHistory,
-  getLatestEdit,
   createEditEntry,
-  getLatestDataEntry,
   getPendingApplicationCount,
   getDataForReviewCount,
   hashPassword,
@@ -1015,20 +1012,6 @@ app.get('/dashboard/data/review/:id', async (req, res) => {
   })
 })
 
-// View data entry edit history
-app.get('/dashboard/data/:id/history', async (req, res) => {
-  const entryId = req.params.id
-  const wasteGen = await getWasteGenById(entryId)
-  const editPointers = await getEditHistory(entryId)
-
-  res.render('dashboard/view-edit-history', {
-    layout: 'dashboard',
-    title: `${wasteGen.title} (Edit History) | GC Dashboard`,
-    wasteGen,
-    editPointers
-  })
-})
-
 // View one data entry
 app.get('/dashboard/data/:id', async (req, res) => {
   const id = req.params.id;
@@ -1042,10 +1025,6 @@ app.get('/dashboard/data/:id', async (req, res) => {
   if (!coords) {
     console.log('ERROR: Location not found.');
   }
-
-  // Latest edit entry
-  let latestEdit = await getLatestEdit(id);
-  latestEdit = latestEdit.length > 0 ? latestEdit[0].datetime : '';
 
   // Create waste map
   const wasteMap = {};
@@ -1197,7 +1176,6 @@ app.get('/dashboard/data/:id', async (req, res) => {
     summaryPieData: JSON.stringify(summaryData),
     detailedPieData: JSON.stringify(detailedData),
     legendData,
-    latestEdit,
     sectorBarData: JSON.stringify(sectorBarData),
     sectorPieData: JSON.stringify(sectorPieData),
     coords: JSON.stringify(coords)
@@ -1514,16 +1492,8 @@ app.post("/api/data/submit-report/manual", async (req, res) => {
       currentUser, title, region, province, municipality, fullLocation, population, per_capita, annual, date_start, date_end, newWasteComp
     );
 
-    // Get ID of new data
-    const idResult = await getLatestDataEntry()
-    const newId = idResult[0].data_entry_id
-
-    // Insert first edit history entry
-    const result = await createEditEntry(newId, currentUser, 'Data entry submitted')
-
     res.status(200).json({
-        message: "Report submitted successfully",
-        reportResult: result,
+      message: "Report submitted successfully"
     });
 
   } catch (error) {
@@ -1599,16 +1569,8 @@ app.post("/api/data/submit-report/upload", async (req, res) => {
       currentUser, title, region, province, municipality, fullLocation, population, per_capita, annual, date_start, date_end, wasteComposition
     );
 
-    // Get ID of new data
-    const idResult = await getLatestDataEntry()
-    const newId = idResult[0].data_entry_id
-
-    // Insert first edit history entry
-    const result = await createEditEntry(newId, currentUser, 'Data entry submitted')
-
     res.status(200).json({
-        message: "Report submitted successfully",
-        reportResult: result,
+        message: "Report submitted successfully"
     });
 
   } catch (error) {
@@ -2083,8 +2045,6 @@ app.patch('/api/data/:id/status', async (req, res) => {
     let result
     
     if(status === 'Approved') {
-      await createEditEntry(id, reviewedBy, 'Approved data entry')
-
       // Retrieve entry location name
       const locationName = await getEntryLocationName(id)
 
