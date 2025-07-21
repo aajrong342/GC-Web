@@ -985,6 +985,91 @@ export async function getAvgWasteCompositionWithFilters(title, locationCode, nam
     const [result] = await sql.query(query, params);
     return result; // important: single object, not array
 }
+export async function getWasteComplianceStatus(dataEntryId) {
+  const [rows] = await sql.query(`
+    SELECT
+        ws.name AS supertype_name,
+        cq.quota_weight,
+        COALESCE(SUM(wc.waste_amount), 0) AS total_collected_weight,
+        CASE
+            WHEN COALESCE(SUM(wc.waste_amount), 0) >= cq.quota_weight THEN 'Compliant'
+            ELSE 'Non-Compliant'
+        END AS compliance_status
+    FROM compliance_quotas cq
+    JOIN waste_supertype ws ON cq.waste_supertype_id = ws.id
+    LEFT JOIN waste_type wt ON wt.supertype_id = ws.id
+    LEFT JOIN data_waste_composition wc ON wc.type_id = wt.id
+    LEFT JOIN data_entry de ON wc.data_entry_id = de.data_entry_id
+    WHERE de.data_entry_id = ?
+    GROUP BY ws.id, cq.quota_weight
+  `, [dataEntryId]);
+
+  return rows;
+}
+
+export async function getWasteComplianceStatusFromSummary(title, region, province, locationCode, author, company, startDate, endDate) {
+  const [rows] = await sql.query(`
+    WITH matching_entries AS (
+      SELECT DISTINCT de.data_entry_id
+      FROM data_entry de
+      JOIN user u ON de.user_id = u.user_id
+      WHERE de.status = 'Approved'
+        ${title ? 'AND de.title LIKE ?' : ''}
+        ${locationCode ? `
+          AND (
+            de.region_id = ? OR 
+            de.province_id = ? OR 
+            de.municipality_id = ?
+          )` : ''}
+        ${author ? 'AND CONCAT(u.firstname, " ", u.lastname) LIKE ?' : ''}
+        ${company ? 'AND u.company_name LIKE ?' : ''}
+        ${startDate ? 'AND de.collection_start >= ?' : ''}
+        ${endDate ? 'AND de.collection_end <= ?' : ''}
+    ),
+    entry_count AS (
+      SELECT COUNT(*) AS total_entries FROM matching_entries
+    ),
+    waste_totals AS (
+      SELECT
+        wt.supertype_id,
+        SUM(wc.waste_amount) AS total_collected_weight
+      FROM data_waste_composition wc
+      JOIN waste_type wt ON wc.type_id = wt.id
+      WHERE wc.data_entry_id IN (SELECT data_entry_id FROM matching_entries)
+      GROUP BY wt.supertype_id
+    )
+    SELECT
+      ws.name AS supertype_name,
+      cq.quota_weight * ec.total_entries AS quota_weight,
+      COALESCE(wt.total_collected_weight, 0) AS total_collected_weight,
+      CASE
+        WHEN COALESCE(wt.total_collected_weight, 0) >= cq.quota_weight * ec.total_entries THEN 'Compliant'
+        ELSE 'Non-Compliant'
+      END AS compliance_status,
+      ec.total_entries AS entry_count
+    FROM compliance_quotas cq
+    JOIN waste_supertype ws ON cq.waste_supertype_id = ws.id
+    JOIN entry_count ec ON 1=1
+    LEFT JOIN waste_totals wt ON wt.supertype_id = ws.id
+  `, [
+    ...(title ? [`%${title}%`] : []),
+    ...(locationCode ? [locationCode, locationCode, locationCode] : []),
+    ...(author ? [`%${author}%`] : []),
+    ...(company ? [`%${company}%`] : []),
+    ...(startDate ? [startDate] : []),
+    ...(endDate ? [endDate] : [])
+  ]);
+
+  if (rows.length > 0) {
+    console.log(`✅ Matching approved entries count: ${rows[0].entry_count}`);
+  } else {
+    console.log(`❌ No approved matching entries`);
+  }
+
+  return rows;
+}
+
+
 
 /* ---------------------------------------
     CONTROL PANEL

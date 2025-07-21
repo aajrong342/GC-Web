@@ -51,7 +51,9 @@ import {
   fetchCoordinates,
   createLocationEntry,
   removeUserRole,
-  updateUserRole
+  updateUserRole,
+  getWasteComplianceStatus,
+  getWasteComplianceStatusFromSummary
 } from './database.js'
 
 // File Upload
@@ -446,7 +448,7 @@ app.get('/dashboard/data/summary', async (req, res, next) => {
       /* ------ LOCATION NAME ------ */
       // Use the most specific locationCode available
       const locationCode = municipality || province || region || null;
-
+      const compliances = await getWasteComplianceStatusFromSummary(title, region, province, locationCode, author, company, startDate, endDate);      
       // Prepare PSGC data for location names
       const psgcRegions = await PSGCResource.getRegions()
       const psgcProvinces = await PSGCResource.getProvinces()
@@ -465,7 +467,7 @@ app.get('/dashboard/data/summary', async (req, res, next) => {
       // Initialize waste comp
       const sectors = await getSectors()
       const supertypes = await getAllTypes()
-      const avgData = await getAvgWasteCompositionWithFilters(title, locationCode, author, company, startDate, endDate)
+      const avgData = await getAvgWasteCompositionWithFilters(title, locationCode, author, company, startDate, endDate);
 
       /* ------ DATA COORDS ------ */
       const coords = await getFilteredDataCoords(title, locationCode, author, company, startDate, endDate)
@@ -601,6 +603,7 @@ app.get('/dashboard/data/summary', async (req, res, next) => {
         summaryPieData: JSON.stringify(summaryData),
         detailedPieData: JSON.stringify(detailedData),
         legendData,
+        compliances,
         sectorBarData: JSON.stringify(sectorBarData),
         sectorPieData: JSON.stringify(sectorPieData),
         regionName, provinceName, municipalityName,
@@ -1036,6 +1039,7 @@ app.get('/dashboard/data/:id', async (req, res) => {
   const sectors = await getSectors();
   const supertypes = await getAllTypes();
   const wasteComp = await getWasteCompById(id);
+  const compliance = await getWasteComplianceStatus(id);
 
   // Retrieve location coordinates
   const coords = await getCoordinates(wasteGen.location_name)
@@ -1191,6 +1195,7 @@ app.get('/dashboard/data/:id', async (req, res) => {
     current_all: true,
     sectors,
     supertypes: Object.values(supertypeMap),
+    supertypeDemo: JSON.stringify(supertypeMap),
     sectorTotals,
     grandTotal: grandTotal.toFixed(3),
     barChartData: JSON.stringify(barChartData),
@@ -1198,12 +1203,12 @@ app.get('/dashboard/data/:id', async (req, res) => {
     detailedPieData: JSON.stringify(detailedData),
     legendData,
     latestEdit,
+    compliance,
     sectorBarData: JSON.stringify(sectorBarData),
     sectorPieData: JSON.stringify(sectorPieData),
     coords: JSON.stringify(coords)
   });
 });
-
 // Get one user from ID (user profile)
 app.get('/dashboard/profile', async (req, res) => {
   res.render('dashboard/user-profile', {

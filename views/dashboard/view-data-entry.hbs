@@ -34,7 +34,7 @@
           </tr>
         </table>
       </div>
-
+      
       <!-- Collection Info -->
       <div class="form-section">
         <h3><i class="fas fa-calendar-alt"></i> Collection Info</h3>
@@ -50,6 +50,27 @@
         </table>
       </div>
     </div>
+<div class="form-section">
+  <h2>Compliance Status</h2>
+  <table class="user-profile">
+    <tr>
+      <th>Waste Category</th>
+      <th>Collected</th>
+      <th>Quota</th>
+      <th>Status</th>
+    </tr>
+    {{#each compliance}}
+      <tr>
+        <td>{{supertype_name}}</td>
+        <td>{{total_collected_weight}} kg</td>
+        <td>{{quota_weight}} kg</td>
+        <td>{{compliance_status}}</td>
+      </tr>
+    {{/each}}
+  </table>
+</div>
+
+
 
     <!-- Waste Generation Info -->
     <div class="form-section">
@@ -259,6 +280,8 @@
 
 <!-- Table filtering script -->
 <script>
+const supertypeDemo = {{{supertypeDemo}}}
+console.log(supertypeDemo)
 
 // Supertype filter
 const searchInput = document.getElementById('tbl-search');
