@@ -758,12 +758,12 @@ export async function getCoordinates(locationName) {
 --------------------------------------- */
 
 // Change status of data entry
-export async function updateDataStatus(dataId, status, rejectionReason, reviewedBy) {
+export async function updateDataStatus(dataId, status) {
     await sql.query(`
         UPDATE greencycle.data_entry
-        SET status = ?, rejection_reason = ?, reviewed_by = ?
+        SET status = ?
         WHERE data_entry_id = ?
-    `, [status, rejectionReason, reviewedBy, dataId], function (err, result) {
+    `, [status, dataId], function (err, result) {
         if (err) throw err;
         console.log(result.affectedRows + " record(s) updated");
     })

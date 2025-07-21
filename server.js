@@ -2079,8 +2079,8 @@ app.put('/api/applications/:id/notes', async (req, res) => {
 
 app.patch('/api/data/:id/status', async (req, res) => {
   try {
-    const id = req.params.id
-    const { status, rejectionReason, reviewedBy } = req.body
+    const entryId = req.params.id
+    const { status, reviewedBy, comment } = req.body
     
     // Basic validation
     if (!status) {
@@ -2088,14 +2088,14 @@ app.patch('/api/data/:id/status', async (req, res) => {
     }
     
     // Update data entry
-    await updateDataStatus(id, status, rejectionReason || null, reviewedBy)
+    await updateDataStatus(entryId, status)
     
     // Update data entry edit history
     let result
     
     if(status === 'Approved') {
       // Retrieve entry location name
-      const locationName = await getEntryLocationName(id)
+      const locationName = await getEntryLocationName(entryId)
 
       // First, make sure entry's location exists in db
       const coords = await getCoordinates(locationName)
@@ -2111,15 +2111,15 @@ app.patch('/api/data/:id/status', async (req, res) => {
     }
     else if(status === 'Needs Revision') {
       // Insert into data revision log
-      const revisionId = await createRevisionEntry(id, reviewedBy, 'Marked for Revision', rejectionReason)
+      const revisionId = await createRevisionEntry(entryId, reviewedBy, 'Marked for Revision', comment)
 
       // Update current revision
-      await updateCurrentLog(id, revisionId)
+      await updateCurrentLog(entryId, revisionId)
     }
 
     res.json({ 
       success: true,
-      message: `Application ${id} status updated to ${status}`,
+      message: `Application ${entryId} status updated to ${status}`,
       data: result
     })
   } catch (error) {

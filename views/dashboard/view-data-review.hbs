@@ -342,10 +342,10 @@ function updateEntry(status) {
                 }
             })
     } else { // Rejected
-        const rejectionReason = document.getElementById('reject-notes').value
+        const comment = document.getElementById('reject-notes').value
 
         // Send request to server
-        reviewApi('Needs Revision', rejectionReason, reviewedBy)
+        reviewApi('Needs Revision', comment, reviewedBy)
             .then(response => {
                 if (response.success) {                
                     // Pop up to show success
@@ -358,7 +358,7 @@ function updateEntry(status) {
     }
 }
 
-async function reviewApi(status, rejectionReason, reviewedBy) {
+async function reviewApi(status, comment, reviewedBy) {
     try {
         const response = await fetch(`/api/data/${entryId}/status`, {
             method: 'PATCH',
@@ -367,7 +367,7 @@ async function reviewApi(status, rejectionReason, reviewedBy) {
             },
             body: JSON.stringify({
                 status,
-                rejectionReason,
+                comment,
                 reviewedBy
             })
         });
