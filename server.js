@@ -764,6 +764,15 @@ app.get('/dashboard/data/wip/:id', async (req, res) => {
       wasteMap[row.type_id][row.sector_id] = row.waste_amount;
   }
 
+  // If status is 'Needs Revision', get revision logs and count
+  let revisionLogs = {}
+  let revisionCount = 0
+
+  if(wasteGen.status === 'Needs Revision') {
+    revisionLogs = await getRevisionEntries(entryId)
+    revisionCount = await getRevisionEntryCount(entryId)
+  }
+
   /* -------- TABLE INITIALIZATION -------- */
 
   // Group types under supertypes
@@ -860,7 +869,9 @@ app.get('/dashboard/data/wip/:id', async (req, res) => {
     supertypes: Object.values(supertypeMap),
     sectorTotals,
     grandTotal: grandTotal.toFixed(3),
-    entryId
+    entryId,
+    revisionCount,
+    revisionLogs
   })
 })
 
@@ -1160,6 +1171,7 @@ app.get('/dashboard/data/:id', async (req, res) => {
     current_all: true,
     sectors,
     supertypes: Object.values(supertypeMap),
+    supertypeDemo: JSON.stringify(supertypeMap),
     sectorTotals,
     grandTotal: grandTotal.toFixed(3),
     barChartData: JSON.stringify(barChartData),
@@ -1217,6 +1229,58 @@ app.get('/dashboard/submit-report', async (req, res) => {
   })
 })
 
+// Data editing form
+app.get('/dashboard/edit-report/:id', async (req, res) => {
+  const sectors = await getSectors()
+  const supertypes = await getWasteSupertypes()
+  const types = await getWasteTypes()
+
+  // Map types to supertypes
+  for (const supertype of supertypes) {
+    supertype.types = types.filter(t => t.supertype_id === supertype.id)
+  }
+
+  const id = req.params.id
+  const wasteGen = await getWasteGenById(id)
+  const wasteComp = await getWasteCompById(id)
+
+  // Location dropdown prefill
+  const prefill = {
+    region: wasteGen.region_id,
+    province: wasteGen.province_id,
+    municipality: wasteGen.municipality_id
+  }
+
+  // Format to 'YYYY-MM-DD'
+  function formatDateOnly(isoString) {
+    return isoString ? new Date(isoString).toISOString().slice(0, 10) : '';
+  }
+
+  wasteGen.collection_start = formatDateOnly(wasteGen.collection_start)
+  wasteGen.collection_end = formatDateOnly(wasteGen.collection_end)
+
+  // Map waste comp values for table prefill
+  const wasteMap = {};
+  for (const entry of wasteComp) {
+    const key = `${entry.sector_id}-${entry.type_id}`;
+    wasteMap[key] = entry.waste_amount;
+  }
+
+  console.log(wasteMap)
+
+  res.render('dashboard/data-edit', {
+    layout: 'dashboard',
+    title: 'Edit Data Entry | GC Dashboard',
+    current_user_report: true,
+    sectors,
+    supertypes,
+    types,
+    wasteGen,
+    prefill,
+    wasteMap
+  })
+})
+
 // Manual form confirmation
 app.post('/dashboard/submit-report/form/confirm', async (req, res) => {
   const rawData = req.body.jsonData
@@ -1233,10 +1297,7 @@ app.post('/dashboard/submit-report/form/confirm', async (req, res) => {
 
   for (const row of allTypes) {
     const {
-      supertype_id,
-      supertype_name,
-      type_id,
-      type_name
+      supertype_id, supertype_name, type_id, type_name
     } = row;
 
     // Initialize supertype if not already in map
