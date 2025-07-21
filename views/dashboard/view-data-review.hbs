@@ -1,19 +1,30 @@
 <!-- Approval window -->
-<div class="form-section">
+<div class="form-section" style="background-color: #f5fff9;">
     <center>
-        <h3 style="font-weight: normal;">Approve data entry?</h3>
+        <!-- Approve buttons (for review) -->
+        {{#ifNotEquals wasteGen.status 'Needs Revision'}}
+            <h3 style="font-weight: normal;">Approve data entry?</h3>
 
-        <button type="button" class="review-approve" onclick="showApprove()">
-            <i class="fa-solid fa-thumbs-up"></i>&nbsp; Approve
-        </button>&emsp;
+            <button type="button" class="review-approve" onclick="showApprove()">
+                <i class="fa-solid fa-thumbs-up"></i>&nbsp; Approve
+            </button>&emsp;
 
-        <button type="button" class="review-reject" onclick="showReject()">
-            <i class="fa-solid fa-pencil"></i>&nbsp; Suggest Edits
-        </button>
+            <button type="button" class="review-reject" onclick="showReject()">
+                <i class="fa-solid fa-pencil"></i>&nbsp; Suggest Edits
+            </button><br><br>
+        {{/ifNotEquals}}
+
+        <!-- Show if entry is on 'Needs Revision' status -->
+        {{#ifEquals wasteGen.status 'Needs Revision'}}
+            <div class="form-section waiting-card">
+                This entry was <b>marked for revision</b>.<br>
+                Waiting for changes on submitter's end.
+            </div>
+        {{/ifEquals}}
 
         <!-- If revision entry counts exist, then show revision log -->
         {{#if (gt revisionEntryCount 0)}}
-        <br><br><h3>EDIT HISTORY</h3>
+        <h3>EDIT HISTORY</h3>
             <div class="form-section revision-window">
                 <table>
                     {{#each revisionLogs}}
@@ -470,6 +481,12 @@ dropdown.addEventListener('change', filterTable);
 
 <!-- General style -->
 <style>
+
+.waiting-card {
+    background-color: #d4edda !important;
+    font-size: large;
+    font-style: italic;
+}
 
 .revision-window {
     background-color: lightgoldenrodyellow !important;

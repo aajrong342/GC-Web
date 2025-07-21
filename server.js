@@ -27,7 +27,6 @@ import {
   getDataForReview,
   getAllTypes,
   wrongPassword,
-  createEditEntry,
   getPendingApplicationCount,
   getDataForReviewCount,
   hashPassword,
@@ -52,7 +51,8 @@ import {
   createRevisionEntry,
   updateCurrentLog,
   getRevisionEntryCount,
-  getRevisionEntries
+  getRevisionEntries,
+  updateForm
 } from './database.js'
 
 // File Upload
@@ -1275,7 +1275,8 @@ app.get('/dashboard/edit-report/:id', async (req, res) => {
     types,
     wasteGen,
     prefill,
-    wasteMap
+    wasteMap,
+    dataEntryId: req.params.id
   })
 })
 
@@ -1540,6 +1541,65 @@ app.post("/api/data/submit-report/manual", async (req, res) => {
     await submitForm(
       currentUser, title, region, province, municipality, fullLocation, population, per_capita, annual, date_start, date_end, newWasteComp
     );
+
+    res.status(200).json({
+      message: "Report submitted successfully"
+    });
+
+  } catch (error) {
+    console.error("Error processing report:", error);
+    res.status(500).json({ error: "Failed to submit report" });
+  }
+});
+
+app.post("/api/data/edit-report", async (req, res) => {
+  // Request body
+  const {
+    dataEntryId, title, region, province, municipality, population, per_capita, annual, date_start, date_end, wasteComposition, comment
+  } = req.body;
+
+  // Get current logged in user
+  const currentUser = req.session.user.id
+
+  // Prepare PSGC data for location names
+  const psgcRegions = await PSGCResource.getRegions()
+  const psgcProvinces = await PSGCResource.getProvinces()
+  const psgcMunicipalities = await PSGCResource.getMunicipalities()
+  const psgcCities = await PSGCResource.getCities()
+
+  // Get location names
+  const regionName = getPsgcName(psgcRegions, region)
+  const provinceName = getPsgcName(psgcProvinces, province) || null
+  const municipalityName = getPsgcName(psgcMunicipalities, municipality) || getPsgcName(psgcCities, municipality) || null
+
+  // Set full location name
+  const parts = [municipalityName, provinceName, regionName].filter(Boolean)
+  const fullLocation = parts.join(', ')
+
+  try {
+    // Format waste composition entries for insertion to DB
+    const newWasteComp = wasteComposition.map((entry) => {
+        return {
+          sector_id: entry.sector_id,
+          type_id: entry.type_id,
+          waste_amount: Number(entry.waste_amount) || 0,  // Ensure weight is always a number
+        }
+    }).filter(entry => entry !== null); // Remove any invalid entries
+
+    // Push form data to db
+    await updateForm(
+      dataEntryId, title, region, province, municipality, fullLocation, population, per_capita, annual, date_start, date_end, newWasteComp
+    );
+
+    // Update entry status to Revised
+    await updateDataStatus(dataEntryId, 'Revised')
+
+    // Finally, create new revision entry
+    // Insert into data revision log
+    const revisionId = await createRevisionEntry(dataEntryId, currentUser, 'Resubmitted', comment)
+
+    // Update current revision
+    await updateCurrentLog(dataEntryId, revisionId)
 
     res.status(200).json({
       message: "Report submitted successfully"

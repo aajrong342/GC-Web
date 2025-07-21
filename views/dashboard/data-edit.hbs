@@ -21,6 +21,9 @@
 
 <form id="waste-form" data-prefill-region="{{prefill.region}}" data-prefill-province="{{prefill.province}}" data-prefill-municipality="{{prefill.municipality}}" novalidate>
 
+    <!-- Pass data entry ID to submission JS -->
+    <input type="hidden" name="dataEntryId" value="{{dataEntryId}}">
+
     <!-- Step 1 -->
     <div class="step active" data-step="0">
         <!-- Title Section -->
@@ -150,7 +153,6 @@
             <button type="button" id="modalBtn" class="disabled upload-btn" onclick="showConfirm()">Submit Changes</button>
         </center>
     </div>
-</form>
 
 <!-- Confirm modal -->
 <div id="confirm-modal" class="modal">
@@ -168,10 +170,11 @@
         </button>
     </div>
 </div>
+</form>
 
 <script src="/../js/form-step-edit.js" type="text/javascript"></script>
 <script src="/../js/locations.js" type="text/javascript"></script>
-<script src="/../js/waste-composition.js" type="text/javascript"></script>
+<script src="/../js/waste-composition-edit.js" type="text/javascript"></script>
 
 <!-- Date picker control -->
 <script>
@@ -355,10 +358,6 @@ document.addEventListener('DOMContentLoaded', function() {
             confirmModal.style.display = "none";
         }
     }
-
-    document.getElementById('confirm-yes').addEventListener('click', function () {
-      document.getElementById('return-to-form').submit();
-    });
 })
 
 function showConfirm() {

@@ -829,20 +829,6 @@ export function getPsgcName(locationSet, code) {
 }
 
 /* ---------------------------------------
-    DATA EDITING HISTORY
---------------------------------------- */
-export async function createEditEntry(entryId, editorId, remarks) {
-    const result = await sql.query(`
-        INSERT INTO greencycle.data_edit_history (data_entry_id, user_id, remarks)
-        VALUES (?, ?, ?)
-    `, [entryId, editorId, remarks])
-    
-    // Return new object if successful
-    const id = result[0].insertId
-    return getUserById(id)
-}
-
-/* ---------------------------------------
     DATA EDITING (NEW VERSION)
 --------------------------------------- */
 
@@ -892,6 +878,55 @@ export async function getRevisionEntries(entryId) {
     `)
 
     return result
+}
+
+// Update data entry
+export async function updateForm(data_entry_id, title, region_id, province_id, municipality_id, location_name, population, per_capita, annual, collection_start, collection_end, wasteComposition) {
+    try {
+        // Update the main data_entry record
+        await sql.query(
+            `UPDATE greencycle.data_entry 
+             SET title = ?, region_id = ?, province_id = ?, municipality_id = ?, location_name = ?, 
+                 population = ?, per_capita = ?, annual = ?, collection_start = ?, collection_end = ?, 
+                 status = 'Pending Review', date_submitted = NOW()
+             WHERE data_entry_id = ?`,
+            [title, region_id, province_id, municipality_id, location_name, population, per_capita, annual, collection_start, collection_end, data_entry_id]
+        );
+
+        // Safer: update existing or insert new waste composition records
+        if (wasteComposition && wasteComposition.length > 0) {
+            for (const item of wasteComposition) {
+                const [existing] = await sql.query(
+                    `SELECT id FROM data_waste_composition 
+                     WHERE data_entry_id = ? AND sector_id = ? AND type_id = ?`,
+                    [data_entry_id, item.sector_id, item.type_id]
+                );
+
+                if (existing.length > 0) {
+                    // Entry exists — update it
+                    await sql.query(
+                        `UPDATE data_waste_composition 
+                         SET waste_amount = ? 
+                         WHERE data_entry_id = ? AND sector_id = ? AND type_id = ?`,
+                        [item.waste_amount, data_entry_id, item.sector_id, item.type_id]
+                    );
+                } else {
+                    // Entry does not exist — insert it
+                    await sql.query(
+                        `INSERT INTO data_waste_composition (data_entry_id, sector_id, type_id, waste_amount)
+                         VALUES (?, ?, ?, ?)`,
+                        [data_entry_id, item.sector_id, item.type_id, item.waste_amount]
+                    );
+                }
+            }
+        }
+
+        return { success: true, message: "Form updated successfully!" };
+
+    } catch (error) {
+        console.error("Database error:", error);
+        throw new Error("Error updating data in the database.");
+    }
 }
 
 /* ---------------------------------------
