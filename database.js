@@ -676,6 +676,36 @@ export async function getDataForReview(currentUser, status, limit, offset) {
     return result
 }
 
+// Get pending entries (both for Review and Revision)
+export async function getPendingData(currentUser, limit, offset) {
+    const [result] = await sql.query(`
+        SELECT
+            dat.data_entry_id, dat.user_id, dat.title, dat.location_name,
+            u.lastname, u.firstname, u.company_name,
+            dat.region_id, dat.province_id, dat.municipality_id,
+            dat.date_submitted, dat.collection_start, dat.collection_end,
+            dat.status,
+            rl.latest_revision_date
+        FROM data_entry dat
+        JOIN user u ON u.user_id = dat.user_id
+        LEFT JOIN (
+            SELECT data_entry_id, MAX(created_at) AS latest_revision_date
+            FROM data_entry_revision_log
+            GROUP BY data_entry_id
+        ) rl ON rl.data_entry_id = dat.data_entry_id
+        WHERE (dat.status = 'Pending Review' OR dat.status = 'Revised')
+          AND dat.user_id != ?
+        ORDER BY 
+            CASE 
+                WHEN dat.status = 'Pending Review' THEN dat.date_submitted
+                WHEN dat.status = 'Revised' THEN rl.latest_revision_date
+            END DESC
+        LIMIT ? OFFSET ?
+    `, [currentUser, limit, offset])
+
+    return result
+}
+
 // Get *number* of entries to review (for notifications)
 export async function getDataForReviewCount(currentUser, status) {
     const [result] = await sql.query(`

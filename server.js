@@ -52,7 +52,8 @@ import {
   updateCurrentLog,
   getRevisionEntryCount,
   getRevisionEntries,
-  updateForm
+  updateForm,
+  getPendingData
 } from './database.js'
 
 // File Upload
@@ -223,7 +224,11 @@ const loginSetup = async (req, res, next) => {
     } else if (req.session && req.session.user) {
       // Retrieve data from DB (replace with your DB query)
       const pendingApplications = await getPendingApplicationCount()
-      const pendingData = await getDataForReviewCount(req.session.user.id, 'Pending Review')
+
+      // Pending data count = total of 'Pending Review' and 'Revised' entries
+      const pendingCount = await getDataForReviewCount(req.session.user.id, 'Pending Review')
+      const revisedCount = await getDataForReviewCount(req.session.user.id, 'Revised')
+      const pendingData = pendingCount + revisedCount
 
       // Make it available to views and routes
       res.locals.pendingApplications = pendingApplications
@@ -682,11 +687,14 @@ app.get('/dashboard/data/submissions/pending', async (req, res) => {
   const limit = 10;
   const offset = (page - 1) * limit;
 
-  const [data, totalCount, revisionCount] = await Promise.all([
-    getDataForReview(omitUser, 'Pending Review', limit, offset),
-    getDataForReviewCount(omitUser, 'Pending Review'),
-    getDataForReviewCount(omitUser, 'Needs Revision')
-  ]);
+  // Get data and counts
+  const data = await getPendingData(omitUser, limit, offset)
+  let pendingCount = await getDataForReviewCount(omitUser, 'Pending Review')
+  const revisionCount = await getDataForReviewCount(omitUser, 'Needs Revision')
+  const revisedCount = await getDataForReviewCount(omitUser, 'Revised')
+
+  pendingCount += revisedCount
+  const totalCount = pendingCount
 
   // Pagination offset
   const totalPages = Math.ceil(totalCount / limit);
@@ -719,11 +727,14 @@ app.get('/dashboard/data/submissions/revision', async (req, res) => {
   const limit = 10;
   const offset = (page - 1) * limit;
 
-  const [data, totalCount, pendingCount] = await Promise.all([
-    getDataForReview(omitUser, 'Needs Revision', limit, offset),
-    getDataForReviewCount(omitUser, 'Needs Revision'),
-    getDataForReviewCount(omitUser, 'Pending Review')
-  ]);
+  // Get data and counts
+  const data = await getDataForReview(omitUser, 'Needs Revision', limit, offset)
+  let pendingCount = await getDataForReviewCount(omitUser, 'Pending Review')
+  const revisionCount = await getDataForReviewCount(omitUser, 'Needs Revision')
+  const revisedCount = await getDataForReviewCount(omitUser, 'Revised')
+
+  pendingCount += revisedCount
+  const totalCount = revisionCount
 
   // Pagination offset
   const totalPages = Math.ceil(totalCount / limit);

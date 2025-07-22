@@ -486,7 +486,7 @@ select {
     background-color: rgb(255, 106, 0);
 }
 .stat-revised {
-    background-color: #d7fc03;
+    background-color: #FFD54F;
 }
 
 .data-entry-header {
@@ -766,7 +766,7 @@ select {
     color: white;
     border-radius: 50%;
     padding: 3px 7px;
-    font-size: x-small;
+    font-size: small;
 }
 
 /* ------ Data Entry Pie Chart ------ */
