@@ -1069,7 +1069,7 @@ export async function getAvgWasteCompositionWithFilters(title, locationCode, nam
 
     const [result] = await sql.query(query, params);
     return result; // important: single object, not array
-}
+} 
 export async function getWasteComplianceStatus(dataEntryId) {
   const [rows] = await sql.query(`
     SELECT
@@ -1154,6 +1154,49 @@ export async function getWasteComplianceStatusFromSummary(title, region, provinc
   return rows;
 }
 
+export async function getUserComplianceSummary() {
+  const [rows] = await sql.query(`
+    WITH approved_entries AS (
+      SELECT de.data_entry_id, de.user_id
+      FROM data_entry de
+      WHERE de.status = 'Approved'
+    ),
+    entry_count AS (
+      SELECT user_id, COUNT(*) AS entry_count
+      FROM approved_entries
+      GROUP BY user_id
+    ),
+    waste_collected AS (
+      SELECT 
+        ae.user_id,
+        wt.supertype_id,
+        SUM(wc.waste_amount) AS total_collected_weight
+      FROM data_waste_composition wc
+      JOIN approved_entries ae ON wc.data_entry_id = ae.data_entry_id
+      JOIN waste_type wt ON wc.type_id = wt.id
+      GROUP BY ae.user_id, wt.supertype_id
+    )
+    SELECT
+      u.firstname,
+      u.lastname,
+      u.company_name,
+      ws.name AS supertype_name,
+      cq.quota_weight * ec.entry_count AS quota_weight,
+      COALESCE(wc.total_collected_weight, 0) AS total_collected_weight,
+      CASE
+        WHEN COALESCE(wc.total_collected_weight, 0) >= cq.quota_weight * ec.entry_count THEN 'Compliant'
+        ELSE 'Non-Compliant'
+      END AS compliance_status
+    FROM user u
+    JOIN entry_count ec ON u.user_id = ec.user_id
+    JOIN compliance_quotas cq ON 1=1
+    JOIN waste_supertype ws ON cq.waste_supertype_id = ws.id
+    LEFT JOIN waste_collected wc ON wc.user_id = u.user_id AND wc.supertype_id = ws.id
+    ORDER BY u.lastname ASC, ws.id ASC
+  `);
+
+  return rows;
+}
 
 
 /* ---------------------------------------

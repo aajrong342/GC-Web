@@ -55,7 +55,8 @@ import {
   getRevisionEntryCount,
   getRevisionEntries,
   updateForm,
-  getPendingData
+  getPendingData,
+  getUserComplianceSummary
 } from './database.js'
 
 // File Upload
@@ -251,10 +252,22 @@ app.use('/control-panel', loginSetup)
     HANDLEBARS
 --------------------------------------- */
 app.engine('hbs', engine({
-  extname: ".hbs",
-  layoutsDir: 'views/layouts'  // Explicitly set layouts directory
-}))
-app.set('view engine', 'hbs')
+  extname: 'hbs',
+  defaultLayout: 'main',
+  helpers: {
+    ifEquals: function (arg1, arg2, options) {
+      // console.log(`[HELPER] ifEquals: ${arg1} === ${arg2}`);
+      return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
+    },
+    uppercase: function (str) {
+      // console.log(`[HELPER] uppercase: ${str}`);
+      return str ? str.toUpperCase() : '';
+    }
+  }
+}));
+
+app.set('view engine', 'hbs');
+app.set('views', './views');
 app.set('views', 'views') // set 'views' folder as HBS view directory
 
 /* ---------------------------------------
@@ -1193,7 +1206,6 @@ app.get('/dashboard/data/:id', async (req, res) => {
     summaryPieData: JSON.stringify(summaryData),
     detailedPieData: JSON.stringify(detailedData),
     legendData,
-    latestEdit,
     compliance,
     sectorBarData: JSON.stringify(sectorBarData),
     sectorPieData: JSON.stringify(sectorPieData),
@@ -1805,17 +1817,19 @@ app.get('/control-panel/entry-statistics', async (req, res) => {
   const latestSubmissions = await getLatestSubmissions(3)
   const topRegions = await getTopReportingRegions(5)
   const monthlySubmissions = await getMonthlySubmissions()
+  const data = await getUserComplianceSummary()
 
   res.render('control-panel/entry-stats', {
-    layout: 'control-panel',
-    title: 'Data Entry Statistics | GC Control Panel',
-    current_stats: true,
-    entryCount,
-    contributors,
-    latestSubmissions,
-    topRegions,
-    monthlySubmissions: JSON.stringify(monthlySubmissions)
-  })
+  layout: 'control-panel',
+  title: 'Data Entry Statistics | GC Control Panel',
+  current_stats: true,
+  entryCount,
+  contributors,
+  latestSubmissions,
+  topRegions,
+  monthlySubmissions: JSON.stringify(monthlySubmissions),
+  data// 👈 Add this
+});
 })
 
 // Fetch top contributors (entry stats)
