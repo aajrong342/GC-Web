@@ -1,0 +1,139 @@
+<h1 class="notif-title">Notifications</h1>
+
+<div class="form-section">
+    {{#if notifications.length}}
+        <ul class="notif-list">
+            {{#each notifications}}
+            <li class="notif-item {{#unless is_read}}unread{{/unless}}">
+                <div class="notif-content">
+                <p class="notif-message">{{message}}</p>
+                {{#if link}}
+                    <a href="{{link}}" class="notif-link">View Details</a>
+                {{/if}}
+                </div>
+                <form action="/notifications/read/{{id}}" method="POST" class="mark-read-form">
+                {{#unless is_read}}
+                    <button type="submit" class="mark-read-btn">Mark as Read</button>
+                {{else}}
+                    <span class="notif-read-label">Read</span>
+                {{/unless}}
+                </form>
+                <span class="notif-date" datetime="{{created_at}}">{{created_at}}</span>
+            </li>
+            {{/each}}
+        </ul>
+    {{else}}
+        <p class="notif-empty">You have no notifications.</p>
+    {{/if}}
+</div>
+
+<!-- Time ago JS (for displaying relative time) -->
+<script src="https://unpkg.com/timeago.js@4.0.2/dist/timeago.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    timeago.render(document.querySelectorAll('.notif-date'));
+  });
+</script>
+
+<!-- Notif styles -->
+<style>
+
+.form-section {
+  background-color: #fdfdfd;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  margin: 1rem auto;
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
+}
+
+.notif-empty {
+    font-size: large;
+}
+
+.notif-title {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+  color: #2f4858;
+}
+
+.notif-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.notif-item {
+  background-color: #f8f9fa;
+  border-left: 4px solid #ccc;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.notif-item.unread {
+  border-left-color: #007bff;
+  background-color: #e7f1ff;
+}
+
+.notif-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.notif-message {
+  font-size: 1rem;
+  margin: 0;
+  color: #333;
+  flex-grow: 1;
+}
+
+.notif-link {
+  margin-left: 1rem;
+  font-size: 0.95rem;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.notif-link:hover {
+  text-decoration: underline;
+}
+
+.mark-read-form {
+  margin-top: 0.5rem;
+}
+
+.mark-read-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.mark-read-btn:hover {
+  background-color: #218838;
+}
+
+.notif-read-label {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.notif-date {
+  font-size: 0.75rem;
+  color: #888;
+  align-self: flex-end;
+}
+
+</style>

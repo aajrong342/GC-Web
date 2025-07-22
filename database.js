@@ -1146,15 +1146,13 @@ export async function getWasteComplianceStatusFromSummary(title, region, provinc
   ]);
 
   if (rows.length > 0) {
-    console.log(`✅ Matching approved entries count: ${rows[0].entry_count}`);
+    console.log(`Matching approved entries count: ${rows[0].entry_count}`);
   } else {
-    console.log(`❌ No approved matching entries`);
+    console.log(`No approved matching entries`);
   }
 
   return rows;
 }
-
-
 
 /* ---------------------------------------
     CONTROL PANEL
@@ -1281,4 +1279,51 @@ export async function getMonthlySubmissions() {
             tension: 0,
         }]
     };
+}
+
+/* ---------------------------------------
+    NOTIFICATIONS
+--------------------------------------- */
+
+// Create notification for user
+export async function createNotification(targetUserId, message, link) {
+    const result = await sql.query(`
+        INSERT INTO notifications (user_id, message, link)
+        VALUES (?, ?, ?)
+    `, [targetUserId, message, link])
+    
+    // Return new object if successful
+    const id = result[0].insertId
+    return id
+}
+
+// Get notifications for user
+export async function getNotifications(userId) {
+    const [result] = await sql.query(`
+        SELECT * FROM greencycle.notifications
+        WHERE user_id = ?
+        ORDER BY created_at DESC`, [userId])
+    return result
+}
+
+// Count notifs for user
+export async function getUnreadNotifCount(userId) {
+    const [result] = await sql.query(`
+        SELECT COUNT(id)
+        FROM greencycle.notifications
+        WHERE user_id = ? AND is_read = 0
+    `, [userId])
+    return result[0]['COUNT(id)']
+}
+
+// Set notif as read
+export async function updateNotifRead(notifId, isRead) {
+    await sql.query(`
+        UPDATE greencycle.notifications
+        SET is_read = ?
+        WHERE id = ?
+    `, [isRead, notifId], function (err, result) {
+        if (err) throw err;
+        console.log(result.affectedRows + " record(s) updated");
+    })
 }

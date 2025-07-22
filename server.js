@@ -55,7 +55,9 @@ import {
   getRevisionEntryCount,
   getRevisionEntries,
   updateForm,
-  getPendingData
+  getPendingData,
+  getNotifications,
+  getUnreadNotifCount
 } from './database.js'
 
 // File Upload
@@ -232,9 +234,13 @@ const loginSetup = async (req, res, next) => {
       const revisedCount = await getDataForReviewCount(req.session.user.id, 'Revised')
       const pendingData = pendingCount + revisedCount
 
+      // Retrieve user's current notif count
+      const notifCount = await getUnreadNotifCount(req.session.user.id)
+
       // Make it available to views and routes
       res.locals.pendingApplications = pendingApplications
       res.locals.pendingData = pendingData
+      res.locals.notifCount = notifCount
     }
 
     next();
@@ -424,7 +430,7 @@ app.get('/dashboard', (req, res) => {
   })
 })
 
-// Dashboard home page
+// Waste guide
 app.get('/dashboard/guide', (req, res) => {
   res.render('dashboard/guide', {
     layout: 'dashboard',
@@ -433,6 +439,20 @@ app.get('/dashboard/guide', (req, res) => {
   })
 })
 
+// User notifs
+app.get('/dashboard/notifications/:id', async (req, res) => {
+  const currentUser = req.params.id
+  const notifications = await getNotifications(currentUser)
+
+  res.render('dashboard/notifications', {
+    layout: 'dashboard',
+    title: 'Notifications | GC Dashboard',
+    current_notifs: true,
+    notifications
+  })
+})
+
+// Display data summary
 app.get('/dashboard/data/summary', async (req, res, next) => {
   // Clean query before proceeding
   const cleanedQuery = {};
