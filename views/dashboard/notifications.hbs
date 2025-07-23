@@ -5,33 +5,52 @@
     <ul class="notif-list">
         {{#each notifications}}
         <!-- Notification item -->
-        <li class="notif-item {{#unless is_read}}unread{{/unless}}">
+        <li class="notif-item {{#unless is_read}}unread{{/unless}}" data-notif-id="{{id}}">
+          <!-- Delete button -->
+          <button class="delete-notif-btn" title="Delete Notification">&times;</button>
+
+          <!-- Main content -->
+          <div class="notif-main-content">
             <div class="notif-content">
               <h3 class="notif-type">{{uppercase message_type}}</h3>
+            </div>
 
-              <!-- Toggle read/unread -->
+            <p class="notif-message">{{{message}}}</p>
+
+            <div style="display: flex;">
+              {{#if link}}
+                <button type="button"
+                  class="link-btn"
+                  data-notif-id="{{id}}"
+                  data-is-read="{{#if is_read}}true{{else}}false{{/if}}"
+                  data-target-link="{{link}}">
+                  <i class="fa-solid fa-paperclip"></i> View Details
+                </button>&nbsp;
+              {{/if}}
+
               <button type="button"
                   class="mark-read-btn"
                   data-notif-id="{{id}}"
                   data-is-read="{{#if is_read}}true{{else}}false{{/if}}">
-                {{#if is_read}}Mark as Unread{{else}}Mark as Read{{/if}}
+                {{#if is_read}}
+                  <i class="fa-solid fa-envelope"></i> Mark as Unread
+                {{else}}
+                  <i class="fa-solid fa-envelope-open"></i> Mark as Read
+                {{/if}}
               </button>
             </div>
-            
-            <p class="notif-message">{{{message}}}</p>
-
-            <!-- Link button -->
-            {{#if link}}
-              <button type="button"
-                class="link-btn"
-                data-notif-id="{{id}}"
-                data-is-read="{{#if is_read}}true{{else}}false{{/if}}"
-                data-target-link="{{link}}">
-                <i class="fa-solid fa-paperclip"></i> View Details
-              </button>
-            {{/if}}
 
             <span class="notif-date" datetime="{{created_at}}">{{created_at}}</span>
+          </div>
+
+          <!-- Delete confirmation -->
+          <div class="notif-delete-confirm hidden">
+            <p>Delete this notification?</p>
+            <form class="delete-notif-form" action="/notifications/delete/{{id}}" method="POST">
+              <button type="submit" class="confirm-delete-btn">Yes</button>
+              <button type="button" class="cancel-delete-btn">Cancel</button>
+            </form>
+          </div>
         </li>
         {{/each}}
     </ul>
@@ -47,102 +66,61 @@
   });
 </script>
 
-<!-- Toggle read/unread + link button 'read' setting -->
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  // Mark as read
-  document.querySelectorAll('.mark-read-btn').forEach(button => {
-    button.addEventListener('click', async () => {
-      const notifId = button.dataset.notifId;
-      const isCurrentlyRead = button.dataset.isRead === 'true';
-      const newIsRead = !isCurrentlyRead;
-
-      console.log('Toggling notif:', notifId, 'New status:', newIsRead);
-
-      try {
-        const res = await fetch(`/notifications/toggle/${notifId}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ isRead: newIsRead })
-        });
-
-        if (!res.ok) throw new Error('Failed to toggle');
-
-        button.dataset.isRead = String(newIsRead);
-        button.textContent = newIsRead ? 'Mark as Unread' : 'Mark as Read';
-
-        const item = button.closest('.notif-item');
-        if (item) item.classList.toggle('unread', !newIsRead);
-
-        // Update unread badge count
-        const unreadCount = document.querySelectorAll('.notif-item.unread').length;
-        const badge = document.getElementById('notif-badge');
-
-        if (badge) {
-          if (unreadCount > 0) {
-            badge.textContent = unreadCount;
-            badge.style.display = 'inline-block';
-          } else {
-            badge.style.display = 'none';
-          }
-        }
-
-      } catch (err) {
-        console.error('Toggle error:', err);
-        alert('Something went wrong.');
-      }
-    });
-  });
-
-  // Link button 'read' setting
-  const linkButtons = document.querySelectorAll('.link-btn');
-
-  linkButtons.forEach(button => {
-    button.addEventListener('click', async () => {
-      const notifId = button.dataset.notifId;
-      const isRead = button.dataset.isRead === 'true';
-      const target = button.dataset.targetLink;
-
-      if (!isRead) {
-        // Mark as read first
-        try {
-          await fetch(`/notifications/read/${notifId}`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ isRead: true })
-          });
-
-          // Optional: update badge count locally
-          const item = button.closest('.notif-item');
-          if (item) item.classList.remove('unread');
-
-          const badge = document.getElementById('notif-badge');
-          if (badge) {
-            let newCount = document.querySelectorAll('.notif-item.unread').length;
-            if (newCount > 0) {
-              badge.textContent = newCount;
-              badge.style.display = 'inline-block';
-            } else {
-              badge.style.display = 'none';
-            }
-          }
-
-        } catch (err) {
-          console.error('Failed to mark notification as read:', err);
-        }
-      }
-
-      // Navigate regardless
-      window.location.href = target;
-    });
-  });
-});
-</script>
+<!-- ALL notif functions -->
+<script src="/../js/notifications.js" type="text/javascript"></script>
 
 <!-- Notif styles -->
 <style>
+
+.notif-delete-confirm {
+  display: hidden;
+  padding: 1rem;
+  border-top: 1px dashed #ccc;
+}
+
+.notif-delete-confirm p {
+  margin: 0 0 0.5rem 0;
+  font-weight: bold;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.confirm-delete-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 0.5rem;
+}
+
+.cancel-delete-btn {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.delete-notif-btn {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  color: #888;
+  cursor: pointer;
+  padding: 0;
+}
+
+.delete-notif-btn:hover {
+  color: #dc3545;
+}
 
 .form-section {
   background-color: #fdfdfd;

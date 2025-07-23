@@ -1334,3 +1334,11 @@ export async function getNotifStatus(notifId) {
         SELECT is_read FROM greencycle.notifications WHERE id = ?`, [notifId])
     return result
 }
+
+// Delete notif
+export async function deleteNotification(notifId) {
+    await sql.query(
+        `DELETE FROM greencycle.notifications WHERE id = ?`,
+        [notifId]
+    );
+}

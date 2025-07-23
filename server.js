@@ -60,7 +60,8 @@ import {
   getUnreadNotifCount,
   getNotifStatus,
   updateNotifRead,
-  createNotification
+  createNotification,
+  deleteNotification
 } from './database.js'
 
 // File Upload
@@ -479,6 +480,19 @@ app.post('/notifications/read/:id', async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error('Failed to update notification:', err);
+    res.status(500).json({ success: false });
+  }
+});
+
+// Delete notif using x button
+app.delete('/notifications/delete/:id', async (req, res) => {
+  const notifId = req.params.id;
+  try {
+    await deleteNotification(notifId)
+
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.error('Failed to delete notification:', err);
     res.status(500).json({ success: false });
   }
 });
