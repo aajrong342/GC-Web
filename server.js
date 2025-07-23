@@ -469,6 +469,20 @@ app.post('/notifications/toggle/:notifId', async (req, res) => {
   }
 })
 
+// Link button sets notif to read
+app.post('/notifications/read/:id', async (req, res) => {
+  const notifId = req.params.id;
+  const { isRead } = req.body;
+
+  try {
+    await updateNotifRead(notifId, isRead);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Failed to update notification:', err);
+    res.status(500).json({ success: false });
+  }
+});
+
 // Display data summary
 app.get('/dashboard/data/summary', async (req, res, next) => {
   // Clean query before proceeding
