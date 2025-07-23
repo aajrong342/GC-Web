@@ -1866,8 +1866,8 @@ app.get('/your-route', async (req, res) => {
     }
 });
 app.get('/dashboard/noncompliance', async (req, res) => {
-  console.log('🔍 Attempting to access /dashboard/noncompliance');
-  console.log('👤 Session User:', req.session.user);
+  // console.log('🔍 Attempting to access /dashboard/noncompliance');
+  // console.log('👤 Session User:', req.session.user);
 
   if (!req.session.user) {
     console.log('🚫 No session user found.');
