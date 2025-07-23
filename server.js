@@ -267,10 +267,12 @@ app.engine('hbs', engine({
   extname: 'hbs',
   defaultLayout: 'main',
   helpers: {
-    ifEquals: function (arg1, arg2, options) {
-      // console.log(`[HELPER] ifEquals: ${arg1} === ${arg2}`);
-      return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
+       ifNotEquals: function (a, b, options) {
+      return a !== b ? options.fn(this) : options.inverse(this);
     },
+    ifArrayNotEmpty: function (array, options) {
+    return Array.isArray(array) && array.length > 0 ? options.fn(this) : options.inverse(this);
+  },
     uppercase: function (str) {
       // console.log(`[HELPER] uppercase: ${str}`);
       return str ? str.toUpperCase() : '';
@@ -1887,7 +1889,8 @@ app.get('/dashboard/noncompliance', async (req, res) => {
       layout: 'dashboard',
       title: 'Non-Compliance Notice | GC Dashboard',
       current_noncompliance: true,
-      clients: nonCompliantClients
+      clients: nonCompliantClients,
+      
     });
   } catch (error) {
     console.error('❌ Error generating non-compliance:', error);

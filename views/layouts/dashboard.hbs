@@ -95,10 +95,10 @@
                 
                     <a href="/dashboard/noncompliance" class="{{#if current_noncompliance}}current{{/if}}">
                     <i class="fa-solid fa-triangle-exclamation nav-icon"></i>&nbsp;Client Compliance Warning
-
-                    {{#ifNotEquals clients 0}}
-                        <span class="notif-badge" title="You are currently non-compliant.">!{{clients.entry_count}}</span>
+                    {{#ifNotEquals clients.length 0}}
+                    <span class="notif-badge"> {{clients.length}}</span>
                     {{/ifNotEquals}}
+
                     </a>
 
 
