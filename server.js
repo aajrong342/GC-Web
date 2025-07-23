@@ -2223,7 +2223,7 @@ app.patch('/api/data/:id/status', async (req, res) => {
       }
 
       // Send notification to user that the entry has been approved
-      await createNotification(submitter, `Your data entry, <b>${title}</b>, has been Approved.`, `/dashboard/data/${entryId}`)
+      await createNotification(submitter, 'Approval', `Your data entry, <b>${title}</b>, has been Approved.`, `/dashboard/data/${entryId}`)
 
     }
     else if(status === 'Needs Revision') {
@@ -2232,6 +2232,9 @@ app.patch('/api/data/:id/status', async (req, res) => {
 
       // Update current revision
       await updateCurrentLog(entryId, revisionId)
+
+      // Send notification to user
+      await createNotification(submitter, 'Revision Notice', `Your data entry, <b>${title}</b>, needs revision.`, `/dashboard/data/wip/${entryId}`)
     }
 
     res.json({ 

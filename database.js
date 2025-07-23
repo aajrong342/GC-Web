@@ -1286,11 +1286,11 @@ export async function getMonthlySubmissions() {
 --------------------------------------- */
 
 // Create notification for user
-export async function createNotification(targetUserId, message, link) {
+export async function createNotification(targetUserId, msgType, message, link) {
     const result = await sql.query(`
-        INSERT INTO notifications (user_id, message, link)
-        VALUES (?, ?, ?)
-    `, [targetUserId, message, link])
+        INSERT INTO notifications (user_id, message_type, message, link)
+        VALUES (?, ?, ?, ?)
+    `, [targetUserId, msgType, message, link])
     
     // Return new object if successful
     const id = result[0].insertId
