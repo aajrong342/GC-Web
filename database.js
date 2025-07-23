@@ -1198,6 +1198,35 @@ export async function getUserComplianceSummary() {
   return rows;
 }
 
+export async function getNonCompliantClients(userId) {
+  const [rows] = await sql.query(`
+    SELECT
+      u.user_id,
+      u.firstname,
+      u.lastname,
+      u.company_name,
+      ws.name AS supertype_name,
+      COUNT(DISTINCT de.data_entry_id) AS entry_count,
+      cq.quota_weight * COUNT(DISTINCT de.data_entry_id) AS required_quota,
+      COALESCE(SUM(wc.waste_amount), 0) AS total_collected,
+      CASE
+        WHEN COALESCE(SUM(wc.waste_amount), 0) >= cq.quota_weight * COUNT(DISTINCT de.data_entry_id) THEN 'Compliant'
+        ELSE 'Non-Compliant'
+      END AS compliance_status
+    FROM user u
+    JOIN user_roles ur ON u.role_id = ur.role_id
+    LEFT JOIN data_entry de ON de.user_id = u.user_id AND de.status = 'Approved'
+    LEFT JOIN data_waste_composition wc ON wc.data_entry_id = de.data_entry_id
+    LEFT JOIN waste_type wt ON wc.type_id = wt.id
+    LEFT JOIN waste_supertype ws ON wt.supertype_id = ws.id
+    LEFT JOIN compliance_quotas cq ON cq.waste_supertype_id = ws.id
+    WHERE u.user_id = ?
+    GROUP BY u.user_id, ws.id
+    HAVING compliance_status = 'Non-Compliant'
+  `, [userId]);
+
+  return rows;
+}
 
 /* ---------------------------------------
     CONTROL PANEL

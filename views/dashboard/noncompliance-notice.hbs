@@ -1,0 +1,100 @@
+<h2 class="title">⚠️ Non-Compliance Warning Notices</h2>
+
+<div class="notice-container">
+  {{#each clients}}
+    <div class="warning-card">
+      <div class="warning-header">
+        <h3><i class="fas fa-user-circle"></i> {{firstname}} {{lastname}}</h3>
+        <span class="company"><i class="fas fa-building"></i> {{company_name}}</span>
+      </div>
+
+      <div class="warning-body">
+        <p><strong>Supertype:</strong> {{supertype_name}}</p>
+        <p><strong>Total Submissions:</strong> {{entry_count}}</p>
+        <p><strong>Total Collected:</strong> {{total_collected}} kg</p>
+        <p><strong>Required Quota:</strong> {{required_quota}} kg</p>
+        <p><strong>Status:</strong> <span class="noncompliant-text">{{compliance_status}}</span></p>
+      </div>
+    </div>
+  {{/each}}
+</div>
+
+<form action="/dashboard/noncompliance/pdf" method="POST" style="text-align: right; margin-bottom: 20px;">
+  <button type="submit" class="pdf-btn">
+    <i class="fa-solid fa-file-pdf"></i> Download Compliance Report
+  </button>
+</form>
+
+
+
+<style>
+.pdf-btn {
+  margin-bottom: 20px;
+  background-color: #2e7d32;
+  color: white;
+  padding: 10px 20px;
+  font-size: 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.pdf-btn:hover {
+  background-color: #1b5e20;
+}
+
+.title {
+    font-size: 28px;
+    margin-bottom: 30px;
+    color: #155724;
+    text-align: center;
+  }
+
+  .notice-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 30px;
+    padding: 20px;
+  }
+
+  .warning-card {
+    background: #e9f7ef;
+    border: 5px solid #28a745;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 128, 0, 0.1);
+    transition: transform 0.2s ease;
+  }
+
+  .warning-card:hover {
+    transform: scale(1.02);
+  }
+
+  .warning-header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+  }
+
+  .warning-header h3 {
+    margin: 0;
+    font-size: 20px;
+    color: #1e4620;
+  }
+
+  .company {
+    font-size: 14px;
+    color: #388e3c;
+    margin-top: 4px;
+  }
+
+  .warning-body p {
+    margin: 25px 0;
+    font-size: 20px;
+    color: #1b5e20;
+  }
+
+  .noncompliant-text {
+    color: #c62828;
+    font-weight: bold;
+  }
+</style>

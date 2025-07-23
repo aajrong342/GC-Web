@@ -1,6 +1,7 @@
 import express from 'express'
 import { engine } from 'express-handlebars'
 import cors from 'cors'
+import PDFDocument from 'pdfkit';
 
 // Session
 import session from 'express-session'
@@ -56,7 +57,8 @@ import {
   getRevisionEntries,
   updateForm,
   getPendingData,
-  getUserComplianceSummary
+  getUserComplianceSummary,
+  getNonCompliantClients
 } from './database.js'
 
 // File Upload
@@ -430,6 +432,7 @@ app.get('/partners', async (req, res) => {
 
 // Dashboard home page
 app.get('/dashboard', (req, res) => {
+  
   res.render('dashboard/dashboard-home', {
     layout: 'dashboard',
     title: 'Main Dashboard | GC Dashboard',
@@ -1793,7 +1796,110 @@ app.get('/your-route', async (req, res) => {
         res.status(500).send('Error fetching users');
     }
 });
+app.get('/dashboard/noncompliance', async (req, res) => {
+  console.log('🔍 Attempting to access /dashboard/noncompliance');
+  console.log('👤 Session User:', req.session.user);
 
+  if (!req.session.user) {
+    console.log('🚫 No session user found.');
+    return res.redirect('/unauthorized');
+  }
+
+  const { id, supertype } = req.session.user;
+
+  // if (supertype !== 2) {
+  //   console.log(`🚫 User ${id} is not allowed to access this page.`);
+  //   return res.redirect('/unauthorized');
+  // }
+
+  try {
+    const nonCompliantClients = await getNonCompliantClients(id); // pass user ID here
+    console.log(`✅ Loaded non-compliant data for user ${id}`);
+
+    res.render('dashboard/noncompliance-notice', {
+      layout: 'dashboard',
+      title: 'Non-Compliance Notice | GC Dashboard',
+      current_noncompliance: true,
+      clients: nonCompliantClients
+    });
+  } catch (error) {
+    console.error('❌ Error generating non-compliance:', error);
+    res.status(500).send('Error generating non-compliance report.');
+  }
+});
+
+
+app.post('/dashboard/noncompliance/pdf', async (req, res) => {
+  try {
+    const userId = req.session.user?.id; // ensure session contains user info
+    if (!userId) return res.status(401).send('Unauthorized');
+
+    const clients = await getNonCompliantClients(userId);
+    if (!clients || clients.length === 0) {
+      return res.status(404).send('No non-compliant records found.');
+    }
+
+    const doc = new PDFDocument({ margin: 50 });
+    const filename = 'Non-Compliance-Notice.pdf';
+
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/pdf');
+
+    doc.pipe(res);
+
+    doc.fontSize(20).fillColor('#2e7d32').text('GreenCycle Compliance Office', { align: 'center' });
+    doc.moveDown(0.3);
+    doc.fontSize(12).fillColor('#555').text('Official Non-Compliance Warning Notice', { align: 'center' });
+    doc.moveDown(1);
+
+    clients.forEach(client => {
+      doc
+        .fillColor('#1b5e20')
+        .fontSize(14)
+        .text(`${client.firstname} ${client.lastname} (${client.company_name})`, { underline: true });
+
+      doc
+        .moveDown(0.3)
+        .fontSize(11)
+        .fillColor('#333')
+        .text(`Supertype Monitored: ${client.supertype_name}`)
+        .text(`Number of Approved Entries: ${client.entry_count}`)
+        .text(`Required Total Quota: ${client.required_quota} kg`)
+        .text(`Actual Total Collected: ${client.total_collected} kg`)
+        .text(`Compliance Status:`, { continued: true })
+        .fillColor('red')
+        .text(`  ${client.compliance_status}`)
+        .moveDown();
+
+      doc
+        .fillColor('#2e7d32')
+        .fontSize(10)
+        .text(
+          `Please ensure future entries meet or exceed the required quota. 
+          You must be able to submit or review your submission as soon as possible.`,
+          {
+            align: 'justify',
+            indent: 20,
+            lineGap: 2
+          }
+        )
+        .moveDown(1);
+      
+      doc
+        .strokeColor('#66bb6a')
+        .lineWidth(0.5)
+        .moveTo(doc.page.margins.left, doc.y)
+        .lineTo(doc.page.width - doc.page.margins.right, doc.y)
+        .stroke()
+        .moveDown(1);
+    });
+
+    doc.end();
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error generating PDF');
+  }
+});
 /* ---------------------------------------
     CONTROL PANEL ROUTES
 --------------------------------------- */
