@@ -113,6 +113,34 @@
     </div>
 </div>
 
+<!-- Success modal -->
+<div id="success-approve" class="modal">
+    <div class="modal-content">
+        <h3>Success</h3>
+        Data entry has been submitted.<br><br>
+
+        <a href="/dashboard">
+            <button type="button" class="review-approve">
+                Return to Home
+            </button>
+        </a>
+    </div>
+</div>
+
+<!-- Error modal -->
+<div id="error-approve" class="modal">
+    <div class="modal-content">
+        <h3>ERROR</h3>
+        An error has occurred.<br><br>
+
+        <a href="/dashboard">
+            <button type="button" class="review-approve">
+                Return to Home
+            </button>
+        </a>
+    </div>
+</div>
+
 <!-- Cancel modal script -->
 <script>
 
@@ -146,10 +174,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 })
 
-function showCancel() {
-    document.getElementById('cancel-modal').style.display = 'block';
-}
-
 </script>
 
 <!-- POST request script -->
@@ -176,9 +200,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const result = await response.json();
       if (response.ok) {
-        alert("Report submitted successfully!");
+        // Pop up to show success
+        document.getElementById('success-approve').style.display = 'block'
       } else {
-        alert(result.error || "Submission failed.");
+        // Pop up to show success
+        document.getElementById('error-approve').style.display = 'block'
       } 
     } catch (error) {
         console.error("Error:", error);
