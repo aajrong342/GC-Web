@@ -76,21 +76,24 @@
                 </a>
 
                 <a href="/dashboard/data/all" class="{{#if current_all}}current{{/if}}">
-                    <i class="fa-solid fa-chart-simple nav-icon"></i> Data Entries
+                    <i class="fa-solid fa-table nav-icon"></i> Data Entries
                 </a>
 
                 <a href="/dashboard/guide" class="{{#if current_guide}}current{{/if}}">
-                    <i class="fa-solid fa-book nav-icon"></i></i> Waste Type Guide
+                    <i class="fa-solid fa-book-open nav-icon"></i></i> Waste Type Guide
                 </a>
 
                 <!-- Report Functions -->
                 <div class="nav-divider">YOUR REPORTS</div>
                 <a href="/dashboard/submit-report" class="{{#if current_report}}current{{/if}}">
-                    <i class="fa-solid fa-file-medical nav-icon"></i>&nbsp; Submit Data Entry
+                    <i class="fa-solid fa-file-upload nav-icon"></i>&nbsp; Submit Data Entry
                 </a>
 
                 <a href="/dashboard/data/user/revision" class="{{#if current_in_progress}}current{{/if}}">
                     <i class="fa-solid fa-file-pen nav-icon"></i> Submissions in Progress
+                    <span class="notif-badge" id="notif-badge" style="{{#ifEquals revisionCount 0}}display:none;{{/ifEquals}}">
+                        {{revisionCount}}
+                    </span>
                 </a>
 
                 <a href="/dashboard/data/user/approved" class="{{#if current_user_report}}current{{/if}}">
@@ -99,8 +102,8 @@
                 
                 <a href="/dashboard/noncompliance" class="{{#if current_noncompliance}}current{{/if}}">
                     <i class="fa-solid fa-triangle-exclamation nav-icon"></i>&nbsp;Client Compliance Warning
-                    {{#ifNotEquals clients.length 0}}
-                    <span class="notif-badge"> {{clients.length}}</span>
+                    {{#ifNotEquals cmpCount 0}}
+                        <span class="notif-badge"> {{cmpCount}}</span>
                     {{/ifNotEquals}}
                 </a>
 

@@ -244,10 +244,19 @@ const loginSetup = async (req, res, next) => {
       // Retrieve user's current notif count
       const notifCount = await getUnreadNotifCount(req.session.user.id)
 
+      // Retrieve entry revision count
+      const revisionCount = await getDataByUserCount(req.session.user.id, 'Needs Revision')
+
+      // Retrieve compliance entry count
+      const clients = await getNonCompliantClients(req.session.user.id)
+      const cmpCount = clients.length
+
       // Make it available to views and routes
       res.locals.pendingApplications = pendingApplications
       res.locals.pendingData = pendingData
       res.locals.notifCount = notifCount
+      res.locals.revisionCount = revisionCount
+      res.locals.cmpCount = cmpCount
     }
 
     next();

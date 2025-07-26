@@ -9,7 +9,12 @@
         <a href="/dashboard/notifications" class="feature-card">
           <div class="feature-icon"><i class="fas fa-bell"></i></div>
           <div class="feature-text">
-            <h3>Notifications</h3>
+            <h3>
+              Notifications&nbsp;
+              <span class="notif-badge" id="notif-badge" style="{{#ifEquals notifCount 0}}display:none;{{/ifEquals}}">
+                {{notifCount}}
+              </span>
+            </h3>
             <p>Stay up-to-date with all your important alerts and messages.</p>
           </div>
         </a>
@@ -46,7 +51,12 @@
         <a href="/dashboard/data/user/revision" class="feature-card">
           <div class="feature-icon"><i class="fas fa-file-pen"></i></div>
           <div class="feature-text">
-            <h3>Submissions in Progress</h3>
+            <h3>
+              Submissions in Progress&nbsp;
+              <span class="notif-badge" id="notif-badge" style="{{#ifEquals revisionCount 0}}display:none;{{/ifEquals}}">
+                  {{revisionCount}}
+              </span>
+            </h3>
             <p>View your submissions for review.</p>
           </div>
         </a>
@@ -62,7 +72,12 @@
         <a href="/dashboard/noncompliance" class="feature-card">
           <div class="feature-icon"><i class="fas fa-exclamation-triangle"></i></div>
           <div class="feature-text">
-            <h3>Client Compliance Warning</h3>
+            <h3>
+              Client Compliance Warning&nbsp;
+              {{#ifNotEquals cmpCount 0}}
+                  <span class="notif-badge"> {{cmpCount}}</span>
+              {{/ifNotEquals}}
+            </h3>
             <p>View your non-compliance notices based on submitted data.</p>
           </div>
         </a>
@@ -73,6 +88,20 @@
         <section class="section">
           <h2>Staff Functions</h2>
           <div class="card-grid">
+
+            <a href="/dashboard/data/submissions/pending" class="feature-card">
+              <div class="feature-icon"><i class="fa-solid fa-file-pen"></i></div>
+              <div class="feature-text">
+                <h3>
+                  Review Data Submissions&nbsp;
+                  {{#ifNotEquals pendingData 0}}
+                      <span class="notif-badge">{{pendingData}}</span>
+                  {{/ifNotEquals}}
+                </h3>
+                <p>View and manage pending or revised data entries.</p>
+              </div>
+            </a>
+
             <a href="/control-panel" class="feature-card admin-card">
               <div class="feature-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
               <div class="feature-text">
