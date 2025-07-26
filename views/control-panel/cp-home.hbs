@@ -156,7 +156,12 @@
         <a href="/control-panel/user-applications" class="feature-card">
           <div class="feature-icon"><i class="fas fa-user-check"></i></div>
           <div class="feature-text">
-            <h3>User Applications</h3>
+            <h3>
+              User Applications&nbsp;
+              {{#ifNotEquals pendingApplications 0}}
+                  <span class="notif-badge"> {{pendingApplications}}</span>
+              {{/ifNotEquals}}
+            </h3>
             <p>Review and approve new registration requests from users.</p>
           </div>
 
