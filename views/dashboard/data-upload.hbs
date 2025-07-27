@@ -11,7 +11,7 @@
 {{!-- <h2>Data Submission Form</h2> --}}
 
 <form action="/dashboard/submit-report/upload/confirm" method="POST" enctype="multipart/form-data"
-data-prefill-region="{{prefill.region}}" data-prefill-province="{{prefill.province}}" data-prefill-municipality="{{prefill.municipality}}">
+data-prefill-region="{{prefill.region}}" data-prefill-province="{{prefill.province}}" data-prefill-municipality="{{prefill.municipality}}" data-prefill-barangay="{{prefill.barangay}}">
 
     <div class="step active" data-step="0">
         <div class="instructions-tab">
@@ -74,7 +74,10 @@ data-prefill-region="{{prefill.region}}" data-prefill-province="{{prefill.provin
           </select>
 
           <label for="barangay">Barangay (if applicable)</label>
-          <input type="text" id="barangay" name="barangay">
+          <select name="barangay" id="barangay" disabled>
+                <option value="">Select a barangay</option>
+                <!-- Populated by locations.js -->
+            </select>
         </div>
 
         <!-- Collection Date Range -->

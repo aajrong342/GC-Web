@@ -548,24 +548,29 @@ app.get('/dashboard/data/summary', async (req, res, next) => {
 
   next();
 }, async (req, res) => {
-  const { title, region, province, municipality, author, company, startDate, endDate } = req.query
+  const { title, region, province, municipality, barangay, author, company, startDate, endDate } = req.query
 
   try {
       /* ------ LOCATION NAME ------ */
       // Use the most specific locationCode available
-      const locationCode = municipality || province || region || null;
-      const wasteCompliances = await getWasteComplianceStatusFromSummary(title, region, province, locationCode, author, company, startDate, endDate);      
-      const sectorCompliances = await getSectorComplianceStatusFromSummary(title, region, province, locationCode, author, company, startDate, endDate); 
+      const locationCode = barangay || municipality || province || region || null;
+      const compliances = await getWasteComplianceStatusFromSummary(title, region, province, locationCode, author, company, startDate, endDate);      
+      
       // Prepare PSGC data for location names
       const psgcRegions = await PSGCResource.getRegions()
       const psgcProvinces = await PSGCResource.getProvinces()
       const psgcMunicipalities = await PSGCResource.getMunicipalities()
       const psgcCities = await PSGCResource.getCities()
 
+      // Barangay data
+      const psgcBarangays = await PSGCResource.getBarangays()
+      const psgcMunicDistricts = await PSGCResource.getMunicipalDistricts()
+
       // Get location names
       const regionName = getPsgcName(psgcRegions, region) || 'ALL'
       const provinceName = getPsgcName(psgcProvinces, province) || 'ALL'
       const municipalityName = getPsgcName(psgcMunicipalities, municipality) || getPsgcName(psgcCities, municipality) || 'ALL'
+      const barangayName = getPsgcName(psgcBarangays, barangay) || getPsgcName(psgcMunicDistricts, barangay) || getPsgcName(psgcCities, barangay) || 'ALL'
 
       /* ------ AVERAGE DATA ------ */
       // Retrieve summary data of given location
@@ -714,7 +719,7 @@ app.get('/dashboard/data/summary', async (req, res, next) => {
         sectorCompliances,
         sectorBarData: JSON.stringify(sectorBarData),
         sectorPieData: JSON.stringify(sectorPieData),
-        regionName, provinceName, municipalityName,
+        regionName, provinceName, municipalityName, barangayName,
         locations: JSON.stringify(validCoords) // map coords
       })
     } catch (err) {
@@ -744,11 +749,11 @@ app.get('/dashboard/data/all', async (req, res, next) => {
   const offset = (page - 1) * limit;
 
   const {
-    title, region, province, municipality, author, company, startDate, endDate
+    title, region, province, municipality, barangay, author, company, startDate, endDate
   } = req.query;
 
   // Use the most specific locationCode available
-  const locationCode = municipality || province || region || null;
+  const locationCode = barangay || municipality || province || region || null;
 
   const [data, totalCount] = await Promise.all([
     getDataWithFilters(limit, offset, title, locationCode, author, company, startDate, endDate),
@@ -761,6 +766,7 @@ app.get('/dashboard/data/all', async (req, res, next) => {
   if(region) prefill.region = region
   if(province) prefill.province = province
   if(municipality) prefill.municipality = municipality
+  if(barangay) prefill.barangay = barangay
 
   // Page handler
   const totalPages = Math.ceil(totalCount / limit);
@@ -1447,7 +1453,8 @@ app.get('/dashboard/edit-report/:id', async (req, res) => {
   const prefill = {
     region: wasteGen.region_id,
     province: wasteGen.province_id,
-    municipality: wasteGen.municipality_id
+    municipality: wasteGen.municipality_id,
+    barangay: wasteGen.barangay_id
   }
 
   // Format to 'YYYY-MM-DD'
@@ -1534,13 +1541,18 @@ app.post('/dashboard/submit-report/form/confirm', async (req, res) => {
   const psgcMunicipalities = await PSGCResource.getMunicipalities()
   const psgcCities = await PSGCResource.getCities()
 
+  // Barangays / municipal districts
+  const psgcBarangays = await PSGCResource.getBarangays()
+  const psgcMunicDistricts = await PSGCResource.getMunicipalDistricts()
+
   // Get location names
   const regionName = getPsgcName(psgcRegions, formData.region)
   const provinceName = getPsgcName(psgcProvinces, formData.province) || null
   const municipalityName = getPsgcName(psgcMunicipalities, formData.municipality) || getPsgcName(psgcCities, formData.municipality) || null
+  const barangayName = getPsgcName(psgcBarangays, formData.barangay) || getPsgcName(psgcMunicDistricts, formData.barangay) || null
 
   // Set full location name
-  const parts = [municipalityName, provinceName, regionName].filter(Boolean)
+  const parts = [barangayName, municipalityName, provinceName, regionName].filter(Boolean)
   const fullLocation = parts.join(', ')
 
   res.render('dashboard/data-form-confirm', {
@@ -1613,13 +1625,18 @@ app.post("/dashboard/submit-report/upload/confirm", xlsxUpload.single('spreadshe
     const psgcMunicipalities = await PSGCResource.getMunicipalities()
     const psgcCities = await PSGCResource.getCities()
 
+    // Barangays / municipal districts
+    const psgcBarangays = await PSGCResource.getBarangays()
+    const psgcMunicDistricts = await PSGCResource.getMunicipalDistricts()
+
     // Get location names
     const regionName = getPsgcName(psgcRegions, formData.region)
     const provinceName = getPsgcName(psgcProvinces, formData.province) || null
     const municipalityName = getPsgcName(psgcMunicipalities, formData.municipality) || getPsgcName(psgcCities, formData.municipality) || null
+    const barangayName = getPsgcName(psgcBarangays, formData.barangay) || getPsgcName(psgcMunicDistricts, formData.barangay) || null
 
     // Set full location name
-    const parts = [municipalityName, provinceName, regionName].filter(Boolean)
+    const parts = [barangayName, municipalityName, provinceName, regionName].filter(Boolean)
     const fullLocation = parts.join(', ')
 
     /* ------- XLSX DATA EXTRACTION ------- */
@@ -1706,7 +1723,7 @@ app.route('/dashboard/submit-report/upload')
 app.post("/api/data/submit-report/manual", async (req, res) => {
   // Request body
   const {
-    title, region, province, municipality, population, per_capita, annual, date_start, date_end, wasteComposition
+    title, region, province, municipality, barangay, population, per_capita, annual, date_start, date_end, wasteComposition
   } = req.body;
 
   const currentUser = req.session.user.id
@@ -1716,14 +1733,19 @@ app.post("/api/data/submit-report/manual", async (req, res) => {
   const psgcProvinces = await PSGCResource.getProvinces()
   const psgcMunicipalities = await PSGCResource.getMunicipalities()
   const psgcCities = await PSGCResource.getCities()
+  
+  // Barangays / municipal districts
+  const psgcBarangays = await PSGCResource.getBarangays()
+  const psgcMunicDistricts = await PSGCResource.getMunicipalDistricts()
 
   // Get location names
   const regionName = getPsgcName(psgcRegions, region)
   const provinceName = getPsgcName(psgcProvinces, province) || null
   const municipalityName = getPsgcName(psgcMunicipalities, municipality) || getPsgcName(psgcCities, municipality) || null
+  const barangayName = getPsgcName(psgcBarangays, barangay) || getPsgcName(psgcMunicDistricts, barangay) || null
 
   // Set full location name
-  const parts = [municipalityName, provinceName, regionName].filter(Boolean)
+  const parts = [barangayName, municipalityName, provinceName, regionName].filter(Boolean)
   const fullLocation = parts.join(', ')
 
   try {
@@ -1738,7 +1760,7 @@ app.post("/api/data/submit-report/manual", async (req, res) => {
 
     // Push form data to db
     await submitForm(
-      currentUser, title, region, province, municipality, fullLocation, population, per_capita, annual, date_start, date_end, newWasteComp
+      currentUser, title, region, province, municipality, barangay, fullLocation, population, per_capita, annual, date_start, date_end, newWasteComp
     );
 
     res.status(200).json({
@@ -1754,7 +1776,7 @@ app.post("/api/data/submit-report/manual", async (req, res) => {
 app.post("/api/data/edit-report", async (req, res) => {
   // Request body
   const {
-    dataEntryId, title, region, province, municipality, population, per_capita, annual, date_start, date_end, wasteComposition, comment
+    dataEntryId, title, region, province, municipality, barangay, population, per_capita, annual, date_start, date_end, wasteComposition, comment
   } = req.body;
 
   // Get current logged in user
@@ -1765,14 +1787,19 @@ app.post("/api/data/edit-report", async (req, res) => {
   const psgcProvinces = await PSGCResource.getProvinces()
   const psgcMunicipalities = await PSGCResource.getMunicipalities()
   const psgcCities = await PSGCResource.getCities()
+  
+  // Barangays / municipal districts
+  const psgcBarangays = await PSGCResource.getBarangays()
+  const psgcMunicDistricts = await PSGCResource.getMunicipalDistricts()
 
   // Get location names
   const regionName = getPsgcName(psgcRegions, region)
   const provinceName = getPsgcName(psgcProvinces, province) || null
   const municipalityName = getPsgcName(psgcMunicipalities, municipality) || getPsgcName(psgcCities, municipality) || null
+  const barangayName = getPsgcName(psgcBarangays, barangay) || getPsgcName(psgcMunicDistricts, barangay) || null
 
   // Set full location name
-  const parts = [municipalityName, provinceName, regionName].filter(Boolean)
+  const parts = [barangayName, municipalityName, provinceName, regionName].filter(Boolean)
   const fullLocation = parts.join(', ')
 
   try {
@@ -1787,7 +1814,7 @@ app.post("/api/data/edit-report", async (req, res) => {
 
     // Push form data to db
     await updateForm(
-      dataEntryId, title, region, province, municipality, fullLocation, population, per_capita, annual, date_start, date_end, newWasteComp
+      dataEntryId, title, region, province, municipality, barangay, fullLocation, population, per_capita, annual, date_start, date_end, newWasteComp
     );
 
     // Update entry status to Revised
@@ -1838,7 +1865,7 @@ function buildWasteCompositionFromMatrix(wasteMatrix, sectorNames, typeMap, sect
 app.post("/api/data/submit-report/upload", async (req, res) => {
   /* ------- REQUEST BODY ------- */
   const {
-    title, region, province, municipality, population, per_capita, annual, date_start, date_end, wasteMatrix, sectorsFromExcel
+    title, region, province, municipality, barangay, population, per_capita, annual, date_start, date_end, wasteMatrix, sectorsFromExcel
   } = req.body;
 
   const currentUser = req.session.user.id
@@ -1849,14 +1876,19 @@ app.post("/api/data/submit-report/upload", async (req, res) => {
   const psgcProvinces = await PSGCResource.getProvinces()
   const psgcMunicipalities = await PSGCResource.getMunicipalities()
   const psgcCities = await PSGCResource.getCities()
+  
+  // Barangays / municipal districts
+  const psgcBarangays = await PSGCResource.getBarangays()
+  const psgcMunicDistricts = await PSGCResource.getMunicipalDistricts()
 
   // Get location names
   const regionName = getPsgcName(psgcRegions, region)
   const provinceName = getPsgcName(psgcProvinces, province) || null
   const municipalityName = getPsgcName(psgcMunicipalities, municipality) || getPsgcName(psgcCities, municipality) || null
+  const barangayName = getPsgcName(psgcBarangays, barangay) || getPsgcName(psgcMunicDistricts, barangay) || null
 
   // Set full location name
-  const parts = [municipalityName, provinceName, regionName].filter(Boolean)
+  const parts = [barangayName, municipalityName, provinceName, regionName].filter(Boolean)
   const fullLocation = parts.join(', ')
   
   /* ------- WASTE MATRIX CONVERSION ------- */
@@ -1874,7 +1906,7 @@ app.post("/api/data/submit-report/upload", async (req, res) => {
   try {
     // Push form data to db
     await submitForm(
-      currentUser, title, region, province, municipality, fullLocation, population, per_capita, annual, date_start, date_end, wasteComposition
+      currentUser, title, region, province, municipality, barangay, fullLocation, population, per_capita, annual, date_start, date_end, wasteComposition
     );
 
     res.status(200).json({

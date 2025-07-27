@@ -19,7 +19,7 @@
   </div>
 </div>
 
-<form id="waste-form" data-prefill-region="{{prefill.region}}" data-prefill-province="{{prefill.province}}" data-prefill-municipality="{{prefill.municipality}}" novalidate>
+<form id="waste-form" data-prefill-region="{{prefill.region}}" data-prefill-province="{{prefill.province}}" data-prefill-municipality="{{prefill.municipality}}" data-prefill-barangay="{{prefill.barangay}}" novalidate>
 
     <!-- Pass data entry ID to submission JS -->
     <input type="hidden" name="dataEntryId" value="{{dataEntryId}}">
@@ -68,7 +68,10 @@
             </select>
 
             <label for="barangay">Barangay (if applicable)</label>
-            <input type="text" id="barangay" name="barangay">
+            <select name="barangay" id="barangay" disabled>
+                <option value="">Select a barangay</option>
+                <!-- Populated by locations.js -->
+            </select>
         </div>
 
         <!-- Location & Waste Information -->

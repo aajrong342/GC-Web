@@ -133,14 +133,14 @@ export async function getAllTypes() {
 /* ---------------------------------------
     DATA SUBMISSION
 --------------------------------------- */
-export async function submitForm(user_id, title, region_id, province_id, municipality_id, location_name, population, per_capita, annual, collection_start, collection_end, wasteComposition) {
+export async function submitForm(user_id, title, region_id, province_id, municipality_id, barangay_id, location_name, population, per_capita, annual, collection_start, collection_end, wasteComposition) {
 
    try {
        // Insert into date_entry table
        const [dataEntryResult] = await sql.query(
-           `INSERT INTO greencycle.data_entry (user_id, title, region_id, province_id, municipality_id, location_name, population, per_capita, annual, date_submitted, collection_start, collection_end, status)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, 'Pending Review')`, 
-           [user_id, title, region_id, province_id, municipality_id, location_name, population, per_capita, annual, collection_start, collection_end]
+           `INSERT INTO greencycle.data_entry (user_id, title, region_id, province_id, municipality_id, barangay_id, location_name, population, per_capita, annual, date_submitted, collection_start, collection_end, status)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, 'Pending Review')`, 
+           [user_id, title, region_id, province_id, municipality_id, barangay_id, location_name, population, per_capita, annual, collection_start, collection_end]
        );
 
        const data_entry_id = dataEntryResult.insertId;
@@ -538,8 +538,8 @@ export async function getDataWithFilters(limit, offset, title, locationCode, nam
     }
 
     if (locationCode) {
-        conditions.push(`(dat.region_id = ? OR dat.province_id = ? OR dat.municipality_id = ?)`);
-        params.push(locationCode, locationCode, locationCode);
+        conditions.push(`(dat.region_id = ? OR dat.province_id = ? OR dat.municipality_id = ? OR dat.barangay_id = ?)`);
+        params.push(locationCode, locationCode, locationCode, locationCode);
     }
 
     if (name) {
@@ -596,8 +596,8 @@ export async function getFilteredDataCount(title, locationCode, name, companyNam
   }
 
   if (locationCode) {
-    conditions.push(`(dat.region_id = ? OR dat.province_id = ? OR dat.municipality_id = ?)`);
-    params.push(locationCode, locationCode, locationCode);
+    conditions.push(`(dat.region_id = ? OR dat.province_id = ? OR dat.municipality_id = ? OR dat.barangay_id = ?)`);
+    params.push(locationCode, locationCode, locationCode, locationCode);
   }
 
   if (name) {
@@ -648,8 +648,8 @@ export async function getFilteredDataCoords(title, locationCode, name, companyNa
     }
 
     if (locationCode) {
-        conditions.push(`(dat.region_id = ? OR dat.province_id = ? OR dat.municipality_id = ?)`);
-        params.push(locationCode, locationCode, locationCode);
+        conditions.push(`(dat.region_id = ? OR dat.province_id = ? OR dat.municipality_id = ? OR dat.barangay_id = ?)`);
+        params.push(locationCode, locationCode, locationCode, locationCode);
     }
 
     if (name) {
@@ -959,16 +959,14 @@ export async function getRevisionEntries(entryId) {
 }
 
 // Update data entry
-export async function updateForm(data_entry_id, title, region_id, province_id, municipality_id, location_name, population, per_capita, annual, collection_start, collection_end, wasteComposition) {
+export async function updateForm(data_entry_id, title, region_id, province_id, municipality_id, barangay_id, location_name, population, per_capita, annual, collection_start, collection_end, wasteComposition) {
     try {
         // Update the main data_entry record
         await sql.query(
             `UPDATE greencycle.data_entry 
-             SET title = ?, region_id = ?, province_id = ?, municipality_id = ?, location_name = ?, 
-                 population = ?, per_capita = ?, annual = ?, collection_start = ?, collection_end = ?, 
-                 status = 'Pending Review', date_submitted = NOW()
+             SET title = ?, region_id = ?, province_id = ?, municipality_id = ?, barangay_id = ?, location_name = ?, population = ?, per_capita = ?, annual = ?, collection_start = ?, collection_end = ?, status = 'Pending Review'
              WHERE data_entry_id = ?`,
-            [title, region_id, province_id, municipality_id, location_name, population, per_capita, annual, collection_start, collection_end, data_entry_id]
+            [title, region_id, province_id, municipality_id, barangay_id, location_name, population, per_capita, annual, collection_start, collection_end, data_entry_id]
         );
 
         // Safer: update existing or insert new waste composition records
@@ -1030,8 +1028,8 @@ export async function getAvgInfoWithFilters(title, locationCode, name, companyNa
     }
 
     if (locationCode) {
-        conditions.push(`(dat.region_id = ? OR dat.province_id = ? OR dat.municipality_id = ?)`);
-        params.push(locationCode, locationCode, locationCode);
+        conditions.push(`(dat.region_id = ? OR dat.province_id = ? OR dat.municipality_id = ? OR dat.barangay_id = ?)`);
+        params.push(locationCode, locationCode, locationCode, locationCode);
     }
 
     if (name) {
@@ -1083,8 +1081,8 @@ export async function getAvgWasteCompositionWithFilters(title, locationCode, nam
     }
 
     if (locationCode) {
-        conditions.push(`(dat.region_id = ? OR dat.province_id = ? OR dat.municipality_id = ?)`);
-        params.push(locationCode, locationCode, locationCode);
+        conditions.push(`(dat.region_id = ? OR dat.province_id = ? OR dat.municipality_id = ? OR barangay_id = ?)`);
+        params.push(locationCode, locationCode, locationCode, locationCode);
     }
 
     if (name) {
