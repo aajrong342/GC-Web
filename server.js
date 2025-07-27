@@ -554,7 +554,8 @@ app.get('/dashboard/data/summary', async (req, res, next) => {
       /* ------ LOCATION NAME ------ */
       // Use the most specific locationCode available
       const locationCode = barangay || municipality || province || region || null;
-      const compliances = await getWasteComplianceStatusFromSummary(title, region, province, locationCode, author, company, startDate, endDate);      
+      const wasteCompliances = await getWasteComplianceStatusFromSummary(title, region, province, locationCode, author, company, startDate, endDate);
+      const sectorCompliances = await getSectorComplianceStatusFromSummary(title, region, province, locationCode, author, company, startDate, endDate);
       
       // Prepare PSGC data for location names
       const psgcRegions = await PSGCResource.getRegions()
