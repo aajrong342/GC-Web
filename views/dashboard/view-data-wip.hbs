@@ -196,6 +196,33 @@
     </div>
 </div>
 
+<!-- Table filtering script -->
+<script>
+
+// Supertype filter
+const searchInput = document.getElementById('tbl-search');
+const dropdown = document.getElementById('supertype-filter');
+
+function filterTable() {
+  const keyword = searchInput.value.trim().toLowerCase();
+  const selectedSupertype = dropdown.value;
+  const allRows = document.querySelectorAll('tr[supertype]');
+
+  allRows.forEach(row => {
+    const rowSupertype = row.getAttribute('supertype');
+    const text = row.textContent.toLowerCase();
+    const matchesSupertype = selectedSupertype === 'all' || rowSupertype === selectedSupertype;
+    const matchesSearch = text.includes(keyword);
+
+    row.style.display = matchesSupertype && matchesSearch ? '' : 'none';
+  });
+}
+
+searchInput.addEventListener('input', filterTable);
+dropdown.addEventListener('change', filterTable);
+
+</script>
+
 <!-- General style -->
 <style>
 

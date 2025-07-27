@@ -673,7 +673,7 @@ app.get('/dashboard/data/summary', async (req, res, next) => {
           if (t.value > 0) {
             detailedData.labels.push(t.label);
             detailedData.data.push(Number(t.value.toFixed(3)));
-            detailedData.backgroundColor.push(shadeColor(baseColor, -0.17 + 0.15 * i));
+            detailedData.backgroundColor.push(shadeColor(baseColor, -0.3 + 0.08 * i));
           }
         });
       }
@@ -1321,7 +1321,7 @@ app.get('/dashboard/data/:id', async (req, res) => {
       if (t.value > 0) {
         detailedData.labels.push(t.label);
         detailedData.data.push(Number(t.value.toFixed(3)));
-        detailedData.backgroundColor.push(shadeColor(baseColor, -0.17 + 0.15 * i));
+        detailedData.backgroundColor.push(shadeColor(baseColor, -0.3 + 0.08 * i));
       }
     });
 
