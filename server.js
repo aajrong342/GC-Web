@@ -256,15 +256,14 @@ const loginSetup = async (req, res, next) => {
       const sectorClients = await getSectorNonCompliantClients(req.session.user.id)
       const cmpCount = wasteClients.length
       const secCount = sectorClients.length
-      const totalCount = cmpCount + secCount
+      const cmpTotalCount = cmpCount + secCount
+
       // Make it available to views and routes
       res.locals.pendingApplications = pendingApplications
       res.locals.pendingData = pendingData
       res.locals.notifCount = notifCount
       res.locals.revisionCount = revisionCount
-      res.locals.cmpCount = cmpCount
-      res.locals.secCount = secCount
-      res.locals.totalCount = totalCount
+      res.locals.cmpTotalCount = cmpTotalCount
     }
 
     next();
