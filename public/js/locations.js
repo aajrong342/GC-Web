@@ -14,13 +14,12 @@ fetch('/locations')
         jsonData = data
         getRegions(jsonData)
 
-        console.log(data)
-
         // If prefill values exist, apply them
         const prefill = {
             region: form.dataset.prefillRegion,
             province: form.dataset.prefillProvince,
-            municipality: form.dataset.prefillMunicipality
+            municipality: form.dataset.prefillMunicipality,
+            barangay: form.dataset.prefillBarangay
         };
 
         if (prefill.region) {
@@ -38,6 +37,13 @@ fetch('/locations')
                 setTimeout(() => {
                     if (prefill.municipality) {
                         municipalitiesDropdown.value = prefill.municipality;
+                        municipalitiesDropdown.dispatchEvent(new Event('change')); // Load barangays
+
+                        setTimeout(() => {
+                            if (prefill.barangay) {
+                                barangayDropdown.value = prefill.barangay;
+                            }
+                        }, 100)
                     }
                 }, 100); // wait for municipalities to load
             }, 100); // wait for provinces to load
