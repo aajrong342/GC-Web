@@ -119,6 +119,16 @@
       </table>
     </div>
   </div>
+    <!-- Insight -->
+<hr>
+<div class="form-section" style="background-color: #eef8f2; padding: 1.5rem; border-radius: 12px; border-left: 6px solid #4CAF50; margin-top: 2rem;">
+  <h2 style="color: #2d613f;"><i class="fa-solid fa-lightbulb" style="margin-right: 8px;"></i>Waste Category Insights & Recommendations</h2>
+  <ul style="font-size: 1.1rem; list-style-type: none; padding-left: 0;">
+    {{#each recommendations}}
+      <li style="margin-bottom: 1rem;">{{{this}}}</li>
+    {{/each}}
+  </ul>
+</div>
 
 <!-- Data Tabs -->
 <div class="tab">
@@ -753,4 +763,30 @@ function exportTableToExcel() {
   margin-top: 12px;
 }
 
+.high-priority {
+  color: #127009;
+  background-color: #c2f3ce;
+  padding: 0.75rem;
+  border-left: 4px solid #127009;
+  border-radius: 6px;
+  display: block;
+}
+
+.mid-priority {
+  color: #cc7a00;
+  background-color: #fff4e0;
+  padding: 0.75rem;
+  border-left: 4px solid #cc7a00;
+  border-radius: 6px;
+  display: block;
+}
+
+.low-priority {
+  color: #b30000;
+  background-color: #ffe6e6;
+  padding: 0.75rem;
+  border-left: 4px solid #b30000;
+  border-radius: 6px;
+  display: block;
+}
 </style>

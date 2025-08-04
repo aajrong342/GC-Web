@@ -22,6 +22,8 @@ import {
   getWasteGenById, getWasteCompById, getDataByStatus,
   getWasteSupertypes,
   getWasteTypes,
+  getWasteComplianceQuotas,getSectorComplianceQuotas,  updateWasteQuota,
+  updateSectorQuota,
   getDataByUser,
   getPsgcName,
   updateDataStatus,
@@ -704,7 +706,20 @@ app.get('/dashboard/data/summary', async (req, res, next) => {
           backgroundColor: rawTotals.map(r => r.color)
         };
       }
+const sortedLegend = [...legendData].sort((a, b) => b.value - a.value);
 
+const categoryRecommendations = sortedLegend.map((item, index) => {
+  const cat = item.label;
+  if (item.value === 0) {
+    return `${cat} has <b>no recorded data</b>. Consider reviewing your data collection or categorization practices for this category.`;
+  } else if (index === 0) {
+    return `${cat} is the <b>top contributor</b> to total waste. Prioritize <b>reduction, reuse, and proper disposal</b> strategies.`;
+  } else if (index === 1 || index === 2) {
+    return `${cat} has a <b>moderate share</b> of the waste stream. Monitor trends and <b>optimize collection methods</b>.`;
+  } else {
+    return `${cat} shows <b>minimal contribution</b>. Evaluate if underreporting or poor classification is affecting this figure.`;
+  }
+});
       res.render('dashboard/view-data-summary', {
         layout: 'dashboard',
         title: 'Data Summary | GC Dashboard',
@@ -717,6 +732,7 @@ app.get('/dashboard/data/summary', async (req, res, next) => {
         legendData,
         wasteCompliances,
         sectorCompliances,
+        categoryRecommendations,
         sectorBarData: JSON.stringify(sectorBarData),
         sectorPieData: JSON.stringify(sectorPieData),
         regionName, provinceName, municipalityName, barangayName,
@@ -1367,6 +1383,24 @@ app.get('/dashboard/data/:id', async (req, res) => {
       backgroundColor: rawTotals.map(r => r.color)
     };
   }
+// Generate waste recommendations
+const sortedLegend = [...legendData].sort((a, b) => b.value - a.value);
+
+const recommendations = sortedLegend.map((item, index) => {
+  const cat = item.label;
+  const value = item.value;
+
+  if (value === 0) {
+    return `<span class="low-priority"><strong>${cat}</strong> shows <strong>no recorded data</strong>. This may indicate issues in waste sorting, data logging, or community awareness. <em>We recommend auditing data entry points and reinforcing waste segregation education among constituents.</em></span>`;
+  } else if (index === 0) {
+    return `<span class="high-priority"><strong>${cat}</strong> is the <strong>largest contributor</strong> to overall waste. <em>Focus efforts on upstream reduction, community education, alternative disposal methods (e.g., composting or recycling), and stronger enforcement of waste segregation at source.</em></span>`;
+  } else if (index === 1 || index === 2) {
+    return `<span class="mid-priority"><strong>${cat}</strong> represents a <strong>moderate proportion</strong> of total waste. <em>Monitor trends closely and implement consistent collection programs and classification training to sustain or improve performance.</em></span>`;
+  } else {
+    return `<span class="low-priority"><strong>${cat}</strong> appears to be <strong>underreported or lacking</strong>. <em>Consider targeted campaigns or infrastructure (e.g., drop-off points, incentives) to encourage proper classification and collection.</em></span>`;
+  }
+});
+
 
   res.render('dashboard/view-data-entry', {
     layout: 'dashboard',
@@ -1384,6 +1418,7 @@ app.get('/dashboard/data/:id', async (req, res) => {
     legendData,
     wasteCompliance,
     sectorCompliance,
+    recommendations,
     sectorBarData: JSON.stringify(sectorBarData),
     sectorPieData: JSON.stringify(sectorPieData),
     coords: JSON.stringify(coords)
@@ -2224,6 +2259,65 @@ app.get('/api/control-panel/top-contributors', async (req, res) => {
 app.get('/api/control-panel/top-regions', async (req, res) => {
   const regions = await getTopReportingRegions();
   res.json(regions);
+});
+
+// Control Panel – Quota Management Page
+app.get('/control-panel/quotas', async (req, res) => {
+  const wasteQuotas = await getWasteComplianceQuotas();
+  const sectorQuotas = await getSectorComplianceQuotas();
+  const wasteSupertypes = await getWasteSupertypes();
+  const sectors = await getSectors();
+
+  res.render('control-panel/quotas', {
+    layout: 'control-panel',
+    title: 'Compliance Quotas | GC Control Panel',
+    current_quotas: true,
+    wasteQuotas,
+    sectorQuotas,
+    wasteSupertypes,
+    sectors
+  });
+});
+
+app.post('/control-panel/quotas/update-waste', async (req, res) => {
+  const { quota_id, quota_weight } = req.body;
+
+  const parsedWeight = parseFloat(quota_weight);
+  if (!quota_id || isNaN(parsedWeight) || parsedWeight < 0) {
+    return res.status(400).send("Invalid quota weight submitted.");
+  }
+
+  try {
+    await updateWasteQuota(quota_id, parsedWeight);
+    res.redirect('/control-panel/quotas');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error updating quota.");
+  }
+});
+
+app.post('/control-panel/quotas/update-sector', async (req, res) => {
+  const { quota_id, quota_weight } = req.body;
+
+  const parsedWeight = parseFloat(quota_weight);
+  if (!quota_id || isNaN(parsedWeight) || parsedWeight < 0) {
+    return res.status(400).send("Invalid quota weight submitted.");
+  }
+
+  try {
+    await updateSectorQuota(quota_id, parsedWeight);
+    res.redirect('/control-panel/quotas');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error updating sector quota.");
+  }
+});
+
+
+app.post('/control-panel/quotas/update-sector', async (req, res) => {
+  const { quota_id, quota_weight } = req.body;
+  await updateSectorQuota(quota_id, quota_weight);
+  res.redirect('/control-panel/quotas');
 });
 
 // User routes

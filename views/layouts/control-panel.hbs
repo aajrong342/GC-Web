@@ -88,6 +88,10 @@
                 <!-- Only show functions if current user is admin -->
                 {{#ifEquals user.supertype 0}}
                     <div class="nav-divider">ADMIN FUNCTIONS</div>
+                    
+                    <a href="/control-panel/quotas" class="{{#if current_quotas}}current{{/if}}">
+                        <i class="fa-solid fa-scale-balanced nav-icon"></i> Manage Quotas
+                    </a>
 
                     <a href="/control-panel/users" class="{{#if current_users}}current{{/if}}">
                         <i class="fa-solid fa-users nav-icon"></i> Manage Users
@@ -96,6 +100,7 @@
                     <a href="/control-panel/roles" class="{{#if current_roles}}current{{/if}}">
                         <i class="fa-solid fa-helmet-safety nav-icon"></i> Manage Roles
                     </a>
+                    
                 {{/ifEquals}}
 
                 <a href="/dashboard" style="background: none !important;">

@@ -1,0 +1,146 @@
+<h2 style="margin-bottom: 20px;">Waste Supertype Quotas</h2>
+<div class="form-section">
+  <h3><i class="fas fa-recycle"></i> Waste Supertype Quotas</h3>
+  <table class="user-profile">
+    <thead>
+      <tr>
+        <th class="label">Waste Supertype</th>
+        <th class="label">Quota (kg)</th>
+        <th class="label">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each wasteQuotas}}
+      <tr>
+        <td>{{this.waste_supertype_name}}</td>
+        <td>
+        <form method="POST" action="/control-panel/quotas/update-waste" class="inline-form" onsubmit="return confirmUpdate('waste supertype', '{{this.waste_supertype_name}}')">
+            <input type="hidden" name="quota_id" value="{{this.quota_id}}">
+            <input type="number" name="quota_weight" value="{{this.quota_weight}}" step="0.01" min="0" required>
+        </td>
+        <td>
+            <button type="submit" class="btn-submit">Update</button>
+          </form>
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
+
+<div class="form-section">
+  <h3><i class="fas fa-industry"></i> Sector Quotas</h3>
+  <table class="user-profile">
+    <thead>
+      <tr>
+        <th class="label">Sector</th>
+        <th class="label">Quota (kg)</th>
+        <th class="label">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each sectorQuotas}}
+      <tr>
+        <td>{{this.sector_name}}</td>
+        <td>
+        <form method="POST" action="/control-panel/quotas/update-sector" class="inline-form" onsubmit="return confirmUpdate('sector', '{{this.sector_name}}')">
+            <input type="hidden" name="quota_id" value="{{this.quota_id}}">
+            <input type="number" name="quota_weight" value="{{this.quota_weight}}" step="0.01" min="0" required>
+        </td>
+        <td>
+            <button type="submit" class="btn-submit">Update</button>
+          </form>
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  function confirmUpdate(type, name) {
+    return confirm(`Are you sure you want to update the quota for the ${type} "${name}"?`);
+  }
+</script>
+
+<style>
+/* Enhance table layout */
+.user-profile {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.user-profile th, .user-profile td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.user-profile thead {
+  background-color: #f4f4f4;
+}
+
+.user-profile th.label {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.user-profile input[type="number"] {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+}
+
+/* Form section background and padding */
+.form-section {
+  background-color: #fdfdfd;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  margin: 2rem auto;
+  max-width: 900px;
+  color: #333;
+}
+
+.form-section h3 {
+  font-size: 1.4rem;
+  margin-bottom: 1.2rem;
+  color: #127009;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.btn-submit {
+  background-color: #28a745;
+  border: none;
+  padding: 0.5rem 1rem;
+  color: white;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background-color 0.2s ease;
+}
+
+.btn-submit:hover {
+  background-color: #23963b;
+}
+
+/* Inline form to align input and button in same row inside cell */
+.inline-form {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.inline-form input[type="number"] {
+  flex: 1;
+}
+
+</style>

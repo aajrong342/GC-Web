@@ -1428,6 +1428,37 @@ export async function getSectorNonCompliantClients(userId) {
   return rows;
 }
 
+export async function getWasteComplianceQuotas() {
+  const [rows] = await sql.query(`
+SELECT cq.*, ws.name AS waste_supertype_name
+FROM compliance_quotas cq
+JOIN waste_supertype ws ON cq.waste_supertype_id = ws.id
+  `);
+  return rows;
+}
+
+export async function getSectorComplianceQuotas() {
+  const [rows] = await sql.query(`
+    SELECT scq.*, s.name AS sector_name
+    FROM sector_compliance_quotas scq
+    JOIN sector s ON scq.sector_id = s.id
+  `);
+  return rows;
+}
+
+export async function updateWasteQuota(quotaId, newWeight) {
+  await sql.query(
+    `UPDATE compliance_quotas SET quota_weight = ? WHERE quota_id = ?`,
+    [newWeight, quotaId]
+  );
+}
+
+export async function updateSectorQuota(quotaId, newWeight) {
+  await sql.query(
+    `UPDATE sector_compliance_quotas SET quota_weight = ? WHERE quota_id = ?`,
+    [newWeight, quotaId]
+  );
+}
 
 /* ---------------------------------------
     CONTROL PANEL
