@@ -736,7 +736,8 @@ const categoryRecommendations = sortedLegend.map((item, index) => {
         sectorBarData: JSON.stringify(sectorBarData),
         sectorPieData: JSON.stringify(sectorPieData),
         regionName, provinceName, municipalityName, barangayName,
-        locations: JSON.stringify(validCoords) // map coords
+        locations: JSON.stringify(validCoords), // map coords
+        show_generate_btn: true
       })
     } catch (err) {
       console.error('Summary Error:', err);  // Log the actual error
@@ -1421,7 +1422,8 @@ const recommendations = sortedLegend.map((item, index) => {
     recommendations,
     sectorBarData: JSON.stringify(sectorBarData),
     sectorPieData: JSON.stringify(sectorPieData),
-    coords: JSON.stringify(coords)
+    coords: JSON.stringify(coords),
+    show_generate_btn: true
   });
 });
 // Get one user from ID (user profile)

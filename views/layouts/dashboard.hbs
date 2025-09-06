@@ -69,7 +69,7 @@
                 </a>
 
                 <a href="/dashboard/notifications" class="{{#if current_notifs}}current{{/if}}">
-                    <i class="fa-solid fa-bell nav-icon"></i> Notifications&nbsp;
+                    <i class="fa-solid fa-bell {{#ifNotEquals notifCount 0}}fa-shake{{/ifNotEquals}} nav-icon"></i> Notifications&nbsp;
                     <span class="notif-badge" id="notif-badge" style="{{#ifEquals notifCount 0}}display:none;{{/ifEquals}}">
                         {{notifCount}}
                     </span>
@@ -132,6 +132,13 @@
             <button id="open-sidebar-btn">
                 <i class="fa-solid fa-bars"></i> Open Sidebar
             </button>
+
+            {{#if show_generate_btn}}
+            <button id="generate-btn">
+                <i class="fa-solid fa-file-pdf"></i>&nbsp; Generate Report
+            </button>
+            {{/if}}
+
             {{{ body }}}
         </main>
     </div>
