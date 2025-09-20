@@ -2,10 +2,14 @@ import express from 'express'
 import { engine } from 'express-handlebars'
 import cors from 'cors'
 import PDFDocument from 'pdfkit';
+import cookieParser from "cookie-parser";
 
 // Session
 import session from 'express-session'
 const store = new session.MemoryStore();
+
+// For PDF report generation
+import puppeteer from 'puppeteer';
 
 // Import database functions
 import {
@@ -110,6 +114,8 @@ app.use(favicon('./favicon.ico'))
 // Use the public folder for assets
 app.use(express.static('public'))
 app.use('/pictures', express.static('pictures'));
+
+app.use(cookieParser());
 
 // File paths
 const __filename = fileURLToPath(import.meta.url)
@@ -1434,9 +1440,62 @@ const recommendations = sortedLegend.map((item, index) => {
     sectorBarData: JSON.stringify(sectorBarData),
     sectorPieData: JSON.stringify(sectorPieData),
     coords: JSON.stringify(coords),
-    show_generate_btn: true
+    show_generate_btn: true,
+    entryId: req.params.id
   });
 });
+
+// Generate PDF report
+app.get("/api/:entryId/pdf", async (req, res) => {
+  const { entryId } = req.params;
+
+  try {
+    const browser = await puppeteer.launch({ headless: "new" });
+    const page = await browser.newPage();
+
+    // Puppeteer logs in then converts page to PDF
+    // This is the full cookie value sent by browser (already signed)
+    const sidCookie = req.cookies["connect.sid"]; 
+    await browser.setCookie({
+      name: "connect.sid",
+      value: sidCookie,
+      domain: "localhost", // or your production hostname
+      path: "/",
+      httpOnly: true
+    });
+
+    // Force "screen" CSS so it doesn’t hide stuff in print
+    await page.emulateMediaType("screen");
+
+    // Load your existing entry page with handlebars template
+    await page.goto(`${process.env.APP_BASE_URL}/dashboard/data/${entryId}`, {
+      waitUntil: "networkidle0"
+    });
+
+    // Wait for some known selector to ensure content is loaded
+    await page.waitForSelector("#sector-pies-container");
+    await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 2000)));
+
+    // Generate PDF
+    const pdfBuffer = await page.pdf({ format: "A4", printBackground: true });
+
+    // DEBUG
+    await page.screenshot({ path: "debug.png", fullPage: true });
+
+    await browser.close();
+
+    // Send PDF to browser
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="entry-${entryId}.pdf"`
+    });
+    res.send(pdfBuffer);
+  } catch (err) {
+    console.error("PDF generation failed:", err);
+    res.status(500).send("Error generating PDF");
+  }
+});
+
 // Get one user from ID (user profile)
 app.get('/dashboard/profile', async (req, res) => {
   res.render('dashboard/user-profile', {

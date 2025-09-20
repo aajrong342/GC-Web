@@ -143,79 +143,182 @@
         </main>
     </div>
 
-<!-- Modal (hidden by default) -->
+<!-- PDF Generation Modal -->
 <div id="pdfModal" class="modal">
   <div class="modal-content">
+    <!-- Close button -->
     <span class="close">&times;</span>
-    <h2>Generate Report</h2>
-    <p>Are you sure you want to generate a PDF of this data entry?</p>
+
+    <h2>Generate PDF Report</h2>
+
+    <!-- Select All / Deselect All -->
+    <button id="toggle-select">Select All</button>
+
+    <!-- Checklist -->
+    <ul class="checklist">
+    <!-- Compliance Status -->
+    <li>
+        <label>
+        <input type="checkbox" class="super-item" data-group="compliance" value="Compliance Status" checked>
+        <span>Compliance Status</span>
+        </label>
+        <ul>
+        <li>
+            <label>
+            <input type="checkbox" class="sub-item" data-group="compliance" value="Waste Category Compliance Status" checked>
+            <span>Waste Category Compliance Status</span>
+            </label>
+        </li>
+        <li>
+            <label>
+            <input type="checkbox" class="sub-item" data-group="compliance" value="Waste Sector Compliance Status" checked>
+            <span>Waste Sector Compliance Status</span>
+            </label>
+        </li>
+        </ul>
+    </li>
+
+    <!-- Waste Category Insights -->
+    <li>
+        <label>
+        <input type="checkbox" class="super-item" data-group="insights" value="Waste Category Insights & Recommendations" checked>
+        <span>Waste Category Insights & Recommendations</span>
+        </label>
+    </li>
+
+    <!-- Top Waste Categories -->
+    <li>
+        <label>
+        <input type="checkbox" class="super-item" data-group="top-cats" value="Top Waste Categories" checked>
+        <span>Top Waste Categories</span>
+        </label>
+        <ul>
+        <li><label><input type="checkbox" class="sub-item" data-group="top-cats" value="Biodegradable" checked><span>Biodegradable</span></label></li>
+        <li><label><input type="checkbox" class="sub-item" data-group="top-cats" value="Recyclable" checked><span>Recyclable</span></label></li>
+        <li><label><input type="checkbox" class="sub-item" data-group="top-cats" value="Residual" checked><span>Residual</span></label></li>
+        <li><label><input type="checkbox" class="sub-item" data-group="top-cats" value="Special/Hazardous" checked><span>Special/Hazardous</span></label></li>
+        </ul>
+    </li>
+
+    <!-- Top Sectors -->
+    <li>
+        <label>
+        <input type="checkbox" class="super-item" data-group="sectors" value="Top Sectors by Waste Output" checked>
+        <span>Top Sectors by Waste Output</span>
+        </label>
+    </li>
+
+    <!-- Top Waste Categories per Sector -->
+    <li>
+        <label>
+        <input type="checkbox" class="super-item" data-group="cats-per-sector" value="Top Waste Categories per Sector" checked>
+        <span>Top Waste Categories per Sector</span>
+        </label>
+        <ul>
+        <li><label><input type="checkbox" class="sub-item" data-group="cats-per-sector" value="Residential" checked><span>Residential</span></label></li>
+        <li><label><input type="checkbox" class="sub-item" data-group="cats-per-sector" value="Commercial" checked><span>Commercial</span></label></li>
+        <li><label><input type="checkbox" class="sub-item" data-group="cats-per-sector" value="Institutional" checked><span>Institutional</span></label></li>
+        <li><label><input type="checkbox" class="sub-item" data-group="cats-per-sector" value="Industrial" checked><span>Industrial</span></label></li>
+        <li><label><input type="checkbox" class="sub-item" data-group="cats-per-sector" value="Health" checked><span>Health</span></label></li>
+        <li><label><input type="checkbox" class="sub-item" data-group="cats-per-sector" value="Agriculture and Livestock" checked><span>Agriculture and Livestock</span></label></li>
+        </ul>
+    </li>
+
+    <!-- Raw Data -->
+    <li>
+        <label>
+        <input type="checkbox" class="super-item" data-group="raw" value="Raw Data" checked>
+        <span>Raw Data</span>
+        </label>
+    </li>
+    </ul>
+
+    <!-- Modal Actions -->
     <div class="modal-actions">
-      <button id="confirm-generate" class="confirm-btn">Yes, Generate</button>
       <button id="cancel-generate" class="cancel-btn">Cancel</button>
+      <button id="confirm-generate" class="confirm-btn">Generate</button>
     </div>
   </div>
 </div>
 
-<style>
-/* Modal container */
-.modal {
-  display: none; /* hidden by default */
-  position: fixed;
-  z-index: 1000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-}
 
+<style>
 /* Modal box */
 .modal-content {
   background: #fff;
-  margin: 15% auto;
+  margin: 5% auto;              /* lower top margin so it's more centered */
   padding: 20px;
   border-radius: 12px;
-  width: 400px;
+  width: 600px;                 /* wider modal */
+  max-height: 80vh;             /* prevent it from overflowing screen */
   text-align: center;
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  overflow-y: auto;             /* scroll modal if content is very tall */
 }
 
-/* Close button (X) */
-.close {
-  float: right;
-  font-size: 24px;
+/* Checklist container */
+.checklist {
+  text-align: left;
+  margin: 20px 0;
+  max-height: 60vh;             /* scroll only the list portion */
+  overflow-y: auto;
+  padding-left: 0;
+  list-style: none;
+}
+
+/* Each list item */
+.checklist > li {
+  margin: 10px 0;
+}
+
+/* Super-item labels */
+.checklist > li > label {
+  font-weight: bold;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Sub-items (nested list) */
+.checklist ul {
+  margin: 6px 0 6px 20px;
+  padding-left: 0;
+  list-style: none;
+  border-left: 2px solid #eee;
+}
+
+.checklist ul li {
+  margin: 4px 0;
+}
+
+.checklist input[type="checkbox"] {
+  margin-right: 8px;
   cursor: pointer;
 }
 
-/* Actions */
-.modal-actions {
-  margin-top: 20px;
-  display: flex;
-  justify-content: space-around;
+/* Default label text */
+.checklist label {
+  color: #000; /* normal black text */
 }
 
-.confirm-btn {
-  background: #d32f2f;
+/* If checkbox is unchecked → gray text */
+.checklist input[type="checkbox"]:not(:checked) + span {
+  color: #bbb;  /* lighter gray but still readable */
+}
+
+/* Select All / Deselect All button */
+#toggle-select {
+  background: #1976d2;
   color: #fff;
-  padding: 8px 16px;
+  padding: 6px 12px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  margin-bottom: 12px;
+  font-size: 14px;
 }
-.confirm-btn:hover {
-  background: #b71c1c;
-}
-
-.cancel-btn {
-  background: #ddd;
-  color: #000;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.cancel-btn:hover {
-  background: #bbb;
+#toggle-select:hover {
+  background: #125a9c;
 }
 </style>
 
@@ -289,10 +392,24 @@ const generateBtn = document.getElementById("generate-btn");
 const closeBtn = document.querySelector(".close");
 const cancelBtn = document.getElementById("cancel-generate");
 const confirmBtn = document.getElementById("confirm-generate");
+const entryId = {{entryId}};
+
+// Extra elements for checklists
+const toggleBtn = document.getElementById("toggle-select");
+let allSelected = false;
 
 // Show modal when clicking generate
 generateBtn.addEventListener("click", () => {
   modal.style.display = "block";
+  
+  // Reset all checkboxes to checked when opening
+  document.querySelectorAll("#pdfModal input[type=checkbox]").forEach(cb => {
+    cb.checked = true;
+  });
+  
+  // Reset toggle button state
+  allSelected = true;
+  toggleBtn.textContent = "Deselect All";
 });
 
 // Close modal on X or cancel
@@ -304,13 +421,59 @@ window.addEventListener("click", (e) => {
   if (e.target === modal) modal.style.display = "none";
 });
 
+// Toggle Select All / Deselect All
+toggleBtn.addEventListener("click", () => {
+  allSelected = !allSelected;
+  document.querySelectorAll("#pdfModal input[type=checkbox]").forEach(cb => {
+    cb.checked = allSelected;
+    cb.indeterminate = false;
+  });
+  toggleBtn.textContent = allSelected ? "Deselect All" : "Select All";
+});
+
+// Super-item behavior
+document.querySelectorAll("#pdfModal .super-item").forEach(superItem => {
+  superItem.addEventListener("change", () => {
+    const group = superItem.dataset.group;
+    document.querySelectorAll(`#pdfModal .sub-item[data-group="${group}"]`)
+      .forEach(sub => sub.checked = superItem.checked);
+  });
+});
+
+// Sub-item behavior
+document.querySelectorAll("#pdfModal .sub-item").forEach(subItem => {
+  subItem.addEventListener("change", () => {
+    const group = subItem.dataset.group;
+    const superItem = document.querySelector(`#pdfModal .super-item[data-group="${group}"]`);
+    const subs = document.querySelectorAll(`#pdfModal .sub-item[data-group="${group}"]`);
+    const allChecked = Array.from(subs).every(s => s.checked);
+    const noneChecked = Array.from(subs).every(s => !s.checked);
+
+    if (allChecked) {
+      superItem.checked = true;
+      superItem.indeterminate = false;
+    } else if (noneChecked) {
+      superItem.checked = false;
+      superItem.indeterminate = false;
+    } else {
+      superItem.indeterminate = true; // dash state
+    }
+  });
+});
+
 // Confirm generate
 confirmBtn.addEventListener("click", () => {
   modal.style.display = "none";
-  // TODO: Trigger your PDF generation logic here
-  console.log("PDF generation triggered!");
-  // Example: window.location.href = "/dashboard/entry/{{id}}/pdf";
+
+  // Collect selected items
+  const selected = Array.from(document.querySelectorAll("#pdfModal input[type=checkbox]:checked"))
+    .map(cb => cb.value); // assume each checkbox has a value attribute
+
+  // Trigger PDF generation with selected sections
+  const query = new URLSearchParams({ sections: JSON.stringify(selected) });
+  window.open(`/api/${entryId}/pdf?${query.toString()}`, "_blank");
 });
+
 </script>
 
 </body>
