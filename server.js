@@ -1446,10 +1446,11 @@ const recommendations = sortedLegend.map((item, index) => {
 });
 
 // Generate PDF report
-// Uses /dashboard instead of /api so that browser won't have to use login cookies anymore
 app.post("/api/data/:entryId/pdf", async (req, res) => {
   const { entryId } = req.params;
   const { sections } = req.body; // array of section IDs (from modal)
+
+  console.log(sections)
 
   if (!sections || !Array.isArray(sections)) {
     return res.status(400).json({ error: "Missing or invalid sections list" });
@@ -1477,34 +1478,88 @@ app.post("/api/data/:entryId/pdf", async (req, res) => {
     const reportUrl = `http://localhost:3000/dashboard/data/${entryId}`;
     await page.goto(reportUrl, { waitUntil: "networkidle0" });
 
-    // Make sure page is rendered
-    await page.waitForSelector(".title-card", { timeout: 10000 });
+    // ensure page rendered
+    await page.waitForSelector("body", { timeout: 10000 });
 
-    // Hide sections not selected
-    await page.evaluate((keepSections) => {      
-      document.querySelectorAll("[data-section]").forEach(el => {
-        const id = el.getAttribute("data-section");
-        if (!keepSections.includes(id)) {
-          //el.style.display = "none";
-          el.style.setProperty("display", "none", "important");
+    // Expand all tab contents
+    await page.evaluate(() => {
+      document.querySelectorAll(".tabcontent, .bar-tabcontent, .sector-tabcontent")
+        .forEach(el => {
+          el.style.display = "block";
+          el.style.visibility = "visible";
+          el.style.opacity = "1";
+          el.style.height = "auto";
+        });
+    });
+
+    // Wait a tick to ensure they actually paint
+    await new Promise(resolve => setTimeout(resolve, 1200));
+
+    // Convert canvases to images
+    await page.evaluate(() => {
+      document.querySelectorAll("canvas").forEach(canvas => {
+        try {
+          const img = document.createElement("img");
+          img.src = canvas.toDataURL("image/png");
+          img.style.maxWidth = "100%";
+          img.style.height = "auto";
+          canvas.replaceWith(img);
+        } catch (e) {
+          console.error("Canvas export failed", e);
         }
       });
+    });
+
+    // Extract HTML for only selected sections
+    const selectedHtml = await page.evaluate((keepSections) => {
+      return Array.from(document.querySelectorAll("[data-section]"))
+        .filter(el => keepSections.includes(el.getAttribute("data-section")))
+        .map(el => el.outerHTML)
+        .join("");
     }, sections);
 
-    // DEBUG
-    await page.evaluate(() => {
-      return Array.from(document.querySelectorAll("[data-section]"))
-        .map(el => el.getAttribute("data-section"));
-    }).then(ids => console.log("Available sections in page:", ids));
+    // Build a new page with just the selected sections
+    const printPage = await browser.newPage();
+    await printPage.setContent(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          
+          <link rel="stylesheet" type="text/css" href="http://localhost:3000/css/dashboard-style.css" />
+          <link rel="stylesheet" type="text/css" href="http://localhost:3000/css/admin-style.css" />
+          <link rel="stylesheet" type="text/css" href="http://localhost:3000/css/chart-style.css" />
+          <link rel="stylesheet" type="text/css" href="http://localhost:3000/css/print-style.css" />
+          <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+          <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+          <script src="https://cdn.jsdelivr.net/npm/handlebars/dist/handlebars.min.js"></script>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+          <script src="https://kit.fontawesome.com/2fcb76e57d.js" crossorigin="anonymous"></script>
+        </head>
+        <body>
+          ${selectedHtml}
+        </body>
+      </html>
+    `, { waitUntil: "networkidle0" });
 
-    await page.screenshot({ path: "after-hide.png", fullPage: true }); // DEBUG
+    // wait a short tick for layout to settle, then screenshot for visual confirmation
+    await new Promise(resolve => setTimeout(resolve, 250));
+    await printPage.screenshot({ path: "after-hide.png", fullPage: true }); // DEBUG
 
     // Generate PDF
-    const pdfBuffer = await page.pdf({
+    const pdfBuffer = await printPage.pdf({
       format: "A4",
       printBackground: true,
-      landscape: true,
-      preferCSSPageSize: false
+      preferCSSPageSize: true,
+      scale: 0.8,
+      margin: {
+        top: "20mm",
+        bottom: "20mm",
+        left: "15mm",
+        right: "15mm"
+      },
     });
 
     await browser.close();

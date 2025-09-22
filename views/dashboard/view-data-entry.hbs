@@ -13,42 +13,42 @@
 
 <div style="display: flex">
   <!-- Div enclosing info blocks -->
-  <div style="width: 50%;" data-section="data-info">
+  <div  data-section="data-info">
     <!-- Info Blocks -->
     <div class="info-grid">
-      <!-- Submission Info -->
-      <div class="form-section">
-        <h3><i class="fas fa-user"></i> Submission Info</h3>
-        <table class="user-profile">
-          <tr>
-            <td class="label">Submitted by</td>
-            <td>{{uppercase wasteGen.lastname}}, {{wasteGen.firstname}}</td>
-          </tr>
-          <tr>
-            <td class="label">Organization Name</td>
-            <td>{{wasteGen.company_name}}</td>
-          </tr>
-          <tr>
-            <td class="label">Date Submitted</td>
-            <td>{{textDate wasteGen.date_submitted}}</td>
-          </tr>
-        </table>
-      </div>
-      
-      <!-- Collection Info -->
-      <div class="form-section">
-        <h3><i class="fas fa-calendar-alt"></i> Collection Info</h3>
-        <table class="user-profile">
-          <tr>
-            <td class="label">Start Date</td>
-            <td>{{textDate wasteGen.collection_start}}</td>
-          </tr>
-          <tr>
-            <td class="label">End Date</td>
-            <td>{{textDate wasteGen.collection_end}}</td>
-          </tr>
-        </table>
-      </div>
+        <!-- Submission Info -->
+        <div class="form-section">
+          <h3><i class="fas fa-user"></i> Submission Info</h3>
+          <table class="user-profile">
+            <tr>
+              <td class="label">Submitted by</td>
+              <td>{{uppercase wasteGen.lastname}}, {{wasteGen.firstname}}</td>
+            </tr>
+            <tr>
+              <td class="label">Organization Name</td>
+              <td>{{wasteGen.company_name}}</td>
+            </tr>
+            <tr>
+              <td class="label">Date Submitted</td>
+              <td>{{textDate wasteGen.date_submitted}}</td>
+            </tr>
+          </table>
+        </div>
+        
+        <!-- Collection Info -->
+        <div class="form-section">
+          <h3><i class="fas fa-calendar-alt"></i> Collection Info</h3>
+          <table class="user-profile">
+            <tr>
+              <td class="label">Start Date</td>
+              <td>{{textDate wasteGen.collection_start}}</td>
+            </tr>
+            <tr>
+              <td class="label">End Date</td>
+              <td>{{textDate wasteGen.collection_end}}</td>
+            </tr>
+          </table>
+        </div>
     </div>
 
     <!-- Waste Generation Info -->
@@ -173,19 +173,22 @@
     <hr>
 
     <!-- Summary pie -->
-    <br><center>
-      <h2>Top Waste Types by Category</h2>
-      <p style="font-size: large;">Each bar chart below focuses on one waste category. The bars represent different types under that category, showing how much each contributed to the total weight.</p>
-    </center>
-    <div class="bar-tab">
-        <button class="bar-tablinks" onclick="openBarTab(event, 'Biodegradable')" id="firstBar">BIODEGRADABLE</button>
-        <button class="bar-tablinks" onclick="openBarTab(event, 'Recyclable')">RECYCLABLE</button>
-        <button class="bar-tablinks" onclick="openBarTab(event, 'Residual')">RESIDUAL</button>
-        <button class="bar-tablinks" onclick="openBarTab(event, 'Special/Hazardous')">SPECIAL/HAZARDOUS</button>
-    </div>
+    <br>
+    {{!-- <section data-section="top-cats"> --}}
+      <center data-section="top-cats">
+        <h2>Top Waste Types by Category</h2>
+        <p style="font-size: large;">Each bar chart below focuses on one waste category. The bars represent different types under that category, showing how much each contributed to the total weight.</p>
+      </center>
+      <div class="bar-tab">
+          <button class="bar-tablinks" onclick="openBarTab(event, 'Biodegradable')" id="firstBar">BIODEGRADABLE</button>
+          <button class="bar-tablinks" onclick="openBarTab(event, 'Recyclable')">RECYCLABLE</button>
+          <button class="bar-tablinks" onclick="openBarTab(event, 'Residual')">RESIDUAL</button>
+          <button class="bar-tablinks" onclick="openBarTab(event, 'Special/Hazardous')">SPECIAL/HAZARDOUS</button>
+      </div>
 
-    <!-- Subtypes bar charts -->
-    <div id="bar-charts-container"></div>
+      <!-- Subtypes bar charts -->
+      <div id="bar-charts-container"></div>
+    {{!-- </section> --}}
 
     <!-- Top sectors producing waste -->
     <br><hr><br>
@@ -199,26 +202,28 @@
 
     <!-- Pie chart per sector -->
     <br><hr><br>
-    <center>
-      <h2>Top Waste Categories per Sector</h2>
-      <p style="font-size: large;">Each pie chart below shows the waste composition for a specific economic sector.</p>
-    </center>
+    {{!-- <section data-section="cats-per-sector"> --}}
+      <center data-section="cats-per-sector">
+        <h2>Top Waste Categories per Sector</h2>
+        <p style="font-size: large;">Each pie chart below shows the waste composition for a specific economic sector.</p>
+      </center>
 
-    <div class="sector-tab">
-        <button class="sector-tablinks" onclick="openPieTab(event, 'Residential')" id="firstSector">RESIDENTIAL</button>
-        <button class="sector-tablinks" onclick="openPieTab(event, 'Commercial')">COMMERCIAL</button>
-        <button class="sector-tablinks" onclick="openPieTab(event, 'Institutional')">INSTITUTIONAL</button>
-        <button class="sector-tablinks" onclick="openPieTab(event, 'Industrial')">INDUSTRIAL</button>
-        <button class="sector-tablinks" onclick="openPieTab(event, 'Health')">HEALTH</button>
-        <button class="sector-tablinks" onclick="openPieTab(event, 'AgricultureandLivestock')">AGRICULTURE AND LIVESTOCK</button>
-    </div>
+      <div class="sector-tab">
+          <button class="sector-tablinks" onclick="openPieTab(event, 'Residential')" id="firstSector">RESIDENTIAL</button>
+          <button class="sector-tablinks" onclick="openPieTab(event, 'Commercial')">COMMERCIAL</button>
+          <button class="sector-tablinks" onclick="openPieTab(event, 'Institutional')">INSTITUTIONAL</button>
+          <button class="sector-tablinks" onclick="openPieTab(event, 'Industrial')">INDUSTRIAL</button>
+          <button class="sector-tablinks" onclick="openPieTab(event, 'Health')">HEALTH</button>
+          <button class="sector-tablinks" onclick="openPieTab(event, 'AgricultureandLivestock')">AGRICULTURE AND LIVESTOCK</button>
+      </div>
 
-    <div id="sector-pies-container"></div>
+      <div id="sector-pies-container"></div>
+    {{!-- </section> --}}
 </div>
 
 <!-- Display B: Raw Data -->
 <div id="Table" class="tabcontent">
-    <p style="font-size: large;">This table shows the waste composition for <b>{{wasteGen.location_name}}</b> according to waste type. The waste types are further divided into <b>economic sectors</b> (e.g., Residential, Commercial). All raw amounts are in <b>kilograms (kg)</b>.</p>
+    <p style="font-size: large;" data-section="raw-data"> This table shows the waste composition for <b>{{wasteGen.location_name}}</b> according to waste type. The waste types are further divided into <b>economic sectors</b> (e.g., Residential, Commercial). All raw amounts are in <b>kilograms (kg)</b>.</p>
 
     <div style="display: flex;">
         <div id="data-table-container">
@@ -409,6 +414,7 @@ for (const [supertype, chartData] of Object.entries(barChartData)) {
   const tabDiv = document.createElement('div');
   tabDiv.id = supertype.replace(/\s+/g, '');
   tabDiv.classList.add('bar-tabcontent');
+  tabDiv.setAttribute('data-section', `types-${supertype.toLowerCase()}`);
 
   const canvas = document.createElement('canvas');
   canvas.id = `barChart-${supertype.replace(/\s+/g, '-')}`;
@@ -526,6 +532,7 @@ for (const [sectorName, pieData] of Object.entries(sectorPieData)) {
   const tabDiv = document.createElement('div');
   tabDiv.id = sectorName.replace(/\s+/g, '');
   tabDiv.classList.add('sector-tabcontent');
+  tabDiv.setAttribute('data-section', `top-${sectorName.toLowerCase()}`);
 
   const canvas = document.createElement('canvas');
   canvas.id = `pieChart-${sectorName.replace(/\s+/g, '-')}`;
