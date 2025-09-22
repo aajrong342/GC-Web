@@ -248,6 +248,14 @@
   </div>
 </div>
 
+<!-- Loading Modal -->
+<div id="loadingModal" class="modal" style="display:none;">
+  <div class="modal-content" style="text-align:center; padding:40px;">
+    <div class="spinner"></div>
+    <p>Generating your PDF report...</p>
+  </div>
+</div>
+
 
 <style>
 /* Modal box */
@@ -327,6 +335,23 @@
 #toggle-select:hover {
   background: #125a9c;
 }
+
+/* Reuse your modal styles */
+#loadingModal .spinner {
+  margin: 50px auto;
+  width: 50px;
+  height: 50px;
+  border: 6px solid #ddd;
+  border-top: 6px solid #4CAF50; /* green accent */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 </style>
 
 <script>
@@ -470,19 +495,24 @@ document.querySelectorAll("#pdfModal .sub-item").forEach(subItem => {
 
 // Confirm generate
 confirmBtn.addEventListener("click", async () => {
+  // Close the section selection modal
   modal.style.display = "none";
+
+  // Show loading modal
+  const loadingModal = document.getElementById("loadingModal");
+  loadingModal.style.display = "block";
 
   try {
     // Collect selected items
     const selected = Array.from(
       document.querySelectorAll("#pdfModal input[type=checkbox]:checked")
-    ).map(cb => cb.value); // assumes each checkbox has value
+    ).map(cb => cb.value);
 
     // Always prepend non-optional
     selected.unshift("data-title");
     selected.unshift("data-info");
 
-    console.log(selected)
+    console.log("Sections selected:", selected);
 
     // Send POST request
     const response = await fetch(`/api/data/${entryId}/pdf`, {
@@ -491,9 +521,7 @@ confirmBtn.addEventListener("click", async () => {
       body: JSON.stringify({ sections: selected })
     });
 
-    if (!response.ok) {
-      throw new Error("Failed to generate PDF");
-    }
+    if (!response.ok) throw new Error("Failed to generate PDF");
 
     // Get PDF as blob
     const blob = await response.blob();
@@ -507,9 +535,13 @@ confirmBtn.addEventListener("click", async () => {
 
     // Optional: revoke object URL after a bit
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+
   } catch (err) {
     console.error("PDF generation failed:", err);
     alert("Failed to generate PDF. Please try again.");
+  } finally {
+    // Always hide loading modal
+    loadingModal.style.display = "none";
   }
 });
 
