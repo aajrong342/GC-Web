@@ -51,8 +51,20 @@ data-prefill-region="{{prefill.region}}" data-prefill-province="{{prefill.provin
               <label for="filter-author">Author</label>
               <input type="text" id="filter-author" name="author" value="{{query.author}}" placeholder="Enter author's name">
 
-              <label for="filter-org">Organization Name</label>
-              <input type="text" id="filter-org" name="company" value="{{query.company}}" placeholder="Enter organization name">
+              <div class="input-wrapper">
+                <label for="filter-org">Organization Name</label>
+                <input 
+                  type="text" 
+                  id="filter-org" 
+                  name="company" 
+                  value="{{query.company}}" 
+                  placeholder="Enter organization name" 
+                  autocomplete="off"
+                >
+
+                <!-- Dropdown container -->
+                <ul id="company-dropdown" class="dropdown-list hidden"></ul>
+              </div>
 
               <label>Collection Date Range</label>
               <div class="date-range">
@@ -457,4 +469,161 @@ document.getElementById('summaryBtn').addEventListener('click', function () {
   background-color: #34b452;
 }
 
+</style>
+
+<!-- Organization dropdown script and style -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // List of companies
+  const companies = [
+    {{#each companies}}
+      "{{this.company_name}}"{{#unless @last}},{{/unless}}
+    {{/each}}
+  ];
+
+  const input = document.getElementById('filter-org');
+  const dropdown = document.getElementById('company-dropdown');
+  const wrapper = input.closest('.input-wrapper');
+  let currentIndex = -1; // track highlighted index
+  let filtered = [...companies]; // track current filtered list
+
+  function showDropdown(list) {
+    dropdown.innerHTML = '';
+    currentIndex = -1;
+
+    if (!list.length) {
+      dropdown.classList.add('hidden');
+      return;
+    }
+
+    list.forEach(company => {
+      const li = document.createElement('li');
+      li.textContent = company;
+      li.setAttribute('role', 'option');
+
+      li.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        input.value = company;
+        dropdown.classList.add('hidden');
+        input.focus();
+      });
+
+      dropdown.appendChild(li);
+    });
+
+    dropdown.classList.remove('hidden');
+  }
+
+  function highlightItem(index) {
+    const items = dropdown.querySelectorAll('li');
+    if (!items.length) return;
+
+    items.forEach(li => li.classList.remove('highlighted'));
+
+    // wrap-around
+    if (index < 0) index = items.length - 1;
+    if (index >= items.length) index = 0;
+
+    const item = items[index];
+    item.classList.add('highlighted');
+    item.scrollIntoView({ block: 'nearest' });
+
+    currentIndex = index;
+  }
+
+  // Input event: live filtering
+  input.addEventListener('input', function () {
+    const q = this.value.toLowerCase().trim();
+    filtered = q ? companies.filter(name => name.toLowerCase().includes(q)) : [...companies];
+    showDropdown(filtered);
+  });
+
+  // On focus: show dropdown if empty
+  input.addEventListener('focus', function () {
+    if (this.value.trim() === '') {
+      filtered = [...companies];
+      showDropdown(filtered);
+    }
+  });
+
+  // On blur: delay to allow pointerdown
+  input.addEventListener('blur', function () {
+    setTimeout(() => {
+      const val = input.value.trim();
+      if (!companies.includes(val)) {
+        this.value = '';
+      }
+      dropdown.classList.add('hidden');
+    }, 0);
+  });
+
+  // Hide dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!wrapper.contains(e.target)) dropdown.classList.add('hidden');
+  });
+
+  // Keyboard navigation
+  input.addEventListener('keydown', (e) => {
+    const items = dropdown.querySelectorAll('li');
+    if (!items.length) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        highlightItem(currentIndex + 1);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        highlightItem(currentIndex - 1);
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (currentIndex >= 0 && currentIndex < items.length) {
+          const selected = items[currentIndex];
+          input.value = selected.textContent;
+        } else if (items.length > 0) {
+          input.value = items[0].textContent;
+        }
+        dropdown.classList.add('hidden');
+        break;
+      case 'Escape':
+        dropdown.classList.add('hidden');
+        break;
+    }
+  });
+});
+</script>
+
+<style>
+.input-wrapper {
+  position: relative;
+  width: 100%;
+  margin-top: 15px;
+}
+#company-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-top: none;
+  max-height: 200px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  z-index: 1000;
+}
+#company-dropdown.hidden {
+  display: none;
+}
+#company-dropdown li {
+  padding: 8px 10px;
+  cursor: pointer;
+}
+#company-dropdown li:hover,
+#company-dropdown li.highlighted {
+  background: #f0f0f0;
+}
 </style>

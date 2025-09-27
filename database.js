@@ -541,7 +541,10 @@ export async function getDataByStatusPaginated(status, limit, offset) {
 
 // Get all company names for search filter
 export async function getAllCompanies() {
-    const [result] = await sql.query(`SELECT DISTINCT company_name FROM greencycle.user`);
+    const [result] = await sql.query(`
+        SELECT DISTINCT company_name
+        FROM greencycle.user
+        ORDER BY company_name`);
     return result;
 }
 

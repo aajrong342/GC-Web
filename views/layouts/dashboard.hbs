@@ -500,7 +500,7 @@ const cancelBtn = document.getElementById("cancel-generate");
 const confirmBtn = document.getElementById("confirm-generate");
 
 // API route
-const isSummary = {{isSummary}}
+const isSummary = {{#if isSummary}}{{isSummary}}{{else}}false{{/if}};
 const apiUrl = isSummary ? "/api/data/summary/pdf" : `/api/data/{{entryId}}/pdf`;
 
 // Query (for data summary version)

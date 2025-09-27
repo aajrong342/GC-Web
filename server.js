@@ -78,7 +78,8 @@ import {
   deleteNotification,
   getDeadlineTimer,
   getRolesOfSupertypes,
-  createCompanyRole
+  createCompanyRole,
+  getAllCompanies
 } from './database.js'
 
 // File Upload
@@ -810,9 +811,10 @@ app.get('/dashboard/data/all', async (req, res, next) => {
   // Use the most specific locationCode available
   const locationCode = barangay || municipality || province || region || null;
 
-  const [data, totalCount] = await Promise.all([
+  const [data, totalCount, companies] = await Promise.all([
     getDataWithFilters(limit, offset, title, locationCode, author, company, startDate, endDate),
-    getFilteredDataCount(title, locationCode, author, company, startDate, endDate)
+    getFilteredDataCount(title, locationCode, author, company, startDate, endDate),
+    getAllCompanies()
   ]);
 
   // Prefill location dropdowns
@@ -839,7 +841,8 @@ app.get('/dashboard/data/all', async (req, res, next) => {
     endEntry,
     current_all: true,
     query: req.query, // Pass current query so you can preserve form values
-    prefill
+    prefill,
+    companies
   });
 });
 
@@ -2413,11 +2416,6 @@ app.get('/dashboard/noncompliance', async (req, res) => {
   }
 
   const { id, supertype } = req.session.user;
-
-  // if (supertype !== 2) {
-  //   console.log(`🚫 User ${id} is not allowed to access this page.`);
-  //   return res.redirect('/unauthorized');
-  // }
 
    try {
     const wasteNonCompliantClients = await getWasteNonCompliantClients(id);
