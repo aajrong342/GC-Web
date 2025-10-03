@@ -87,7 +87,8 @@ import {
   completeTask,
   getTaskByEntryId,
   updateNotifReadBatch,
-  deleteNotificationsBatch
+  deleteNotificationsBatch,
+  getNotificationCount
 } from './database.js'
 
 // File Upload
@@ -543,13 +544,31 @@ app.get('/dashboard/deadline', async (req, res) => {
 // User notifs
 app.get('/dashboard/notifications', async (req, res) => {
   const currentUser = req.session.user.id
-  const notifications = await getNotifications(currentUser)
+
+  // Pagination
+  const page = parseInt(req.query.page) || 1;
+  const limit = 10;
+  const offset = (page - 1) * limit;
+
+  // Initialize
+  const [notifications, total] = await Promise.all([
+    getNotifications(currentUser, limit, offset),
+    getNotificationCount(currentUser)
+  ]);
+  const totalPages = Math.ceil(total / limit);
+  const startEntry = total === 0 ? 0 : offset + 1;
+  const endEntry = Math.min(offset + limit, total);
 
   res.render('dashboard/notifications', {
     layout: 'dashboard',
     title: 'Notifications | GC Dashboard',
     current_notifs: true,
-    notifications
+    notifications,
+    currentPage: page,
+    totalPages,
+    totalNotifs: total,
+    startEntry,
+    endEntry
   })
 })
 

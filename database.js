@@ -1846,12 +1846,36 @@ export async function createNotification(targetUserId, msgType, message, link) {
 }
 
 // Get notifications for user
-export async function getNotifications(userId) {
+/* export async function getNotifications(userId) {
     const [result] = await sql.query(`
         SELECT * FROM greencycle.notifications
         WHERE user_id = ?
         ORDER BY created_at DESC`, [userId])
     return result
+} */
+
+// Get notifications for user (paginated)
+export async function getNotifications(userId, limit = 10, offset = 0) {
+  const [result] = await sql.query(`
+    SELECT *
+    FROM greencycle.notifications
+    WHERE user_id = ?
+    ORDER BY created_at DESC
+    LIMIT ? OFFSET ?`,
+    [userId, limit, offset]
+  );
+  return result;
+}
+
+// Total notif count (regardless of status)
+export async function getNotificationCount(userId) {
+  const [[{ total }]] = await sql.query(`
+    SELECT COUNT(*) AS total
+    FROM greencycle.notifications
+    WHERE user_id = ?`,
+    [userId]
+  );
+  return total;
 }
 
 // Count notifs for user

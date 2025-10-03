@@ -1,4 +1,4 @@
-<h1 class="notif-title">Notifications</h1>
+<h1 class="notif-title">{{totalNotifs}} Notifications</h1>
 
 <!-- Bulk actions toolbar -->
 <div id="notif-toolbar" class="notif-toolbar">
@@ -16,6 +16,11 @@
       <i class="fa-solid fa-trash"></i> Delete
     </button>
   </div>
+
+  <!-- Entry count -->
+  <p class="entry-count-text" style="margin-left: auto; color: darkgreen;">
+    Showing <b>{{startEntry}} – {{endEntry}}</b> of <b>{{totalCount}}</b> notifications
+  </p>
 </div>
 
 
@@ -77,6 +82,41 @@
 {{else}}
     <p class="notif-empty">You have no notifications.</p>
 {{/if}}
+
+<!-- Page counter -->
+<div class="pagination">
+    {{#if totalPages}}
+        {{#unless (eq currentPage 1)}}
+            <a href="{{queryString query page=1}}" class="pagination-btn arrow">
+              <i class="fa-solid fa-angles-left"></i>
+            </a>
+        {{/unless}}
+
+        {{#if (gt currentPage 1)}}
+            <a href="{{queryString query page=(subtract currentPage 1)}}" class="pagination-btn arrow">
+              <i class="fa-solid fa-chevron-left"></i>
+            </a>
+        {{/if}}
+
+        {{#each (paginationRange currentPage totalPages)}}
+          <a href="{{queryString ../query page=this}}" class="pagination-btn {{#ifEquals this ../currentPage}}active{{/ifEquals}}">
+            {{this}}
+          </a>
+        {{/each}}
+
+        {{#if (lt currentPage totalPages)}}
+            <a href="{{queryString query page=(add currentPage 1)}}" class="pagination-btn arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </a>
+        {{/if}}
+
+        {{#unless (eq currentPage totalPages)}}
+            <a href="{{queryString query page=totalPages}}" class="pagination-btn arrow">
+              <i class="fa-solid fa-angles-right"></i>
+            </a>
+        {{/unless}}
+    {{/if}}
+</div>
 
 <!-- Delete confirmation modal -->
 <div id="delete-confirm-modal" class="delete-modal hidden">
