@@ -59,46 +59,41 @@
    Participants Included
   </h2>
 
-  <!-- Users -->
-  <div style="margin-bottom: 1rem;">
-    <strong style="color:#2d613f;">Users:</strong>
-    {{#if uniqueUsers.length}}
-      <ul style="list-style-type: disc; padding-left: 1.5rem; margin: 0.5rem 0;">
-        {{#each uniqueUsers}}
-          <li style="margin-bottom: 0.25rem; color: #333;">{{this}}</li>
-        {{/each}}
-      </ul>
-    {{else}}
-      <p style="margin: 0.5rem 0; color: #777;">None</p>
-    {{/if}}
-  </div>
+  <div style="display: flex">
+    <!-- Orgs and Users List -->
+    <div style="margin-bottom: 1rem; width: 50%">
+      <strong style="color:#2d613f;">Organizations & Users:</strong>
+      {{#if orgGroups.length}}
+        <ul style="padding-left: 1.5rem;">
+          {{#each orgGroups}}
+            <li>
+              <strong>{{company_name}}</strong>
+              <ul style="list-style-type: circle; padding-left: 1.5rem; margin: 0.25rem 0;">
+                {{#each users}}
+                  <li>{{this}}</li>
+                {{/each}}
+              </ul>
+            </li>
+          {{/each}}
+        </ul>
+      {{else}}
+        <p style="margin: 0.5rem 0; color: #777;">None</p>
+      {{/if}}
+    </div>
 
-  <!-- Organizations -->
-  <div style="margin-bottom: 1rem;">
-    <strong style="color:#2d613f;">Organizations:</strong>
-    {{#if uniqueOrgs.length}}
-      <ul style="list-style-type: disc; padding-left: 1.5rem; margin: 0.5rem 0;">
-        {{#each uniqueOrgs}}
-          <li style="margin-bottom: 0.25rem; color: #333;">{{this}}</li>
-        {{/each}}
-      </ul>
-    {{else}}
-      <p style="margin: 0.5rem 0; color: #777;">None</p>
-    {{/if}}
-  </div>
-
-  <!-- Locations -->
-  <div>
-    <strong style="color:#2d613f;">Locations:</strong>
-    {{#if uniqueLocations.length}}
-      <ul style="list-style-type: disc; padding-left: 1.5rem; margin: 0.5rem 0;">
-        {{#each uniqueLocations}}
-          <li style="margin-bottom: 0.25rem; color: #333;">{{this}}</li>
-        {{/each}}
-      </ul>
-    {{else}}
-      <p style="margin: 0.5rem 0; color: #777;">None</p>
-    {{/if}}
+    <!-- Locations -->
+    <div style="width: 50%">
+      <strong style="color:#2d613f;">Locations:</strong>
+      {{#if uniqueLocations.length}}
+        <ul style="list-style-type: disc; padding-left: 1.5rem; margin: 0.5rem 0;">
+          {{#each uniqueLocations}}
+            <li style="margin-bottom: 0.25rem; color: #333;">{{this}}</li>
+          {{/each}}
+        </ul>
+      {{else}}
+        <p style="margin: 0.5rem 0; color: #777;">None</p>
+      {{/if}}
+    </div>
   </div>
 </div>
 
@@ -192,20 +187,13 @@
     </div>
   </div>
 
-<!-- Insight Summary -->
+<!-- Insight -->
 <hr>
-<div class="form-section" style="background-color: #eef8f2; padding: 1.5rem; border-radius: 12px; border-left: 6px solid #4CAF50; margin-top: 2rem;" data-section="insights">
-  <h2 style="color: #2d613f; font-weight: 600; margin-bottom: 1rem;">
-    <i class="fa-solid fa-lightbulb" style="margin-right: 10px; color: #ffb300;"></i>
-    Waste Category Insights & Recommendations
-  </h2>
-
-  <ul style="list-style: none; padding-left: 0; font-size: 1.1rem; line-height: 1.6;">
-    {{#each categoryRecommendations}}
-      <li style="margin-bottom: 1rem; background-color: #ffffff; border-left: 4px solid #4CAF50; padding: 0.75rem 1rem; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-        <i class="fa-solid fa-recycle" style="color: #4CAF50; margin-right: 10px;"></i>
-        <span style="color: #333;">{{{this}}}</span>
-      </li>
+<div data-section="insights" class="form-section" style="background-color: #eef8f2; padding: 1.5rem; border-radius: 12px; border-left: 6px solid #4CAF50; margin-top: 2rem;">
+  <h2 style="color: #2d613f;"><i class="fa-solid fa-lightbulb" style="margin-right: 8px;"></i>General Waste Category Insights & Recommendations</h2>
+  <ul style="font-size: 1.1rem; list-style-type: none; padding-left: 0;">
+    {{#each recommendations}}
+      <li style="margin-bottom: 1rem;">{{{this}}}</li>
     {{/each}}
   </ul>
 </div>
@@ -403,6 +391,7 @@ for (const [supertype, chartData] of Object.entries(barChartData)) {
       }]
     },
     options: {
+      animation: false,
       responsive: true,
       indexAxis: 'x',
       plugins: {
@@ -734,6 +723,33 @@ for (const [sectorName, pieData] of Object.entries(sectorPieData)) {
   flex-direction: column;
   gap: 6px;
   margin-top: 12px;
+}
+
+.high-priority {
+  color: #127009;
+  background-color: #c2f3ce;
+  padding: 0.75rem;
+  border-left: 4px solid #127009;
+  border-radius: 6px;
+  display: block;
+}
+
+.mid-priority {
+  color: #cc7a00;
+  background-color: #fff4e0;
+  padding: 0.75rem;
+  border-left: 4px solid #cc7a00;
+  border-radius: 6px;
+  display: block;
+}
+
+.low-priority {
+  color: #b30000;
+  background-color: #ffe6e6;
+  padding: 0.75rem;
+  border-left: 4px solid #b30000;
+  border-radius: 6px;
+  display: block;
 }
 
 </style>

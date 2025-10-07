@@ -134,7 +134,7 @@
   <!-- Insight -->
   <hr>
   <div data-section="insights" class="form-section" style="background-color: #eef8f2; padding: 1.5rem; border-radius: 12px; border-left: 6px solid #4CAF50; margin-top: 2rem;">
-    <h2 style="color: #2d613f;"><i class="fa-solid fa-lightbulb" style="margin-right: 8px;"></i>Waste Category Insights & Recommendations</h2>
+    <h2 style="color: #2d613f;"><i class="fa-solid fa-lightbulb" style="margin-right: 8px;"></i>General Waste Category Insights & Recommendations</h2>
     <ul style="font-size: 1.1rem; list-style-type: none; padding-left: 0;">
       {{#each recommendations}}
         <li style="margin-bottom: 1rem;">{{{this}}}</li>
@@ -560,7 +560,7 @@ function insertPerSupertypeInsights() {
         box.style = 'min-width:260px;padding:1rem;border-radius:8px;background:#fffef8;border-left:4px solid #ff9800;';
         wrapper.appendChild(box);
       }
-      box.innerHTML = `<h4 style="margin:0 0 .5rem 0">${sv.name} Category</h4><div>${generateSupertypeInsight(sv, Number(grandTotal || 0))}</div>`;
+      box.innerHTML = `<h3 style="margin:0 0 0.25rem 0;color:#2d613f">${sv.name} Category</h3><div>${generateSupertypeInsight(sv, Number(grandTotal || 0))}</div>`;
     }
   } catch (err) { console.error(err); }
 }
@@ -579,7 +579,7 @@ function insertSectorInsights() {
         wrapper.appendChild(box);
       }
       const sectorTotalVal = (sectorBarData || []).find(s=>s.label===sectorName)?.value || 0;
-      box.innerHTML = `<h4 style="margin:0 0 .5rem 0">${sectorName} Sector</h4><div>${generateSectorInsight(sectorName, pieData, Number(sectorTotalVal || 0), Number(grandTotal || 0))}</div>`;
+      box.innerHTML = `<h3 style="margin:0 0 0.25rem 0;color:#2d613f">${sectorName} Sector</h3><div>${generateSectorInsight(sectorName, pieData, Number(sectorTotalVal || 0), Number(grandTotal || 0))}</div>`;
     }
   } catch (err) { console.error(err); }
 }
@@ -685,6 +685,7 @@ for (const [supertype, chartData] of Object.entries(barChartData)) {
       }]
     },
     options: {
+      animation: false, 
       responsive: true,
       indexAxis: 'x',
       plugins: {
