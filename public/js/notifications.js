@@ -41,17 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Update unread badge count
-        const unreadCount = document.querySelectorAll('.notif-item.unread').length;
-        const badge = document.getElementById('notif-badge');
-
-        if (badge) {
-          if (unreadCount > 0) {
-            badge.textContent = unreadCount;
-            badge.style.display = 'inline-block';
-          } else {
-            badge.style.display = 'none';
-          }
-        }
+        updateNotifCount();
 
       } catch (err) {
         console.error('Toggle error:', err);
@@ -145,16 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
           notifItem.remove();
 
           // Update badge
-          const unreadCount = document.querySelectorAll('.notif-item.unread').length;
-          const badge = document.querySelector('.notif-badge');
-          if (badge) {
-            if (unreadCount > 0) {
-              badge.textContent = unreadCount;
-              badge.style.display = 'inline-block';
-            } else {
-              badge.style.display = 'none';
-            }
-          }
+          updateNotifCount();
 
           // Show empty message if all gone
           const list = document.querySelector('.notif-list');
@@ -230,6 +211,28 @@ document.addEventListener('DOMContentLoaded', () => {
         : '<i class="fa-solid fa-envelope-open"></i> Mark as Read';
     } else {
       bulkActions.classList.add('hidden');
+    }
+  }
+
+  // Update notification count badge dynamically
+  async function updateNotifCount() {
+    try {
+      const res = await fetch('/notifications/update-count');
+      const data = await res.json();
+
+      if (!data.success) throw new Error(data.message || 'Failed to fetch count');
+
+      const badge = document.getElementById('notif-badge');
+      if (badge) {
+        if (data.total > 0) {
+          badge.textContent = data.total;
+          badge.style.display = 'inline-block';
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+    } catch (err) {
+      console.error('Error updating notification count:', err);
     }
   }
 
@@ -325,16 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       // Update unread badge
-      const unreadCount = document.querySelectorAll('.notif-item.unread').length;
-      const badge = document.getElementById('notif-badge');
-      if (badge) {
-        if (unreadCount > 0) {
-          badge.textContent = unreadCount;
-          badge.style.display = 'inline-block';
-        } else {
-          badge.style.display = 'none';
-        }
-      }
+      updateNotifCount();
 
     } catch (err) {
       console.error(err);
@@ -381,16 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateUI();
 
         // Update badge
-        const unreadCount = document.querySelectorAll('.notif-item.unread').length;
-        const badge = document.getElementById('notif-badge');
-        if (badge) {
-          if (unreadCount > 0) {
-            badge.textContent = unreadCount;
-            badge.style.display = 'inline-block';
-          } else {
-            badge.style.display = 'none';
-          }
-        }
+        updateNotifCount();
 
         // Hide modal
         deleteModal.classList.add('hidden');

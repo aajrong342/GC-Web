@@ -654,6 +654,26 @@ app.delete('/notifications/delete-batch', async (req, res) => {
   }
 });
 
+// Update notif count
+app.get('/notifications/update-count', async (req, res) => {
+  try {
+    // Assuming you store the logged-in user's ID in the session
+    const userId = req.session.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'User not authenticated' });
+    }
+
+    // Get total notification count
+    const totalCount = await getUnreadNotifCount(userId);
+
+    return res.json({ success: true, total: totalCount });
+  } catch (error) {
+    console.error('Error updating notification count:', error);
+    return res.status(500).json({ success: false, message: 'Server error while fetching notification count' });
+  }
+});
+
 // Display data summary
 app.get('/dashboard/data/summary', async (req, res, next) => {
   // Clean query before proceeding
