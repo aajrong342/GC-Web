@@ -1540,28 +1540,32 @@ app.get('/dashboard/data/:id', async (req, res) => {
   const legendData = [];
   const barChartData = {};
 
+  const summaryEntries = []; // collect before sorting
+
   for (const supertype of Object.values(supertypeMap)) {
     const baseColor = baseHexMap[supertype.name] || '#9e9e9e';
     const sectorSubtotals = {};
-    sectors.forEach(s => sectorSubtotals[s.id] = 0);
+    sectors.forEach(s => (sectorSubtotals[s.id] = 0));
 
     let supertypeTotal = 0;
 
-    const sortedTypes = supertype.types.map(type => {
-      const weight = type.weight;
-      const amounts = type.amounts || {};
+    const sortedTypes = supertype.types
+      .map(type => {
+        const weight = type.weight;
+        const amounts = type.amounts || {};
 
-      for (const [sid, val] of Object.entries(amounts)) {
-        const sidNum = Number(sid);
-        const amt = Number(val);
-        sectorSubtotals[sidNum] += amt;
-        sectorTotals[sidNum] += amt;
-      }
+        for (const [sid, val] of Object.entries(amounts)) {
+          const sidNum = Number(sid);
+          const amt = Number(val);
+          sectorSubtotals[sidNum] += amt;
+          sectorTotals[sidNum] += amt;
+        }
 
-      supertypeTotal += weight;
+        supertypeTotal += weight;
 
-      return { label: type.name, value: weight };
-    }).sort((a, b) => b.value - a.value);
+        return { label: type.name, value: weight };
+      })
+      .sort((a, b) => b.value - a.value);
 
     const totalTypes = sortedTypes.length;
     sortedTypes.forEach((item, i) => {
@@ -1571,23 +1575,23 @@ app.get('/dashboard/data/:id', async (req, res) => {
     barChartData[supertype.name] = {
       labels: sortedTypes.map(t => t.label),
       data: sortedTypes.map(t => t.value),
-      legend: sortedTypes
+      legend: sortedTypes,
     };
 
-    summaryData.labels.push(supertype.name);
-    summaryData.data.push(Number(supertypeTotal.toFixed(3)));
-    summaryData.backgroundColor.push(baseColor);
-    legendData.push({
-      label: supertype.name,
-      value: Number(supertypeTotal.toFixed(3)),
-      color: baseColor
+    // collect entry for later sorting
+    summaryEntries.push({
+      name: supertype.name,
+      total: Number(supertypeTotal.toFixed(3)),
+      color: baseColor,
     });
 
     sortedTypes.forEach((t, i) => {
       if (t.value > 0) {
         detailedData.labels.push(t.label);
         detailedData.data.push(Number(t.value.toFixed(3)));
-        detailedData.backgroundColor.push(shadeColor(baseColor, -0.3 + 0.08 * i));
+        detailedData.backgroundColor.push(
+          shadeColor(baseColor, -0.3 + 0.08 * i)
+        );
       }
     });
 
@@ -1597,11 +1601,33 @@ app.get('/dashboard/data/:id', async (req, res) => {
 
     supertype.sectorTotals = sectorSubtotals;
     supertype.totalWeight = supertypeTotal.toFixed(3);
-    supertype.percentage = grandTotal > 0 ? ((supertypeTotal / grandTotal) * 100).toFixed(3) : '0.000';
+    supertype.percentage =
+      grandTotal > 0
+        ? ((supertypeTotal / grandTotal) * 100).toFixed(3)
+        : "0.000";
 
     supertype.types.forEach(type => {
       type.totalWeight = type.weight.toFixed(3);
-      type.percentage = grandTotal > 0 ? ((type.weight / grandTotal) * 100).toFixed(3) : '0.000';
+      type.percentage =
+        grandTotal > 0
+          ? ((type.weight / grandTotal) * 100).toFixed(3)
+          : "0.000";
+    });
+  }
+
+  // Sort by total descending
+  summaryEntries.sort((a, b) => b.total - a.total);
+
+  // Push sorted values into summaryData and legendData
+  for (const e of summaryEntries) {
+    summaryData.labels.push(e.name);
+    summaryData.data.push(e.total);
+    summaryData.backgroundColor.push(e.color);
+
+    legendData.push({
+      label: e.name,
+      value: e.total,
+      color: e.color,
     });
   }
 
