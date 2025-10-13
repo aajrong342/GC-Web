@@ -1793,9 +1793,14 @@ app.post("/api/data/summary/pdf", async (req, res) => {
 
   try {
     const browser = await puppeteer.launch({
-      headless: true, // use 'new' for latest Puppeteer
-      executablePath: puppeteer.executablePath(), // force bundled Chromium
-      args: ["--no-sandbox", "--disable-setuid-sandbox"]
+      headless: "new", // faster startup mode
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage", // improves perf in low-memory
+        "--disable-extensions",
+        "--disable-gpu"
+      ]
     });
     const page = await browser.newPage();
 
@@ -1818,8 +1823,8 @@ app.post("/api/data/summary/pdf", async (req, res) => {
     const reportUrl = `http://localhost:3000/dashboard/data/summary?${queryString}`;
 
     // Navigate to report view page (server-rendered HTML)
-    //const reportUrl = `http://localhost:3000/dashboard/data/summary`;
-    await page.goto(reportUrl, { waitUntil: "networkidle0" });
+    //await page.goto(reportUrl, { waitUntil: "networkidle0" });
+    await page.goto(reportUrl, { waitUntil: "domcontentloaded" });
 
     // ensure page rendered
     await page.waitForSelector("body", { timeout: 10000 });
@@ -1836,7 +1841,7 @@ app.post("/api/data/summary/pdf", async (req, res) => {
     });
 
     // Wait a tick to ensure they actually paint
-    await new Promise(resolve => setTimeout(resolve, 1200));
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Convert canvases to images
     await page.evaluate(() => {
@@ -1906,11 +1911,7 @@ app.post("/api/data/summary/pdf", async (req, res) => {
           ${selectedHtml}
         </body>
       </html>
-    `, { waitUntil: "networkidle0" });
-
-    // wait a short tick for layout to settle, then screenshot for visual confirmation
-    await new Promise(resolve => setTimeout(resolve, 250));
-    await printPage.screenshot({ path: "after-hide.png", fullPage: true }); // DEBUG
+    `, { waitUntil: "domcontentloaded" });
 
     // Generate PDF
     const pdfBuffer = await printPage.pdf({
@@ -1954,9 +1955,14 @@ app.post("/api/data/:entryId(\\d+)/pdf", async (req, res) => {
 
   try {
     const browser = await puppeteer.launch({
-      headless: true, // use 'new' for latest Puppeteer
-      executablePath: puppeteer.executablePath(), // force bundled Chromium
-      args: ["--no-sandbox", "--disable-setuid-sandbox"]
+      headless: "new", // faster startup mode
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage", // improves perf in low-memory
+        "--disable-extensions",
+        "--disable-gpu"
+      ]
     });
     const page = await browser.newPage();
 
@@ -1972,7 +1978,7 @@ app.post("/api/data/:entryId(\\d+)/pdf", async (req, res) => {
 
     // Navigate to report view page (server-rendered HTML)
     const reportUrl = `http://localhost:3000/dashboard/data/${entryId}`;
-    await page.goto(reportUrl, { waitUntil: "networkidle0" });
+    await page.goto(reportUrl, { waitUntil: "domcontentloaded" });
 
     // ensure page rendered
     await page.waitForSelector("body", { timeout: 10000 });
@@ -1989,7 +1995,7 @@ app.post("/api/data/:entryId(\\d+)/pdf", async (req, res) => {
     });
 
     // Wait a tick to ensure they actually paint
-    await new Promise(resolve => setTimeout(resolve, 1200));
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Convert canvases to images
     await page.evaluate(() => {
@@ -2059,11 +2065,7 @@ app.post("/api/data/:entryId(\\d+)/pdf", async (req, res) => {
           ${selectedHtml}
         </body>
       </html>
-    `, { waitUntil: "networkidle0" });
-
-    // wait a short tick for layout to settle, then screenshot for visual confirmation
-    await new Promise(resolve => setTimeout(resolve, 250));
-    await printPage.screenshot({ path: "after-hide.png", fullPage: true }); // DEBUG
+    `, { waitUntil: "domcontentloaded" });
 
     // Generate PDF
     const pdfBuffer = await printPage.pdf({
