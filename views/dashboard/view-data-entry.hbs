@@ -773,40 +773,122 @@ function insertSectorOverviewInsight() {
 let currentMode = 'summary';
 const ctx = document.getElementById('supertypePieChart').getContext('2d');
 
-const createPieChart = data => new Chart(ctx, {
-  type: 'pie',
-  data: {
-    labels: data.labels,
-    datasets: [{
-      data: data.data,
-      backgroundColor: data.backgroundColor,
-      hoverOffset: 20
-    }]
-  },
-  options: {
-    responsive: true,
-    plugins: {
-      tooltip: {
-        callbacks: {
-          label: ({ raw, label, chart }) => {
-            const total = chart._metasets[0].total || 1;
-            const percent = ((raw / total) * 100).toFixed(3);
-            return `${label}: ${Number(raw).toFixed(3)} kg (${percent}%)`;
+const baseWidth = 600;
+const baseHeight = 600;
+const detailedExtraHeight = 250; // space *below* for legend
+
+const createPieChart = (data, mode) => {
+  const canvas = document.getElementById('supertypePieChart');
+  canvas.width = baseWidth;
+  canvas.height = mode === 'detailed'
+    ? baseHeight + detailedExtraHeight
+    : baseHeight;
+
+  return new Chart(canvas.getContext('2d'), {
+    type: 'pie',
+    data: {
+      labels: data.labels,
+      datasets: [{
+        data: data.data,
+        backgroundColor: data.backgroundColor,
+        hoverOffset: 20
+      }]
+    },
+    options: {
+      responsive: false,
+      maintainAspectRatio: false,
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: ({ raw, label, chart }) => {
+              const total = chart._metasets[0].total || 1;
+              const percent = ((raw / total) * 100).toFixed(3);
+              return `${label}: ${Number(raw).toFixed(3)} kg (${percent}%)`;
+            }
           }
+        },
+        legend: {
+          display: mode === 'detailed',
+          position: 'bottom',
+          labels: {
+            boxWidth: 20,
+            padding: 10
+          }
+        },
+        title: { display: false }
+      },
+      layout: {
+        padding: {
+          bottom: mode === 'detailed' ? detailedExtraHeight - 100 : 0
         }
       },
-      legend: { position: 'right' },
-      title: { display: false }
-    }
-  }
-});
+      cutout: 0,
+      radius: mode === 'summary' ? '80%' : '100%'
+    },
+    plugins: [{
+      id: 'multiColumnLegend',
+      afterUpdate(chart) {
+        // 🟢 Force pie to re-center horizontally after layout adjustments
+        const chartArea = chart.chartArea;
+        const centerX = (chartArea.left + chartArea.right) / 2;
+        const centerY = (chartArea.top + chartArea.bottom) / 2 - (mode === 'detailed' ? 60 : 0); 
+        chart._metasets.forEach(meta => {
+          meta.controller.outerRadius = meta.controller.chart.radius;
+          meta.controller.chartArea = chartArea;
+          meta.controller.xCenter = centerX;
+          meta.controller.yCenter = centerY;
+        });
 
-let chart = createPieChart(summaryData);
+        // Skip legend override unless detailed
+        if (mode !== 'detailed') return;
+
+        const legend = chart.legend;
+        if (!legend) return;
+
+        const items = legend.legendItems;
+        const mid = Math.ceil(items.length / 2);
+        const firstCol = items.slice(0, mid);
+        const secondCol = items.slice(mid);
+
+        // Override draw to render legend in two columns BELOW the pie
+        legend.draw = function() {
+          const ctx = chart.ctx;
+          const font = Chart.helpers.toFont(legend.options.labels.font);
+          ctx.font = font.string;
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+
+          const lineHeight = font.lineHeight + 6;
+          const colSpacing = chart.width / 2.5;
+          const startY = chart.chartArea.bottom + 30;
+
+          const drawColumn = (col, x) => {
+            col.forEach((item, i) => {
+              const y = startY + i * lineHeight;
+              ctx.fillStyle = item.fillStyle;
+              ctx.fillRect(x, y - 5, 12, 12);
+              ctx.fillStyle = item.textColor;
+              ctx.fillText(item.text, x + 18, y + 2);
+            });
+          };
+
+          drawColumn(firstCol, chart.chartArea.left + 20);
+          drawColumn(secondCol, chart.chartArea.left + colSpacing);
+        };
+      }
+    }]
+  });
+};
+
+let chart = createPieChart(summaryData, 'summary');
 
 document.getElementById('togglePieBtn').addEventListener('click', () => {
   chart.destroy();
   currentMode = currentMode === 'summary' ? 'detailed' : 'summary';
-  chart = createPieChart(currentMode === 'summary' ? summaryData : detailedData);
+  chart = createPieChart(
+    currentMode === 'summary' ? summaryData : detailedData,
+    currentMode
+  );
   togglePieBtn.innerHTML = currentMode === 'summary'
     ? '<i class="fa-solid fa-circle-info"></i>&nbsp; Show Detailed Pie Chart'
     : '<i class="fa-solid fa-chart-pie"></i>&nbsp; Back to Summary Pie Chart';

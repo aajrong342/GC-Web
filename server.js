@@ -831,17 +831,6 @@ app.get('/dashboard/data/summary', async (req, res, next) =>{
           color: baseColor,
         });
 
-        // Add to detailed dataset
-        sortedTypes.forEach((t, i) => {
-          if (t.value > 0) {
-            detailedData.labels.push(t.label);
-            detailedData.data.push(Number(t.value.toFixed(3)));
-            detailedData.backgroundColor.push(
-              shadeColor(baseColor, -0.3 + 0.08 * i)
-            );
-          }
-        });
-
         // Optional: store sector subtotals and percentages on supertype object
         for (const id in sectorSubtotals) {
           sectorSubtotals[id] = sectorSubtotals[id].toFixed(3);
@@ -875,6 +864,31 @@ app.get('/dashboard/data/summary', async (req, res, next) =>{
           label: e.name,
           value: e.total,
           color: e.color,
+        });
+      }
+
+      // ===== Rebuild detailedData using sorted summary order =====
+      detailedData.labels = [];
+      detailedData.data = [];
+      detailedData.backgroundColor = [];
+
+      for (const e of summaryEntries) {
+        const supertype = Object.values(supertypeMap).find(s => s.name === e.name);
+        if (!supertype) continue;
+
+        // Get sorted subtypes again (you already have them stored)
+        const sortedTypes = supertype.types
+          .slice() // clone
+          .sort((a, b) => b.weight - a.weight);
+
+        sortedTypes.forEach((t, i) => {
+          if (t.weight > 0) {
+            detailedData.labels.push(t.name);
+            detailedData.data.push(Number(t.weight.toFixed(3)));
+            detailedData.backgroundColor.push(
+              shadeColor(e.color, -0.3 + 0.08 * i)
+            );
+          }
         });
       }
 
@@ -1637,16 +1651,6 @@ app.get('/dashboard/data/:id', async (req, res) => {
       color: baseColor,
     });
 
-    sortedTypes.forEach((t, i) => {
-      if (t.value > 0) {
-        detailedData.labels.push(t.label);
-        detailedData.data.push(Number(t.value.toFixed(3)));
-        detailedData.backgroundColor.push(
-          shadeColor(baseColor, -0.3 + 0.08 * i)
-        );
-      }
-    });
-
     for (const id in sectorSubtotals) {
       sectorSubtotals[id] = sectorSubtotals[id].toFixed(3);
     }
@@ -1667,10 +1671,9 @@ app.get('/dashboard/data/:id', async (req, res) => {
     });
   }
 
-  // Sort by total descending
+  // ===== Sort and push summary results =====
   summaryEntries.sort((a, b) => b.total - a.total);
 
-  // Push sorted values into summaryData and legendData
   for (const e of summaryEntries) {
     summaryData.labels.push(e.name);
     summaryData.data.push(e.total);
@@ -1680,6 +1683,31 @@ app.get('/dashboard/data/:id', async (req, res) => {
       label: e.name,
       value: e.total,
       color: e.color,
+    });
+  }
+
+  // ===== Rebuild detailedData using sorted summary order =====
+  detailedData.labels = [];
+  detailedData.data = [];
+  detailedData.backgroundColor = [];
+
+  for (const e of summaryEntries) {
+    const supertype = Object.values(supertypeMap).find(s => s.name === e.name);
+    if (!supertype) continue;
+
+    // Get sorted subtypes again (you already have them stored)
+    const sortedTypes = supertype.types
+      .slice() // clone
+      .sort((a, b) => b.weight - a.weight);
+
+    sortedTypes.forEach((t, i) => {
+      if (t.weight > 0) {
+        detailedData.labels.push(t.name);
+        detailedData.data.push(Number(t.weight.toFixed(3)));
+        detailedData.backgroundColor.push(
+          shadeColor(e.color, -0.3 + 0.08 * i)
+        );
+      }
     });
   }
 
