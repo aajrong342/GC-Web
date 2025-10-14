@@ -613,7 +613,7 @@ confirmBtn.addEventListener("click", async () => {
     // Download
     const a = document.createElement("a");
     a.href = url;
-    a.download = "Waste_Report.pdf";
+    a.download = "{{title}}.pdf" || "Data Summary.pdf";
     a.click();
 
     // Optional: revoke object URL after a bit
