@@ -989,6 +989,10 @@ app.get('/dashboard/data/summary', async (req, res, next) =>{
         return [barangay, municipality, province, region].filter(Boolean).join(", ");
       }).filter(Boolean))];
 
+      // Compliance narratives
+      const wasteComplianceNarrative = generateCategoryComplianceNarrative(wasteCompliances);
+      const sectorComplianceNarrative = generateSectorComplianceNarrative(sectorCompliances);
+
       res.render('dashboard/view-data-summary', {
         layout: 'dashboard',
         title: 'Data Summary | GC Dashboard',
@@ -1011,7 +1015,9 @@ app.get('/dashboard/data/summary', async (req, res, next) =>{
         regionName, provinceName, municipalityName, barangayName,
         locations: JSON.stringify(validCoords), // map coords
         show_generate_btn: true,
-        isSummary: true
+        isSummary: true,
+        wasteComplianceNarrative,
+        sectorComplianceNarrative
       })
     } catch (err) {
       console.error('Summary Error:', err);  // Log the actual error
@@ -1548,6 +1554,71 @@ app.post('/api/task/:id/unclaim', async (req, res, next) => {
   }
 });
 
+function generateCategoryComplianceNarrative(categoryRows) {
+  if (!categoryRows || !categoryRows.length) {
+    return "No waste category compliance data available for this entry.";
+  }
+
+  const compliant = categoryRows.filter(c => c.compliance_status === 'Compliant');
+  const nonCompliant = categoryRows.filter(c => c.compliance_status === 'Non-Compliant');
+
+  // use correct field names for summary route
+  const avgDiversion = categoryRows.reduce((sum, c) => sum + Number(c.diversion_percentage || c.diversion_pct || 0), 0) / categoryRows.length;
+  const avgTarget = categoryRows.reduce((sum, c) => sum + Number(c.target_percentage || c.target_rate || 0), 0) / categoryRows.length;
+
+  let narrative = `<div class='insight-compliance'>Among the four major waste categories, the overall average diversion rate is <b>${avgDiversion.toFixed(2)}%</b>, compared to the average target rate of <b>${avgTarget.toFixed(2)}%</b>.<br><br> `;
+
+  if (compliant.length === categoryRows.length) {
+    narrative += "All waste categories met or exceeded their diversion targets, indicating strong compliance across the board.";
+  } else if (nonCompliant.length === categoryRows.length) {
+    narrative += "<b style='color:red'>None of the waste categories achieved their diversion targets</b>, showing a need for improved waste recovery efforts.";
+  } else {
+    const compliantNames = compliant.map(c => c.supertype_name).join(", ");
+    const nonCompliantNames = nonCompliant.map(c => c.supertype_name).join(", ");
+
+    narrative += `The following categories are compliant: <b>${compliantNames || 'None'}</b>. `;
+    narrative += `Meanwhile, the following are non-compliant: <b style='color:red'>${nonCompliantNames || 'None'}</b>. `;
+    narrative += "This mixed performance suggests that certain waste streams are being managed more effectively than others.";
+  }
+
+  narrative += "</div>";
+
+  return narrative;
+}
+
+
+function generateSectorComplianceNarrative(sectorRows) {
+  if (!sectorRows || !sectorRows.length) {
+    return "No waste sector compliance data available for this entry.";
+  }
+
+  const compliant = sectorRows.filter(s => s.compliance_status === 'Compliant');
+  const nonCompliant = sectorRows.filter(s => s.compliance_status === 'Non-Compliant');
+
+  // use correct field names for summary route
+  const avgDiversion = sectorRows.reduce((sum, s) => sum + Number(s.diversion_percentage || s.diversion_pct || 0), 0) / sectorRows.length;
+  const avgTarget = sectorRows.reduce((sum, s) => sum + Number(s.target_percentage || s.target_rate || 0), 0) / sectorRows.length;
+
+  let narrative = `<div class='insight-compliance'>Across all economic sectors, the average diversion rate is <b>${avgDiversion.toFixed(2)}%</b>, compared to the target rate of <b>${avgTarget.toFixed(2)}%</b>.<br><br>`;
+
+  if (compliant.length === sectorRows.length) {
+    narrative += "All sectors are compliant, reflecting broad adherence to waste management targets.";
+  } else if (nonCompliant.length === sectorRows.length) {
+    narrative += "<b style='color:red'>All sectors are non-compliant</b>, indicating significant challenges in meeting diversion goals.";
+  } else {
+    const compliantNames = compliant.map(s => s.sector_name || s.name).join(", ");
+    const nonCompliantNames = nonCompliant.map(s => s.sector_name || s.name).join(", ");
+
+    narrative += `Compliant sectors include: <b>${compliantNames || 'None'}</b>. `;
+    narrative += `Non-compliant sectors include: <b style='color:red'>${nonCompliantNames || 'None'}</b>. `;
+    narrative += "This suggests that compliance levels vary depending on the sector's waste generation and collection efficiency.";
+  }
+
+  narrative += "</div>";
+
+  return narrative;
+}
+
 // View one data entry
 app.get('/dashboard/data/:id', async (req, res) => {
   const id = req.params.id;
@@ -1752,6 +1823,7 @@ app.get('/dashboard/data/:id', async (req, res) => {
     'Special/Hazardous': 'fa-radiation'
   };
 
+  // Print general recommendations (colored insight blocks)
   const recommendations = sortedLegend.map((item, index) => {
     const cat = item.label;
     const value = item.value;
@@ -1781,6 +1853,10 @@ app.get('/dashboard/data/:id', async (req, res) => {
     `;
   });
 
+  // Compliance narratives
+  const wasteComplianceNarrative = generateCategoryComplianceNarrative(wasteCompliance);
+  const sectorComplianceNarrative = generateSectorComplianceNarrative(sectorCompliance);
+
   res.render('dashboard/view-data-entry', {
     layout: 'dashboard',
     title: `${wasteGen.title} | GC Dashboard`,
@@ -1804,7 +1880,9 @@ app.get('/dashboard/data/:id', async (req, res) => {
     show_generate_btn: true,
     data_entry: true,
     isSummary: false,
-    entryId: req.params.id
+    entryId: req.params.id,
+    wasteComplianceNarrative,
+    sectorComplianceNarrative
   });
 });
 

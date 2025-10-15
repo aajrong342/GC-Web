@@ -170,7 +170,85 @@
 }
 
 .insight-general {
-  background-color: #eef8f2; padding: 1.5rem; border-radius: 12px; border-left: 6px solid #4CAF50; margin-top: 2rem;
+  background-color: #eef8f2;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border-left: 6px solid #4CAF50;
+  margin-top: 2rem;
+}
+
+.insight-compliance {
+  background: white;
+  border: 1px solid #b5e0b5;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin: 14px 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  color: #1e4620;
+  font-size: 0.95rem;
+}
+.insight-compliance h3 {
+  color: #2e7d32;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.compliance-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 0.95rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* Header styling */
+.compliance-table th {
+  background-color: #c8e6c9; /* soft green */
+  color: #1b5e20;
+  text-align: left;
+  padding: 10px 12px;
+  font-weight: 600;
+  border-bottom: 2px solid #a5d6a7;
+}
+
+/* Body rows */
+.compliance-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #e0f2e0;
+  color: #2e4630;
+}
+
+/* Alternate row shading */
+.compliance-table tr:nth-child(even) {
+  background-color: #f9fff9;
+}
+
+/* Hover highlight */
+.compliance-table tr:hover {
+  background-color: #eef9ee;
+  transition: background-color 0.15s ease-in-out;
+}
+
+/* Numeric alignment for percentage/weight columns */
+.compliance-table td:nth-child(2),
+.compliance-table td:nth-child(3),
+.compliance-table td:nth-child(4),
+.compliance-table td:nth-child(5) {
+  text-align: right;
+}
+
+/* Status column styling */
+.compliance-table td:nth-child(6) {
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Optional: color code the compliance status */
+.non-compliant {
+  color: #c62828 !important;
 }
 
 .filter-columns {
