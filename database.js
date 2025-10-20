@@ -1019,6 +1019,7 @@ export async function createLocationEntry(locationName, lat, lon) {
 /* ---------------------------------------
     DATA REVIEW TASKS
 --------------------------------------- */
+
 // Create task when
 // 1. Data entry is submitted
 // 2. Data entry is re-submitted for review (revised)
@@ -1430,6 +1431,7 @@ export async function getWasteComplianceStatusFromSummary(title, region, provinc
 
   return rows;
 }
+
 export async function getSectorComplianceStatusFromSummary(title, region, province, locationCode, author, company, startDate, endDate) {
   const [rows] = await sql.query(`
     WITH matching_entries AS (
@@ -1854,7 +1856,8 @@ export async function getSectorNonCompliantClients(userId) {
 }
 
 
-// ✅ Get all waste quotas by organization (grouped)
+
+// Get all waste quotas by organization (grouped)
 export async function getWasteQuotasByOrganization(orgName) {
   const [rows] = await sql.query(`
     SELECT 
@@ -1870,7 +1873,7 @@ export async function getWasteQuotasByOrganization(orgName) {
   return rows;
 }
 
-// ✅ Get all sector quotas by organization (grouped)
+// Get all sector quotas by organization (grouped)
 export async function getSectorQuotasByOrganization(orgName) {
   const [rows] = await sql.query(`
     SELECT 
@@ -1886,7 +1889,7 @@ export async function getSectorQuotasByOrganization(orgName) {
   return rows;
 }
 
-// ✅ Update ALL users under that organization
+// Update ALL users under that organization
 export async function updateWasteQuotaForOrg(orgName, wasteName, newWeight) {
   await sql.query(`
     UPDATE compliance_quotas cq
@@ -2004,8 +2007,78 @@ export async function getDeadlineTimer(userId) {
   };
 }
 
+// Get time series data (for trend charts)
+export async function getTimeSeriesData(title, locationCode, author, company, startDate, endDate, aggregation = 'daily') {
+  let dateExpr = '';
+  if (aggregation === 'weekly') {
+    dateExpr = `YEARWEEK(dat.collection_start, 1)`; // week number
+  } else if (aggregation === 'monthly') {
+    dateExpr = `DATE_FORMAT(dat.collection_start, '%Y-%m')`; // month string
+  } else {
+    dateExpr = `DATE(dat.collection_start)`; // default daily
+  }
 
+  let query = `
+    SELECT
+      ${dateExpr} AS date,
+      SUM(dwc.waste_amount) AS total_weight,
+      AVG(dat.per_capita) AS avg_per_capita,
+      ws.name AS waste_type,
+      CASE
+        WHEN SUM(dwc.waste_amount) > 0 THEN 'Compliant'
+        ELSE 'Non-Compliant'
+      END AS compliance_status
+    FROM data_entry dat
+    JOIN data_waste_composition dwc ON dat.data_entry_id = dwc.data_entry_id
+    JOIN waste_type wt ON dwc.type_id = wt.id
+    JOIN waste_supertype ws ON wt.supertype_id = ws.id
+    JOIN user u ON dat.user_id = u.user_id
+    WHERE dat.status = 'Approved'`;
 
+  const conditions = [];
+  const params = [];
+
+  if (title) {
+    conditions.push(`dat.title LIKE ?`);
+    params.push(`%${title}%`);
+  }
+
+  if (locationCode) {
+    conditions.push(`(dat.region_id = ? OR dat.province_id = ? OR dat.municipality_id = ? OR dat.barangay_id = ?)`);
+    params.push(locationCode, locationCode, locationCode, locationCode);
+  }
+
+  if (author) {
+    conditions.push(`(u.firstname LIKE ? OR u.lastname LIKE ?)`);
+    params.push(`%${author}%`, `%${author}%`);
+  }
+
+  if (company) {
+    conditions.push(`u.company_name LIKE ?`);
+    params.push(`%${company}%`);
+  }
+
+  if (startDate && endDate) {
+    conditions.push(`(dat.collection_start >= ? AND dat.collection_end <= ?)`);
+    params.push(startDate, endDate);
+  } else if (startDate) {
+    conditions.push(`dat.collection_start >= ?`);
+    params.push(startDate);
+  } else if (endDate) {
+    conditions.push(`dat.collection_end <= ?`);
+    params.push(endDate);
+  }
+
+  if (conditions.length > 0) query += ` AND ` + conditions.join(' AND ');
+
+  query += `
+    GROUP BY date, ws.name
+    ORDER BY date ASC;
+  `;
+
+  const [rows] = await sql.query(query, params);
+  return rows;
+}
 
 /* ---------------------------------------
     CONTROL PANEL

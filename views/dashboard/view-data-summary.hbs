@@ -518,7 +518,7 @@
 
 <!-- Modal Script -->
 <script>
-const modal = document.getElementById('reportModal');
+const reportModal = document.getElementById('reportModal');
 const btn = document.getElementById('customizeReportBtn');
 const closeBtn = document.querySelector('.close');
 const cancelBtn = document.getElementById('cancelBtn');
@@ -526,11 +526,11 @@ const resetBtn = document.getElementById('resetBtn');
 const applyBtn = document.getElementById('applyBtn');
 const exportPdfBtn = document.getElementById('exportPdfBtn');
 
-btn.onclick = () => modal.style.display = 'block';
-closeBtn.onclick = () => modal.style.display = 'none';
-cancelBtn.onclick = () => modal.style.display = 'none';
+btn.onclick = () => reportModal.style.display = 'block';
+closeBtn.onclick = () => reportModal.style.display = 'none';
+cancelBtn.onclick = () => reportModal.style.display = 'none';
 window.onclick = (e) => {
-    if (e.target == modal) modal.style.display = 'none';
+    if (e.target == reportModal) reportModal.style.display = 'none';
 }
 
 resetBtn.onclick = () => {
@@ -542,7 +542,7 @@ resetBtn.onclick = () => {
 }
 
 exportPdfBtn.onclick = () => {
-    modal.style.display = 'none';
+    reportModal.style.display = 'none';
     window.print();
 }
 
@@ -580,7 +580,7 @@ applyBtn.onclick = () => {
     if (aggregation) currentUrl.searchParams.set('aggregation', aggregation);
     else currentUrl.searchParams.delete('aggregation');
     
-    modal.style.display = 'none';
+    reportModal.style.display = 'none';
     
     if (wasteType || sector || compliance || aggregation) {
         window.location.href = currentUrl.toString();
@@ -601,13 +601,14 @@ window.addEventListener('DOMContentLoaded', function () {
     return;
   }
 
-  const timeSeriesData = {{{timeSeriesData}}};
   const STATIC_SAMPLE_DATA = [
     { date: '2024-01-01', total_weight: 1250, avg_per_capita: 0.45, waste_type: 'Biodegradable', compliance_status: 'Compliant' },
     { date: '2024-01-02', total_weight: 1320, avg_per_capita: 0.48, waste_type: 'Biodegradable', compliance_status: 'Compliant' },
     { date: '2024-01-03', total_weight: 1180, avg_per_capita: 0.42, waste_type: 'Recyclable', compliance_status: 'Non-Compliant' },
     { date: '2024-01-04', total_weight: 1400, avg_per_capita: 0.51, waste_type: 'Biodegradable', compliance_status: 'Compliant' }
   ];
+  const timeSeriesData = {{{timeSeriesData}}};
+  //const timeSeriesData = STATIC_SAMPLE_DATA;
 
   const dataToUse = (timeSeriesData && timeSeriesData.length > 0) ? timeSeriesData : STATIC_SAMPLE_DATA;
 
@@ -700,8 +701,7 @@ window.addEventListener('DOMContentLoaded', function () {
           label: 'Projected Waste',
           data: [...Array(totalWasteByPeriod.length).fill(null), ...futureY],
           borderColor: '#FFC107',
-          borderDash: [10, 5],
-          fill: false
+          borderDash: [10, 5]
         }
       ]
     },

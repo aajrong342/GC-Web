@@ -95,7 +95,8 @@ import {
   getSectorQuotasByOrganization,
   getOrganizations,
   updateWasteQuotaForOrg,
-updateSectorQuotaForOrg
+updateSectorQuotaForOrg,
+getTimeSeriesData
 } from './database.js'
 
 // File Upload
@@ -685,7 +686,7 @@ app.get('/notifications/update-count', async (req, res) => {
 });
 
 // Display data summary
-app.get('/dashboard/data/summary', async (req, res, next) =>{
+app.get('/dashboard/data/summary', async (req, res, next) => {
   // Clean query before proceeding
   const cleanedQuery = {};
   for (const [key, value] of Object.entries(req.query)) {
@@ -735,8 +736,11 @@ app.get('/dashboard/data/summary', async (req, res, next) =>{
       const avgData = await getAvgWasteCompositionWithFilters(title, locationCode, author, company, startDate, endDate);
       const participants = await getSummaryParticipants(title, region, province, locationCode, author, company, startDate, endDate);
 
-      console.log(avgInfo)
-      console.log(avgData)
+      // Initialize time series data
+      //const timeSeriesData = getTimeSeriesData(title, locationCode, author, company, startDate, endDate, aggregation || 'daily');
+      const timeSeriesData = await getTimeSeriesData(title, locationCode, author, company, startDate, endDate, 'daily');
+
+      console.log(timeSeriesData)
 
       /* ------ DATA COORDS ------ */
       const coords = await getFilteredDataCoords(title, locationCode, author, company, startDate, endDate)
@@ -1017,7 +1021,8 @@ app.get('/dashboard/data/summary', async (req, res, next) =>{
         show_generate_btn: true,
         isSummary: true,
         wasteComplianceNarrative,
-        sectorComplianceNarrative
+        sectorComplianceNarrative,
+        timeSeriesData: JSON.stringify(timeSeriesData)
       })
     } catch (err) {
       console.error('Summary Error:', err);  // Log the actual error
