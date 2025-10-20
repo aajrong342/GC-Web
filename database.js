@@ -2008,7 +2008,7 @@ export async function getDeadlineTimer(userId) {
 }
 
 // Get time series data (for trend charts)
-export async function getTimeSeriesData(title, locationCode, author, company, startDate, endDate, aggregation = 'daily') {
+export async function getTimeSeriesData(title, locationCode, author, company, startDate, endDate, aggregation) {
   let dateExpr = '';
   if (aggregation === 'weekly') {
     dateExpr = `YEARWEEK(dat.collection_start, 1)`; // week number

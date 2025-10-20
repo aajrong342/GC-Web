@@ -701,7 +701,7 @@ app.get('/dashboard/data/summary', async (req, res, next) => {
 
   next();
 }, async (req, res) => {
-  const { title, region, province, municipality, barangay, author, company, startDate, endDate } = req.query
+  const { title, region, province, municipality, barangay, author, company, startDate, endDate, aggregation } = req.query
 
   try {
       /* ------ LOCATION NAME ------ */
@@ -738,7 +738,7 @@ app.get('/dashboard/data/summary', async (req, res, next) => {
 
       // Initialize time series data
       //const timeSeriesData = getTimeSeriesData(title, locationCode, author, company, startDate, endDate, aggregation || 'daily');
-      const timeSeriesData = await getTimeSeriesData(title, locationCode, author, company, startDate, endDate, 'daily');
+      const timeSeriesData = await getTimeSeriesData(title, locationCode, author, company, startDate, endDate, aggregation || 'daily');
 
       console.log(timeSeriesData)
 

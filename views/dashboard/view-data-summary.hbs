@@ -63,7 +63,7 @@
 <div id="reportModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h2><i class="fa-solid fa-chart-line"></i> Customize Report Parameters</h2>
+            <h2 style="color: #fff;"><i class="fa-solid fa-chart-line"></i> Customize Report Parameters</h2>
             <span class="close">&times;</span>
         </div>
         
@@ -518,6 +518,7 @@
 
 <!-- Modal Script -->
 <script>
+
 const reportModal = document.getElementById('reportModal');
 const btn = document.getElementById('customizeReportBtn');
 const closeBtn = document.querySelector('.close');
@@ -590,6 +591,50 @@ applyBtn.onclick = () => {
 
 <!-- Trend Charts Script -->
 <script>
+
+function getISOWeekNumber(date) {
+  const tmp = new Date(date);
+  tmp.setHours(0, 0, 0, 0);
+  // Thursday in current week decides the year
+  tmp.setDate(tmp.getDate() + 3 - ((tmp.getDay() + 6) % 7));
+  const week1 = new Date(tmp.getFullYear(), 0, 4);
+  const weekNumber = 1 + Math.round(((tmp - week1) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+  return { week: weekNumber, year: tmp.getFullYear() };
+}
+
+function parseFlexibleDate(input) {
+  if (!input) return null;
+
+  // Convert numbers to string first
+  const str = String(input).trim();
+
+  // Case 1: already a Date object
+  if (input instanceof Date) return input;
+
+  // Case 2: string with dashes (e.g. "2024-01-02")
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+    return new Date(str);
+  }
+
+  // Case 3: YYYYMM or YYYYMMDD compact formats
+  if (/^\d{6}$/.test(str)) {
+    const year = parseInt(str.slice(0, 4), 10);
+    const month = parseInt(str.slice(4, 6), 10) - 1;
+    return new Date(year, month, 1);
+  }
+
+  if (/^\d{8}$/.test(str)) {
+    const year = parseInt(str.slice(0, 4), 10);
+    const month = parseInt(str.slice(4, 6), 10) - 1;
+    const day = parseInt(str.slice(6, 8), 10);
+    return new Date(year, month, day);
+  }
+
+  // Case 4: fallback
+  const parsed = new Date(str);
+  return isNaN(parsed) ? null : parsed;
+}
+
 window.addEventListener('DOMContentLoaded', function () {
   if (typeof Chart === 'undefined') {
     console.error('Chart.js is not loaded!');
@@ -608,7 +653,6 @@ window.addEventListener('DOMContentLoaded', function () {
     { date: '2024-01-04', total_weight: 1400, avg_per_capita: 0.51, waste_type: 'Biodegradable', compliance_status: 'Compliant' }
   ];
   const timeSeriesData = {{{timeSeriesData}}};
-  //const timeSeriesData = STATIC_SAMPLE_DATA;
 
   const dataToUse = (timeSeriesData && timeSeriesData.length > 0) ? timeSeriesData : STATIC_SAMPLE_DATA;
 
@@ -636,6 +680,19 @@ window.addEventListener('DOMContentLoaded', function () {
     }
     return item.date || `${item.year}-${item.month || item.week}`;
   };
+
+  // Preprocess data to add week, month, year if missing
+  dataToUse.forEach(item => {
+    const dateObj = parseFlexibleDate(item.date);
+    if (isNaN(dateObj)) return;
+
+    const { week, year } = getISOWeekNumber(dateObj);
+    item.year = item.year || year;
+    item.month = item.month || dateObj.getMonth() + 1;
+    item.week = item.week || week;
+  });
+
+  console.log(dataToUse)
 
   const timePeriods = [...new Set(dataToUse.map(d => formatDate(d, aggregation)))];
 
@@ -1559,6 +1616,33 @@ insertSectorOverviewInsight();
 <script src="/js/tabs-sector-pie.js"></script>
 
 <style>
+
+.high-priority {
+  color: #127009;
+  background-color: #c2f3ce;
+  padding: 0.75rem;
+  border-left: 4px solid #127009;
+  border-radius: 6px;
+  display: block;
+}
+
+.mid-priority {
+  color: #cc7a00;
+  background-color: #fff4e0;
+  padding: 0.75rem;
+  border-left: 4px solid #cc7a00;
+  border-radius: 6px;
+  display: block;
+}
+
+.low-priority {
+  color: #b30000;
+  background-color: #ffe6e6;
+  padding: 0.75rem;
+  border-left: 4px solid #b30000;
+  border-radius: 6px;
+  display: block;
+}
 
 .insight-general {
   background-color: #eef8f2;
