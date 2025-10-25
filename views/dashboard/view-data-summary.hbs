@@ -231,7 +231,7 @@
   </h2>
 
   <div class="form-section participants-list" data-section="participants">
-    <div style="display: flex">
+    <div class="content">
       <!-- Orgs and Users List -->
       <div style="margin-bottom: 1rem; width: 50%">
         <strong style="color:#2d613f;">Organizations & Users:</strong>
@@ -1855,6 +1855,13 @@ insertSectorOverviewInsight();
 
 .participants-list {
   display: none;
+}
+
+.participants-list .content {
+  max-height: 300px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  display: flex;
 }
 
 .participants-header {
