@@ -40,14 +40,14 @@
 
         <!-- Additional Metrics Filters -->
         <div class="filter-column">
-            <label>Waste Type</label>
-            {{query.wasteType}} {{#ifEquals query.wasteType undefined}}ALL{{/ifEquals}}
-
-            <label>Status</label>
-            {{query.status}} {{#ifEquals query.status undefined}}ALL{{/ifEquals}}
-
-            <label>Sector</label>
-            {{query.sector}} {{#ifEquals query.sector undefined}}ALL{{/ifEquals}}
+            <label>Time Aggregation</label>
+            {{#if query.aggregation}}
+                {{#ifEquals query.aggregation "daily"}}Daily{{/ifEquals}}
+                {{#ifEquals query.aggregation "weekly"}}Weekly{{/ifEquals}}
+                {{#ifEquals query.aggregation "monthly"}}Monthly{{/ifEquals}}
+            {{else}}
+                Not Set
+            {{/if}}
         </div>
     </div>
 
@@ -86,39 +86,6 @@
             <!-- Additional Filters -->
             <h3 style="color: #2d613f; margin-bottom: 1rem;"><i class="fa-solid fa-sliders"></i> Additional Metric Filters:</h3>
             <div class="filter-grid">
-                <div>
-                    <label><i class="fa-solid fa-recycle"></i> Waste Type</label>
-                    <select id="modal-wasteType">
-                        <option value="">All Types</option>
-                        <option value="Biodegradable" {{#ifEquals query.wasteType "Biodegradable"}}selected{{/ifEquals}}>Biodegradable</option>
-                        <option value="Recyclable" {{#ifEquals query.wasteType "Recyclable"}}selected{{/ifEquals}}>Recyclable</option>
-                        <option value="Residual" {{#ifEquals query.wasteType "Residual"}}selected{{/ifEquals}}>Residual</option>
-                        <option value="Special/Hazardous" {{#ifEquals query.wasteType "Special/Hazardous"}}selected{{/ifEquals}}>Special/Hazardous</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label><i class="fa-solid fa-building"></i> Sector</label>
-                    <select id="modal-sector">
-                        <option value="">All Sectors</option>
-                        <option value="Residential" {{#ifEquals query.sector "Residential"}}selected{{/ifEquals}}>Residential</option>
-                        <option value="Commercial" {{#ifEquals query.sector "Commercial"}}selected{{/ifEquals}}>Commercial</option>
-                        <option value="Institutional" {{#ifEquals query.sector "Institutional"}}selected{{/ifEquals}}>Institutional</option>
-                        <option value="Industrial" {{#ifEquals query.sector "Industrial"}}selected{{/ifEquals}}>Industrial</option>
-                        <option value="Health" {{#ifEquals query.sector "Health"}}selected{{/ifEquals}}>Health</option>
-                        <option value="Agriculture and Livestock" {{#ifEquals query.sector "Agriculture and Livestock"}}selected{{/ifEquals}}>Agriculture and Livestock</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label><i class="fa-solid fa-check-circle"></i> Compliance Status</label>
-                    <select id="modal-compliance">
-                        <option value="">All Entries</option>
-                        <option value="compliant" {{#ifEquals query.compliance "compliant"}}selected{{/ifEquals}}>Compliant Only</option>
-                        <option value="non-compliant" {{#ifEquals query.compliance "non-compliant"}}selected{{/ifEquals}}>Non-Compliant Only</option>
-                    </select>
-                </div>
-
                 <div>
                     <label><i class="fa-solid fa-calendar-days"></i> Time Aggregation</label>
                     <select id="modal-aggregation">
@@ -342,7 +309,11 @@
       <h3 style="color: #2d613f; font-size: 1.1rem; margin-bottom: 0.75rem;">
         <i class="fa-solid fa-trash"></i> Total Waste Generation Trend with Projection
       </h3>
-      <canvas id="trendTotalWaste" style="max-height: 300px;"></canvas>
+      <div style="overflow-x: auto; overflow-y: hidden; width: 100%;">
+        <div style="position: relative; height: 300px; min-width: 100%;" id="trendTotalWasteContainer">
+          <canvas id="trendTotalWaste"></canvas>
+        </div>
+      </div>
       <div style="margin-top: 1rem; padding: 1rem; background: #e8f5e9; border-radius: 6px; font-size: 0.9rem;">
         <strong style="color: #2d613f;">📊 Trend Analysis:</strong>
         <span id="regressionStats" style="color: #555;"></span>
@@ -354,7 +325,11 @@
       <h3 style="color: #2d613f; font-size: 1.1rem; margin-bottom: 0.75rem;">
         <i class="fa-solid fa-user"></i> Per Capita Waste Trend
       </h3>
-      <canvas id="trendPerCapita" style="max-height: 300px;"></canvas>
+      <div style="overflow-x: auto; overflow-y: hidden; width: 100%;">
+        <div style="position: relative; height: 300px; min-width: 100%;" id="trendPerCapitaContainer">
+          <canvas id="trendPerCapita"></canvas>
+        </div>
+      </div>
     </div>
 
     <!-- Waste by Category Trend -->
@@ -362,7 +337,11 @@
       <h3 style="color: #2d613f; font-size: 1.1rem; margin-bottom: 0.75rem;">
         <i class="fa-solid fa-layer-group"></i> Waste by Category Over Time
       </h3>
-      <canvas id="trendByCategory" style="max-height: 350px;"></canvas>
+      <div style="overflow-x: auto; overflow-y: hidden; width: 100%;">
+        <div style="position: relative; height: 350px; min-width: 100%;" id="trendByCategoryContainer">
+          <canvas id="trendByCategory"></canvas>
+        </div>
+      </div>
     </div>
 
     <!-- Compliance Trend -->
@@ -370,7 +349,11 @@
       <h3 style="color: #2d613f; font-size: 1.1rem; margin-bottom: 0.75rem;">
         <i class="fa-solid fa-check-double"></i> Compliance Rate Trend
       </h3>
-      <canvas id="trendCompliance" style="max-height: 300px;"></canvas>
+      <div style="overflow-x: auto; overflow-y: hidden; width: 100%;">
+        <div style="position: relative; height: 300px; min-width: 100%;" id="trendComplianceContainer">
+          <canvas id="trendCompliance"></canvas>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -575,9 +558,6 @@ window.onclick = (e) => {
 }
 
 resetBtn.onclick = () => {
-    document.getElementById('modal-wasteType').value = '';
-    document.getElementById('modal-sector').value = '';
-    document.getElementById('modal-compliance').value = '';
     document.getElementById('modal-aggregation').value = 'daily';
     document.querySelectorAll('input[name="section"]').forEach(cb => cb.checked = true);
 }
@@ -588,9 +568,6 @@ exportPdfBtn.onclick = () => {
 }
 
 applyBtn.onclick = () => {
-    const wasteType = document.getElementById('modal-wasteType').value;
-    const sector = document.getElementById('modal-sector').value;
-    const compliance = document.getElementById('modal-compliance').value;
     const aggregation = document.getElementById('modal-aggregation').value;
     
     const selectedSections = Array.from(document.querySelectorAll('input[name="section"]:checked'))
@@ -609,21 +586,12 @@ applyBtn.onclick = () => {
     
     const currentUrl = new URL(window.location.href);
     
-    if (wasteType) currentUrl.searchParams.set('wasteType', wasteType);
-    else currentUrl.searchParams.delete('wasteType');
-    
-    if (sector) currentUrl.searchParams.set('sector', sector);
-    else currentUrl.searchParams.delete('sector');
-    
-    if (compliance) currentUrl.searchParams.set('compliance', compliance);
-    else currentUrl.searchParams.delete('compliance');
-    
     if (aggregation) currentUrl.searchParams.set('aggregation', aggregation);
     else currentUrl.searchParams.delete('aggregation');
     
     reportModal.style.display = 'none';
     
-    if (wasteType || sector || compliance || aggregation) {
+    if (aggregation) {
         window.location.href = currentUrl.toString();
     }
 }
@@ -925,26 +893,122 @@ window.addEventListener('DOMContentLoaded', function () {
   console.log(dataToUse)
 
   const timePeriods = [...new Set(dataToUse.map(d => formatDate(d, aggregation)))];
+  
+  // Interpolation function to fill missing data points
+  const interpolateData = (timePeriods, dataByPeriod) => {
+    const interpolated = [];
+    for (let i = 0; i < timePeriods.length; i++) {
+      if (dataByPeriod[i] !== null && dataByPeriod[i] !== undefined && !isNaN(dataByPeriod[i])) {
+        interpolated.push(dataByPeriod[i]);
+      } else {
+        // Find previous and next valid points
+        let prevIdx = i - 1;
+        let nextIdx = i + 1;
+        
+        while (prevIdx >= 0 && (dataByPeriod[prevIdx] === null || isNaN(dataByPeriod[prevIdx]))) {
+          prevIdx--;
+        }
+        while (nextIdx < timePeriods.length && (dataByPeriod[nextIdx] === null || isNaN(dataByPeriod[nextIdx]))) {
+          nextIdx++;
+        }
+        
+        if (prevIdx < 0 && nextIdx >= timePeriods.length) {
+          interpolated.push(0); // No data at all
+        } else if (prevIdx < 0) {
+          interpolated.push(dataByPeriod[nextIdx]); // Use next value
+        } else if (nextIdx >= timePeriods.length) {
+          interpolated.push(dataByPeriod[prevIdx]); // Use previous value
+        } else {
+          // Linear interpolation
+          const ratio = (i - prevIdx) / (nextIdx - prevIdx);
+          interpolated.push(dataByPeriod[prevIdx] + ratio * (dataByPeriod[nextIdx] - dataByPeriod[prevIdx]));
+        }
+      }
+    }
+    return interpolated;
+  };
 
   const calculateRegression = (xValues, yValues) => {
+    // Use polynomial regression (3rd degree) instead of linear
     const n = xValues.length;
-    const sumX = xValues.reduce((a, b) => a + b, 0);
-    const sumY = yValues.reduce((a, b) => a + b, 0);
-    const sumXY = xValues.reduce((sum, x, i) => sum + x * yValues[i], 0);
-    const sumX2 = xValues.reduce((sum, x) => sum + x * x, 0);
-
-    const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-    const intercept = (sumY - slope * sumX) / n;
-
-    const yMean = sumY / n;
+    const degree = Math.min(3, n - 1); // Use 3rd degree if we have enough points
+    
+    // Build the matrix for polynomial regression
+    const matrix = [];
+    const vector = [];
+    
+    for (let i = 0; i <= degree; i++) {
+      const row = [];
+      for (let j = 0; j <= degree; j++) {
+        let sum = 0;
+        for (let k = 0; k < n; k++) {
+          sum += Math.pow(xValues[k], i + j);
+        }
+        row.push(sum);
+      }
+      matrix.push(row);
+      
+      let sum = 0;
+      for (let k = 0; k < n; k++) {
+        sum += yValues[k] * Math.pow(xValues[k], i);
+      }
+      vector.push(sum);
+    }
+    
+    // Solve using Gaussian elimination
+    const coefficients = gaussianElimination(matrix, vector);
+    
+    // Calculate R-squared
+    const yMean = yValues.reduce((a, b) => a + b, 0) / n;
     const ssTotal = yValues.reduce((sum, y) => sum + Math.pow(y - yMean, 2), 0);
     const ssResidual = yValues.reduce((sum, y, i) => {
-      const predicted = slope * xValues[i] + intercept;
+      const predicted = evaluatePolynomial(coefficients, xValues[i]);
       return sum + Math.pow(y - predicted, 2);
     }, 0);
     const rSquared = 1 - (ssResidual / ssTotal);
-
-    return { slope, intercept, rSquared };
+    
+    return { coefficients, rSquared, degree };
+  };
+  
+  const gaussianElimination = (matrix, vector) => {
+    const n = matrix.length;
+    const augmented = matrix.map((row, i) => [...row, vector[i]]);
+    
+    for (let i = 0; i < n; i++) {
+      let maxRow = i;
+      for (let k = i + 1; k < n; k++) {
+        if (Math.abs(augmented[k][i]) > Math.abs(augmented[maxRow][i])) {
+          maxRow = k;
+        }
+      }
+      [augmented[i], augmented[maxRow]] = [augmented[maxRow], augmented[i]];
+      
+      for (let k = i + 1; k < n; k++) {
+        const factor = augmented[k][i] / augmented[i][i];
+        for (let j = i; j <= n; j++) {
+          augmented[k][j] -= factor * augmented[i][j];
+        }
+      }
+    }
+    
+    const solution = new Array(n);
+    for (let i = n - 1; i >= 0; i--) {
+      solution[i] = augmented[i][n];
+      for (let j = i + 1; j < n; j++) {
+        solution[i] -= augmented[i][j] * solution[j];
+      }
+      solution[i] /= augmented[i][i];
+    }
+    
+    return solution;
+  };
+  
+  const evaluatePolynomial = (coefficients, x) => {
+    let result = 0;
+    for (let i = 0; i < coefficients.length; i++) {
+      result += coefficients[i] * Math.pow(x, i);
+    }
+    return result;
   };
 
   const totalWasteByPeriod = timePeriods.map(period => {
@@ -952,48 +1016,119 @@ window.addEventListener('DOMContentLoaded', function () {
       .filter(d => formatDate(d, aggregation) === period)
       .reduce((sum, d) => sum + (parseFloat(d.total_weight) || 0), 0);
   });
+  
+  // Apply interpolation to fill missing data points
+  const interpolatedTotalWaste = interpolateData(timePeriods, totalWasteByPeriod);
 
-  const xValues = Array.from({ length: totalWasteByPeriod.length }, (_, i) => i);
-  const regression = calculateRegression(xValues, totalWasteByPeriod);
+  const xValues = Array.from({ length: interpolatedTotalWaste.length }, (_, i) => i);
+  const regression = calculateRegression(xValues, interpolatedTotalWaste);
 
-  const regressionLine = xValues.map(x => regression.slope * x + regression.intercept);
-  const futureX = [xValues.length, xValues.length + 1, xValues.length + 2];
-  const futureY = futureX.map(x => regression.slope * x + regression.intercept);
+  // Generate smooth polynomial curve with many intermediate points
+  const smoothRegressionLine = [];
+  const smoothProjection = [];
+  for (let i = 0; i < xValues.length; i++) {
+    // Add 10 intermediate points between each data point for smoothness
+    for (let j = 0; j < 10; j++) {
+      const x = i + (j / 10);
+      smoothRegressionLine.push(evaluatePolynomial(regression.coefficients, x));
+    }
+  }
+  
+  // Add projection points
+  const projectionSteps = 30; // 3 periods x 10 points each
+  for (let i = 0; i < projectionSteps; i++) {
+    const x = xValues.length + (i / 10);
+    smoothProjection.push(evaluatePolynomial(regression.coefficients, x));
+  }
+  
+  // Create smooth labels (repeat each label 10 times for smooth curve)
+  const smoothLabels = [];
+  timePeriods.forEach(label => {
+    for (let i = 0; i < 10; i++) {
+      smoothLabels.push(label);
+    }
+  });
+  
   const futureLabels = ['Projection +1', 'Projection +2', 'Projection +3'];
+  futureLabels.forEach(label => {
+    for (let i = 0; i < 10; i++) {
+      smoothLabels.push(label);
+    }
+  });
+  
+  // Prepare actual data with nulls for smooth labels
+  const actualDataExpanded = [];
+  interpolatedTotalWaste.forEach((value, idx) => {
+    for (let i = 0; i < 10; i++) {
+      actualDataExpanded.push(i === 0 ? value : null); // Only show point at start of each period
+    }
+  });
+  for (let i = 0; i < projectionSteps; i++) {
+    actualDataExpanded.push(null);
+  }
+  
+  // Prepare projection data
+  const projectionDataExpanded = new Array(smoothRegressionLine.length).fill(null).concat(smoothProjection);
+  
+  const regressionLine = xValues.map(x => evaluatePolynomial(regression.coefficients, x));
+  const futureX = [xValues.length, xValues.length + 1, xValues.length + 2];
+  const futureY = futureX.map(x => evaluatePolynomial(regression.coefficients, x));
+  
+  // Calculate trend direction from derivative at last point
+  const lastX = xValues[xValues.length - 1];
+  let derivative = 0;
+  for (let i = 1; i < regression.coefficients.length; i++) {
+    derivative += i * regression.coefficients[i] * Math.pow(lastX, i - 1);
+  }
 
   document.getElementById('regressionStats').innerHTML =
-    `${regression.slope > 0 ? '📈 Increasing' : '📉 Decreasing'} at ${Math.abs(regression.slope).toFixed(2)} kg per period | R² = ${(regression.rSquared * 100).toFixed(1)}% | Projected in 3 periods: ${futureY[2].toFixed(2)} kg`;
+    `${derivative > 0 ? '📈 Increasing' : '📉 Decreasing'} trend (${regression.degree}° polynomial) | R² = ${(regression.rSquared * 100).toFixed(1)}% | Projected in 3 periods: ${futureY[2].toFixed(2)} kg`;
+
+  // Calculate width needed: minimum 20px per data point for readability
+  const containerWidth = Math.max(1000, timePeriods.length * 20);
+  document.getElementById('trendTotalWasteContainer').style.width = containerWidth + 'px';
 
   new Chart(document.getElementById('trendTotalWaste').getContext('2d'), {
     type: 'line',
     data: {
-      labels: [...timePeriods, ...futureLabels],
+      labels: smoothLabels,
       datasets: [
         {
           label: 'Actual Waste (kg)',
-          data: [...totalWasteByPeriod, null, null, null],
+          data: actualDataExpanded,
           borderColor: '#4CAF50',
           backgroundColor: 'rgba(76, 175, 80, 0.1)',
           fill: true,
-          tension: 0.4
+          tension: 0,
+          pointRadius: 3,
+          pointHitRadius: 10,
+          spanGaps: false
         },
         {
           label: 'Trend Line',
-          data: [...regressionLine, ...futureY],
+          data: [...smoothRegressionLine, ...smoothProjection],
           borderColor: '#FF5722',
           borderDash: [5, 5],
-          fill: false
+          fill: false,
+          tension: 0,
+          pointRadius: 0,
+          borderWidth: 3
         },
         {
           label: 'Projected Waste',
-          data: [...Array(totalWasteByPeriod.length).fill(null), ...futureY],
+          data: projectionDataExpanded,
           borderColor: '#FFC107',
-          borderDash: [10, 5]
+          borderDash: [10, 5],
+          fill: false,
+          tension: 0,
+          pointRadius: 0,
+          borderWidth: 2
         }
       ]
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: { position: 'top' },
         tooltip: {
@@ -1004,7 +1139,15 @@ window.addEventListener('DOMContentLoaded', function () {
       },
       scales: {
         y: { beginAtZero: true, title: { display: true, text: 'Weight (kg)' } },
-        x: { title: { display: true, text: 'Time Period' } }
+        x: { 
+          title: { display: true, text: 'Time Period' },
+          ticks: {
+            maxRotation: 45,
+            minRotation: 45,
+            autoSkip: true,
+            maxTicksLimit: 50
+          }
+        }
       }
     }
   });
@@ -1014,6 +1157,9 @@ window.addEventListener('DOMContentLoaded', function () {
     const total = periodData.reduce((sum, d) => sum + (parseFloat(d.avg_per_capita) || 0), 0);
     return periodData.length ? total / periodData.length : 0;
   });
+
+  // Set container width for horizontal scrolling
+  document.getElementById('trendPerCapitaContainer').style.width = Math.max(1000, timePeriods.length * 20) + 'px';
 
   new Chart(document.getElementById('trendPerCapita').getContext('2d'), {
     type: 'line',
@@ -1030,6 +1176,7 @@ window.addEventListener('DOMContentLoaded', function () {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: { position: 'top' },
         tooltip: {
@@ -1042,6 +1189,15 @@ window.addEventListener('DOMContentLoaded', function () {
         y: {
           beginAtZero: true,
           title: { display: true, text: 'kg/cap-day' }
+        },
+        x: {
+          title: { display: true, text: 'Time Period' },
+          ticks: {
+            maxRotation: 45,
+            minRotation: 45,
+            autoSkip: true,
+            maxTicksLimit: 50
+          }
         }
       }
     }
@@ -1068,16 +1224,29 @@ window.addEventListener('DOMContentLoaded', function () {
     tension: 0.4
   }));
 
+  // Set container width for horizontal scrolling
+  document.getElementById('trendByCategoryContainer').style.width = Math.max(1000, timePeriods.length * 20) + 'px';
+
   new Chart(document.getElementById('trendByCategory').getContext('2d'), {
     type: 'line',
     data: { labels: timePeriods, datasets: categoryDatasets },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
       plugins: { legend: { position: 'top' } },
       scales: {
         y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Weight (kg)' } },
-        x: { stacked: true }
+        x: { 
+          stacked: true,
+          title: { display: true, text: 'Time Period' },
+          ticks: {
+            maxRotation: 45,
+            minRotation: 45,
+            autoSkip: true,
+            maxTicksLimit: 50
+          }
+        }
       }
     }
   });
@@ -1087,6 +1256,9 @@ window.addEventListener('DOMContentLoaded', function () {
     const compliant = periodData.filter(d => d.compliance_status === 'Compliant').length;
     return periodData.length ? (compliant / periodData.length) * 100 : 0;
   });
+
+  // Set container width for horizontal scrolling
+  document.getElementById('trendComplianceContainer').style.width = Math.max(1000, timePeriods.length * 20) + 'px';
 
   new Chart(document.getElementById('trendCompliance').getContext('2d'), {
     type: 'line',
@@ -1103,9 +1275,19 @@ window.addEventListener('DOMContentLoaded', function () {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       plugins: { legend: { position: 'top' } },
       scales: {
-        y: { beginAtZero: true, max: 100, title: { display: true, text: 'Compliance Rate (%)' } }
+        y: { beginAtZero: true, max: 100, title: { display: true, text: 'Compliance Rate (%)' } },
+        x: {
+          title: { display: true, text: 'Time Period' },
+          ticks: {
+            maxRotation: 45,
+            minRotation: 45,
+            autoSkip: true,
+            maxTicksLimit: 50
+          }
+        }
       }
     }
   });
