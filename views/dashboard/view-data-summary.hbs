@@ -380,9 +380,9 @@
   <div id="simulationSummary" class="summary-box"></div>
 </div>
 
-<div style="display: flex;">
+<div style="display: flex; gap: 10px; flex-wrap: wrap;">
     <!-- Compliance -->
-    <div class="form-section" style="background-color: rgb(227, 255, 227); margin: 0 10px 10px 0 !important; width: 100%;" data-section="compliance-category">
+    <div class="form-section" style="background-color: rgb(227, 255, 227); flex: 1 1 calc(50% - 5px);" data-section="compliance-category">
       <h2>Waste Category Compliance Status</h2>
 
       <!-- Insights -->
@@ -410,7 +410,7 @@
       </table>
     </div>
 
-    <div class="form-section" style="background-color: rgb(227, 255, 227); margin: 0 10px 10px 0 !important; width: 100%;" data-section="compliance-sector">
+    <div class="form-section" style="background-color: rgb(227, 255, 227); flex: 1 1 calc(50% - 5px);" data-section="compliance-sector">
       <h2>Waste Sector Compliance Status</h2>
       
       <!-- Insights -->
@@ -458,7 +458,13 @@
 <!-- Display A: Chart -->
 <div id="Chart" class="tabcontent">
     <!-- Supertype summary pie chart -->
-    <div data-section="top-categories" style="display: flex;">
+    <div data-section="top-categories">
+      <div style="text-align: center;">
+        <h2>Top Waste Categories in This Area</h2>
+        <p style="font-size: large;" id="summary-description">This pie chart shows the distribution of waste by supertype. Each slice represents the total weight (in kilograms) of waste classified as Biodegradable, Recyclable, Residual, or Special/Hazardous. Hover over a slice to view its percentage and absolute weight.</p>
+      </div>
+
+      <div style="display: flex;">
         <div class="pie-chart">
             <canvas id="supertypePieChart">
                 <!-- Populated by JS -->
@@ -466,9 +472,7 @@
         </div>
 
         <div id="summary-legend">
-            <h2>Top Waste Categories in This Area</h2>
-            <p style="font-size: large;" id="summary-description">This pie chart shows the distribution of waste by supertype. Each slice represents the total weight (in kilograms) of waste classified as Biodegradable, Recyclable, Residual, or Special/Hazardous. Hover over a slice to view its percentage and absolute weight.</p>
-
+          <div id="summary-insight"></div>
             {{#each legendData}}
                 {{#if (gt value 0)}}
                 <span class="legend-item" style="background-color: {{color}}">
@@ -486,6 +490,7 @@
             <!-- Toggle showing summary or detailed pie -->
             <button id="togglePieBtn"><i class="fa-solid fa-circle-info"></i>&nbsp; Show Detailed Pie Chart</button>
         </div>
+      </div>
     </div><br>
 
     <!-- Subtypes bar charts -->
@@ -1591,14 +1596,14 @@ function generateSectorOverviewInsight(sectorBarArr, grandTotalVal) {
 function insertOverallInsight() {
   try {
     const overallText = generateOverallInsight(supertypeDemo || {}, Number(grandTotal || 0));
-    const container = document.getElementById('summary-description');
+    const container = document.getElementById('summary-insight');
 
     if (container) {
       let box = container.querySelector('.insight-box.overall');
       if (!box) {
         box = document.createElement('div');
         box.className = 'insight-box overall';
-        box.style = 'margin-top:1rem; padding:1rem; border-left:4px solid #2e7d32;background:#f7fff8; border-radius:6px;';
+        box.style = 'padding:1rem; border-left:4px solid #2e7d32; background:#f7fff8; border-radius:6px;';
         container.appendChild(box);
       }
       box.innerHTML = `<h3 style="margin:0 0 0.25rem 0;color:#2d613f">Quick Recommendation</h3><div>${overallText}</div>`;
@@ -1819,7 +1824,7 @@ for (const [supertype, chartData] of Object.entries(barChartData)) {
 
   const canvas = document.createElement('canvas');
   canvas.id = `barChart-${supertype.replace(/\s+/g, '-')}`;
-  canvas.style.maxWidth = '700px';
+  canvas.classList.add('bar-chart');
   canvas.style.marginBottom = '20px';
 
   const wrapper = document.createElement('div');
@@ -1875,7 +1880,7 @@ const tsContainer = document.getElementById('sector-chart-container');
 
 const tsCanvas = document.createElement('canvas');
 tsCanvas.id = 'sectorBarChart';
-tsCanvas.style.maxWidth = '700px';
+tsCanvas.classList.add('bar-chart');
 tsCanvas.style.marginBottom = '20px';
 
 const tsWrapper = document.createElement('div');
@@ -1933,7 +1938,7 @@ for (const [sectorName, pieData] of Object.entries(sectorPieData)) {
 
   const canvas = document.createElement('canvas');
   canvas.id = `pieChart-${sectorName.replace(/\s+/g, '-')}`;
-  canvas.style.cssText = 'max-width:625px; max-height:600px; margin-bottom:20px; margin-left: 30px';
+  canvas.style.cssText = 'max-width:425px; max-height:400px; margin-bottom:20px; margin-left: 30px';
 
   const wrapper = document.createElement('div');
   wrapper.classList.add('chart-wrapper');
@@ -1977,7 +1982,7 @@ for (const [sectorName, pieData] of Object.entries(sectorPieData)) {
             }
           }
         },
-        legend: { position: 'right' },
+        legend: false,
         title: { display: false }
       }
     }
@@ -2028,6 +2033,34 @@ insertSectorOverviewInsight();
 <script src="/js/tabs-sector-pie.js"></script>
 
 <style>
+
+[data-section="top-categories"] {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap; /* ensures stacking on smaller screens */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#summary-legend {
+  flex: 1 1 400px;       /* takes remaining space */
+  min-width: 300px;
+  max-width: 600px;
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+}
+
+#summary-legend h2 {
+  color: #2d613f;
+  margin-bottom: 0.5rem;
+}
+
+#summary-legend p {
+  font-size: 1rem;
+  line-height: 1.4;
+}
 
 .click-note {
   color: gray;
@@ -2207,7 +2240,7 @@ insertSectorOverviewInsight();
 }
 
 #trend-charts-wrapper {
-  display: grid;
+  /* display: grid; */
   gap: 1.5rem;
 }
 
@@ -2572,10 +2605,17 @@ hr {
 }
 
 .pie-chart {
-  width: 625px;
-  height: 600px;
-  margin-bottom: 20px;
-  margin-left: 30px;
+  flex: 1 1 350px;       /* can shrink/grow, min width of 350px */
+  max-width: 500px;      /* keeps it from hogging the whole row */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bar-chart {
+  flex: 1 1 350px;       /* can shrink/grow, min width of 350px */
+  max-width: 550px;      /* keeps it from hogging the whole row */
+  min-height: 300px;
 }
 
 .legend-item {
@@ -2587,6 +2627,7 @@ hr {
   color: white;
   font-weight: 500;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-sizing: border-box;
 }
 
 .legend-name {
@@ -2602,16 +2643,6 @@ hr {
 .legend-kg {
   font-weight: 700;
   font-size: 1.05rem;
-}
-
-#summary-legend {
-  flex: 1;
-  padding-left: 20px;
-}
-
-#summary-legend h2 {
-  color: #2d613f;
-  margin-bottom: 0.5rem;
 }
 
 #togglePieBtn {
