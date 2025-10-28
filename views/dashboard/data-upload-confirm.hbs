@@ -107,21 +107,38 @@
     </div>
 </div>
 
-<!-- Error modal -->
+<!-- Enhanced Error modal with detailed feedback -->
 <div id="error-approve" class="modal">
-    <div class="modal-content">
-        <h3>ERROR</h3>
-        An error has occurred.<br><br>
+    <div class="modal-content" style="max-width: 700px;">
+        <span id="error-close" class="close">&times;</span>
+        <div style="text-align: center; margin-bottom: 20px;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545;"></i>
+        </div>
+        <h3 style="color: #dc3545;">Spreadsheet Validation Error</h3>
+        
+        <div id="error-message" style="text-align: left; margin: 20px 0;">
+            <!-- Error details will be inserted here -->
+        </div>
 
-        <a href="/dashboard">
-            <button type="button" class="review-approve">
-                Return to Home
+        <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; text-align: left;">
+            <strong><i class="fas fa-lightbulb"></i> What to do:</strong>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>Review the error details above</li>
+                <li>Click "Go Back and Fix" to return to the form</li>
+                <li>Upload a corrected spreadsheet</li>
+                <li>Re-submit your data</li>
+            </ul>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <button type="button" id="fix-spreadsheet-btn" class="review-approve" style="background-color: #28a745;">
+                <i class="fas fa-arrow-left"></i> Go Back and Fix
             </button>
-        </a>
+        </div>
     </div>
 </div>
 
-<!-- Prefill data (if user cancels submission) -->
+<!-- Prefill data (if user cancels submission or needs to fix) -->
 <form id="return-to-form" method="POST" action="/dashboard/submit-report/upload">
   <input type="hidden" name="return" value="true">
   <input type="hidden" name="title" value="{{formDataRaw.title}}">
@@ -156,11 +173,96 @@ formData.sectorsFromExcel = sectorsJson
 // Submit button
 const submitBtn = document.getElementById("submitBtn")
 
+// Function to format error messages with details
+function formatErrorMessage(error) {
+  let html = '<div style="margin-bottom: 15px;">';
+  
+  // Main error message
+  if (error.message) {
+    html += `<p style="font-size: 1.1rem; margin-bottom: 10px;"><strong>${error.message}</strong></p>`;
+  }
+  
+  // Validation errors (array of specific issues)
+  if (error.validationErrors && error.validationErrors.length > 0) {
+    html += '<div style="background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; padding: 15px; margin: 15px 0;">';
+    html += '<p style="margin: 0 0 10px 0; font-weight: 600; color: #721c24;"><i class="fas fa-times-circle"></i> Issues Found:</p>';
+    html += '<ul style="margin: 0; padding-left: 25px; color: #721c24;">';
+    
+    error.validationErrors.forEach(err => {
+      html += `<li style="margin-bottom: 8px;">`;
+      
+      // Cell location
+      if (err.cell || (err.row && err.column)) {
+        const cellRef = err.cell || `Row ${err.row}, Column "${err.column}"`;
+        html += `<strong>${cellRef}:</strong> `;
+      }
+      
+      // Error description
+      html += err.error || err.message || 'Invalid value';
+      
+      // Current value if provided
+      if (err.value !== undefined && err.value !== null) {
+        html += ` <span style="background-color: #fff; padding: 2px 6px; border-radius: 3px; font-family: monospace;">(Found: ${err.value})</span>`;
+      }
+      
+      // Expected value or suggestion
+      if (err.expected) {
+        html += ` <span style="color: #155724;">(Expected: ${err.expected})</span>`;
+      }
+      
+      html += `</li>`;
+    });
+    
+    html += '</ul>';
+    html += '</div>';
+  }
+  
+  // Data quality warnings
+  if (error.warnings && error.warnings.length > 0) {
+    html += '<div style="background-color: #fff3cd; border: 1px solid #ffeeba; border-radius: 8px; padding: 15px; margin: 15px 0;">';
+    html += '<p style="margin: 0 0 10px 0; font-weight: 600; color: #856404;"><i class="fas fa-exclamation-triangle"></i> Warnings:</p>';
+    html += '<ul style="margin: 0; padding-left: 25px; color: #856404;">';
+    
+    error.warnings.forEach(warn => {
+      html += `<li style="margin-bottom: 5px;">${warn}</li>`;
+    });
+    
+    html += '</ul>';
+    html += '</div>';
+  }
+  
+  // Specific field errors
+  if (error.fields) {
+    html += '<div style="margin-top: 15px;">';
+    html += '<p style="font-weight: 600; margin-bottom: 8px;">Field Errors:</p>';
+    html += '<ul style="padding-left: 25px;">';
+    
+    Object.keys(error.fields).forEach(field => {
+      html += `<li><strong>${field}:</strong> ${error.fields[field]}</li>`;
+    });
+    
+    html += '</ul>';
+    html += '</div>';
+  }
+  
+  // If no structured errors, show plain message
+  if (!error.validationErrors && !error.warnings && !error.fields && !error.message) {
+    html += '<p style="color: #721c24;">An error occurred while processing your submission. Please check your data and try again.</p>';
+  }
+  
+  html += '</div>';
+  return html;
+}
+
 document.addEventListener("DOMContentLoaded", function () {
 
   // Once submit is clicked, begin pushing to db
   submitBtn.addEventListener("click", async function (event) {
     event.preventDefault()
+    
+    // Disable button and show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
 
     try {
       const response = await fetch("/api/data/submit-report/upload", {
@@ -170,18 +272,49 @@ document.addEventListener("DOMContentLoaded", function () {
       });
 
       const result = await response.json();
+      
       if (response.ok) {
-        // Pop up to show success
+        // Success
         document.getElementById('success-approve').style.display = 'block'
       } else {
-        // Pop up to show success
-        document.getElementById('error-approve').style.display = 'block'
+        // Error - show detailed message from backend
+        const errorMessageDiv = document.getElementById('error-message');
+        errorMessageDiv.innerHTML = formatErrorMessage(result.error || result);
+        document.getElementById('error-approve').style.display = 'block';
       } 
     } catch (error) {
         console.error("Error:", error);
-        alert("Something went wrong.");
+        
+        // Network or unexpected error
+        const errorMessageDiv = document.getElementById('error-message');
+        errorMessageDiv.innerHTML = `
+          <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; padding: 15px;">
+            <p style="margin: 0; color: #721c24;">
+              <strong>Network Error:</strong> Unable to connect to the server. Please check your connection and try again.
+            </p>
+            <p style="margin: 10px 0 0 0; color: #721c24; font-size: 0.9rem;">
+              <em>Technical details: ${error.message}</em>
+            </p>
+          </div>
+        `;
+        document.getElementById('error-approve').style.display = 'block';
+    } finally {
+      // Re-enable button
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = 'Confirm Submission';
     }
   })
+  
+  // Error modal close handler
+  document.getElementById('error-close').onclick = function() {
+    document.getElementById('error-approve').style.display = 'none';
+  }
+  
+  // Go back to fix spreadsheet
+  document.getElementById('fix-spreadsheet-btn').onclick = function() {
+    // Return to form with all data preserved
+    document.getElementById('return-to-form').submit();
+  }
 
 })
 
@@ -197,7 +330,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelClose = document.getElementById('cancel-close');
     const cancelNo = document.getElementById('cancel-no');
 
-    /* APPROVE MODAL */
+    /* CANCEL MODAL */
     // Hide modal if close btn is clicked
     if (cancelClose) {
         cancelClose.onclick = function() {
@@ -216,6 +349,9 @@ document.addEventListener('DOMContentLoaded', function() {
     window.onclick = function(event) {
         if (event.target == cancelModal) {
             cancelModal.style.display = "none";
+        }
+        if (event.target == document.getElementById('error-approve')) {
+            document.getElementById('error-approve').style.display = "none";
         }
     }
 
@@ -328,8 +464,43 @@ function showCancel() {
   background-color: #218838;
 }
 
+.upload-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
 .upload-btn i {
   margin-right: 0.5rem;
+}
+
+.review-approve {
+  background-color: #28a745;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.review-approve:hover {
+  background-color: #218838;
+}
+
+.review-cancel {
+  background-color: #6c757d;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.review-cancel:hover {
+  background-color: #5a6268;
 }
 
 </style>
@@ -346,19 +517,21 @@ function showCancel() {
         width: 100%;
         height: 100%;
         overflow: auto;
-        background-color: rgba(0,0,0,0.4);
+        background-color: rgba(0,0,0,0.5);
     }
 
     .modal-content {
         background-color: #fefefe;
-        margin: 20% auto;
-        padding: 20px;
+        margin: 5% auto;
+        padding: 30px;
         border: 1px solid #888;
-        width: 80%;
+        width: 90%;
         max-width: 900px;
-        border-radius: 5px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         text-align: center;
+        max-height: 80vh;
+        overflow-y: auto;
     }
 
     .close {
@@ -367,11 +540,12 @@ function showCancel() {
         font-size: 28px;
         font-weight: bold;
         cursor: pointer;
+        transition: color 0.2s;
     }
 
     .close:hover,
     .close:focus {
-        color: black;
+        color: #000;
         text-decoration: none;
     }
 </style>
