@@ -492,7 +492,7 @@ app.get('/about', (req, res) => {
   res.render('about', {
     layout: 'public',
     title: 'About | GreenCycle',
-    companyName: 'GreenCycle Consultancy Inc.',
+    companyName: 'GreenCycle Consulting Inc.',
     year: new Date().getFullYear(),
     current_about: true
   });
