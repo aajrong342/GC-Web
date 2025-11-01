@@ -390,13 +390,21 @@ const fmtKg = (n) => `${Number(n).toFixed(3)} kg`;
 // phrase banks for variation
 const overallPhrases = {
   balanced:
-    "All major categories are nearly proportional, indicating a balanced waste composition with no single dominant source.<br>",
+    "All major categories are nearly proportional, indicating a balanced waste composition with no single dominant source.<br><br>",
   dominant:
-    "One category dominates the waste stream. Prioritize source reduction and targeted segregation for this category.<br>",
+    "One category dominates the waste stream. Prioritize source reduction and targeted segregation for this category.<br><br>",
   lowReported:
-    "Some categories show very low or missing volumes. This may be caused by underreporting, misclassification, gaps in reporting, or genuinely low output.<br>",
+    "Some categories show very low or missing volumes. This may be caused by underreporting, misclassification, gaps in reporting, or genuinely low output.<br><br>",
   mixedDominant:
-    "Several categories contribute significant amounts. Consider combined campaigns (e.g., recycling + organics) rather than programs for a single type.<br>"
+    "Several categories contribute significant amounts. Consider combined campaigns (e.g., recycling + organics) rather than programs for a single type.<br><br>"
+};
+
+// quick recommendations per type
+const overallRecommendations = {
+  Biodegradable: "Enhance composting initiatives and promote household segregation of organics.",
+  Recyclable: "Expand recycling collection routes and promote local recycling markets.",
+  Residual: "Reduce single-use packaging as much as possible. Encourage proper containment of sanitary waste and explore recovery options (e.g., co-processing) for non-recyclables like wrappers, textiles, and ceramics.",
+  "Special/Hazardous": "Implement safe collection and disposal protocols, raise awareness on proper handling, and coordinate with authorized hazardous waste facilities."
 };
 
 // dynamic insight generators
@@ -419,58 +427,85 @@ function generateOverallInsight(supertypeMapObj, grandTotalVal) {
   const second = shares[1] || null;
   const avgPct = shares.reduce((a,b)=>a+b.pct,0)/shares.length;
   const deviations = shares.map(s => Math.abs(s.pct - avgPct));
-  const allBalanced = deviations.every(d => d < 5); // 5% deviation tolerance
+  const allBalanced = deviations.every(d => d < 5);
 
   const lowList = shares.filter(s => s.pct < 2).map(s => s.name);
-  const tinyList = shares.filter(s => s.pct < 10).map(s => s.name); // condition 6 pointer
+  const tinyList = shares.filter(s => s.pct < 10).map(s => s.name);
 
-  // Helper for full summary
   const fullBreakdown = shares.map(s => `${s.name}: ${s.pct.toFixed(1)}%`).join(', ');
+
+  let insightText = ""; // main insight
+  let recHTML = ""; // recommendations HTML
 
   // CASE 1: Evenly distributed (Condition 5)
   if (allBalanced && nonzero.length > 2) {
-    let text = overallPhrases.balanced;
-    if (lowList.length) text += ` However, some categories appear minimal: ${lowList.join(', ')}.`;
-    if (tinyList.length === 1) text += ` The category ${tinyList[0]} is noticeably small compared to others.`;
-    return text;
+    insightText = overallPhrases.balanced;
+    if (lowList.length) insightText += ` However, some categories appear minimal: ${lowList.join(', ')}.`;
+    if (tinyList.length === 1) insightText += ` The category ${tinyList[0]} is noticeably small compared to others.`;
   }
 
   // CASE 2: One dominant (Conditions 1 and 2)
-  if (top.pct >= 50) {
-    let text = `${overallPhrases.dominant} Currently, <strong>${top.name}</strong> represents ${top.pct.toFixed(1)}% of the total.`;
-    if (lowList.length) text += ` Some low categories: ${lowList.join(', ')}.`;
-    if (tinyList.length === 1) text += ` ${tinyList[0]} appears significantly underrepresented.`;
-    return text;
+  else if (top.pct >= 50) {
+    insightText = `${overallPhrases.dominant} Currently, <strong>${top.name}</strong> represents ${top.pct.toFixed(1)}% of the total.`;
+    if (lowList.length) insightText += ` Some low categories: ${lowList.join(', ')}.`;
+    if (tinyList.length === 1) insightText += ` The category ${tinyList[0]} is noticeably small compared to others.`;
+
+    // add recommendation box for dominant type
+    if (overallRecommendations[top.name]) {
+      recHTML = `
+        <div class="recommendation-box">
+        <span>
+          <i class="fas fa-lightbulb" style="color:#ffb300;margin-right:0.5rem;"></i>
+          <b style='color:#2d613f;'>${top.name.toUpperCase()}</b><br>
+          ${overallRecommendations[top.name]}
+        </span>
+        </div>
+      `;
+    }
   }
 
   // CASE 3: Two share dominance (Conditions 3a & 3b)
-  const strongList = shares.filter(s => s.pct >= 20);
-  if (strongList.length >= 2 && strongList.length < shares.length) {
-    let text = `${overallPhrases.mixedDominant} <br><b>Major categories: ${strongList.map(s => s.name).join(', ')}</b>`;
-    if (lowList.length) text += ` Lower: ${lowList.join(', ')}.`;
-    if (tinyList.length === 1) text += ` The category ${tinyList[0]} has a notably small portion.`;
-    return text;
+  else if (shares.filter(s => s.pct >= 20).length >= 2 &&
+         shares.filter(s => s.pct >= 20).length <= 3) {
+    const strongList = shares.filter(s => s.pct >= 20);
+    insightText = `${overallPhrases.mixedDominant} <b>Major categories: ${strongList.map(s => s.name).join(', ')}</b>`;
+
+    recHTML = strongList
+      .filter(s => overallRecommendations[s.name])
+      .map(s => `
+        <div class="recommendation-box">
+          <i class="fas fa-lightbulb" style="color:#ffb300;margin-right:0.5rem;"></i>
+          <span>
+          <b style='color:#2d613f;'>${s.name.toUpperCase()}</b><br>
+          ${overallRecommendations[s.name]}
+          </span>
+        </div>
+      `)
+      .join('');
   }
 
   // CASE 4: Mainly low/underreported (Condition 4)
-  if (lowList.length === shares.length) {
-    return "All categories show minimal values; likely incomplete or unreported data.";
-  }
-  if (lowList.length) {
-    let text = `${overallPhrases.lowReported} Notably low: ${lowList.join(', ')}.`;
-    return text;
+  else if (lowList.length === shares.length) {
+    insightText = "All categories show minimal values; likely incomplete or unreported data.";
   }
 
-  // CASE 7: All different (varied but not extreme)
-  const uniquePattern = new Set(shares.map(s => Math.round(s.pct / 5) * 5)).size === shares.length;
-  if (uniquePattern && !allBalanced && top.pct < 50) {
-    let text = "Each category has a distinct share, showing a varied waste composition with no single type dominating.";
-    if (tinyList.length) text += ` The category ${tinyList.join(', ')} has smaller proportions than others.`;
-    return text;
+  // CASE 5: Some low but not all
+  else if (lowList.length) {
+    insightText = `${overallPhrases.lowReported} Notably low: ${lowList.join(', ')}.`;
   }
 
-  // Default fallback
-  return "The waste composition shows a mixed pattern without extreme concentrations. Continue tracking for shifts over time.";
+  // CASE 6: Varied but not extreme (Condition 7)
+  else {
+    const uniquePattern = new Set(shares.map(s => Math.round(s.pct / 5) * 5)).size === shares.length;
+    if (uniquePattern && !allBalanced && top.pct < 50) {
+      insightText = "Each category has a distinct share, showing a varied waste composition with no single type dominating.";
+      if (tinyList.length) insightText += ` The category ${tinyList.join(', ')} has smaller proportions than others.`;
+    } else {
+      insightText = "The waste composition shows a mixed pattern without extreme concentrations. Continue tracking for shifts over time.";
+    }
+  }
+
+  return `${insightText}${recHTML}`;
 }
 
 // ---------------- SUPERTYPE DETAIL INSIGHT ----------------
@@ -1248,6 +1283,16 @@ function exportTableToExcel() {
 <script src="/js/tabs-sector-pie.js"></script>
 
 <style>
+
+.recommendation-box {
+  background: #fff;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
 
 .bar-legend-title {
   color: #2d613f;
