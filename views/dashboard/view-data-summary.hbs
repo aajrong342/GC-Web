@@ -1368,64 +1368,130 @@ function generateSupertypeInsight(supertypeObj, grandTotalVal) {
     return `No data recorded for <strong>${supertypeObj.name}</strong>. Verify reporting for this category.`;
   }
 
-  const pct = (v, t) => (t ? (v / t) * 100 : 0);
-
   const pairs = types.map(t => ({
     name: t.name,
-    value: Number(t.weight),
-    pct: pct(Number(t.weight), total)
-  })).sort((a, b) => b.pct - a.pct);
+    value: Number(t.weight) || 0
+  })).sort((a, b) => b.value - a.value);
 
   const top = pairs[0];
   const second = pairs[1] || null;
-  const avgPct = pairs.reduce((a, b) => a + b.pct, 0) / pairs.length;
-  const allBalanced = pairs.every(p => Math.abs(p.pct - avgPct) < 5);
-  const lowList = pairs.filter(p => p.pct < 2).map(p => p.name);
+  const avgVal = pairs.reduce((a, b) => a + b.value, 0) / pairs.length;
+  const allBalanced = pairs.every(p => Math.abs(p.value - avgVal) < avgVal * 0.05); // within ±5%
+  const lowList = pairs.filter(p => p.value < avgVal * 0.2).map(p => p.name);
+  const highList = pairs.filter(p => p.value >= avgVal * 1.2);
 
-  if (allBalanced && pairs.length > 2) {
-    let text = `Types under <strong>${supertypeObj.name}</strong> are evenly distributed.`;
-    if (lowList.length) text += ` Lower types: ${lowList.join(', ')}.`;
+  // --- Recommendation dictionary ---
+  const recs = {
+    Biodegradable: {
+      "Food / Kitchen Waste": "Promote household and commercial composting, and encourage portion control to minimize food waste.",
+      "Agricultural Waste": "Encourage conversion into compost or animal feed.",
+      "Animal / Livestock Waste": "Implement safe manure management where feasible.",
+      "Garden / Park Waste": "Set up community composting areas or mulching programs.",
+      "Vegetable and Fruit Peelings": "Encourage home composting and segregation from residuals.",
+      "Other (Biodegradable)": "Ensure clear segregation and consider composting methods or biomass processing."
+    },
+    Recyclable: {
+      "Polyethylene Terephthalate (PET)": "Enhance PET bottle collection drives and link with recycling facilities.",
+      "Office Paper": "Encourage adoption of paperless systems.",
+      "Corrugated Cardboard": "Encourage reuse for packaging and bulk recycling in business establishments.",
+      "Glass": "Set up collection for glass containers and support bottle return programs.",
+      "Newspaper": "Encourage reuse or bulk recycling, especially from offices and stores.",
+      "Polyvinyl Chloride (PVC)": "Coordinate with accredited recyclers; discourage open burning.",
+      "Polypropylene (PP)": "Support sorting programs to recover PP plastics (e.g., bottle caps, containers).",
+      "Aluminum": "Promote aluminum recycling; used metals may be molten and reused for production of cans, car parts, or construction materials.",
+      "High-density polyethylene (HDPE)": "Facilitate recovery and proper cleaning for reuse or recycling.",
+      "Tin Cans": "Encourage collection through metal recyclers; avoid disposal with residual waste.",
+      "Low-density polyethylene (LDPE)": "Minimize single-use plastics; promote use of thicker, reusable alternatives.",
+      "Polystyrene (PS)": "Discourage styrofoam use and support recycling alternatives.",
+      "Other (Recyclable)": "Clarify labeling and strengthen material recovery facility (MRF) sorting."
+    },
+    Residual: {
+      "Wrappers / Sachets": "Advocate for reduction of single-use plastics.",
+      "Sanitary Napkins / Diapers": "Enforce proper segregation and explore biodegradable alternatives.",
+      "Textiles / Fabrics": "Encourage clothing donation or repurposing; reduce textile waste.",
+      "Rubber": "Coordinate with facilities that repurpose or process rubber materials.",
+      "Ceramics": "Promote reuse in construction filler applications or proper disposal.",
+      "Other (Residual)": "Focus on waste reduction at source and explore alternative disposal technologies."
+    },
+    "Special/Hazardous": {
+      "Healthcare Waste": "Ensure collection and treatment through accredited hazardous waste handlers.",
+      "Bulky Waste": "Coordinate scheduled pickup or reuse programs for furniture and appliances.",
+      "Tires": "Explore reuse for playground or construction materials; avoid open burning.",
+      "Paints / Thinners": "Handle as hazardous; ensure separate storage and disposal.",
+      "Oil": "Encourage oil recycling or proper collection by accredited facilities. Used oil can be re-refined into lubricants, fuel, and raw materials for petrochemical industries.",
+      "Consumer Electronics / Black Goods": "Establish e-waste collection drives and proper recycling channels.",
+      "Household Appliances / White Goods": "Coordinate with repair/reuse programs and e-waste recyclers.",
+      "Household Batteries": "Promote safe collection points for used batteries.",
+      "Other (Special / Hazardous)": "Promote segregation, labeling, and proper disposal."
+    }
+  };
+
+  // --- Helper to get recommendation HTML blocks ---
+  const getRecommendation = (dominantList, supertype) => {
+    const rset = recs[supertype] || {};
+    const blocks = dominantList
+      .map(t => {
+        const recText = rset[t.name];
+        if (!recText) return null;
+        return `
+          <div class="recommendation-box">
+            <span>
+              <i class="fas fa-lightbulb" style="color:#ffb300;margin-right:0.5rem;"></i>
+              <b style='color:#2d613f;'>${t.name.toUpperCase()}</b><br>
+              ${recText}
+            </span>
+          </div>
+        `;
+      })
+      .filter(Boolean)
+      .join("");
+    return blocks ? `<br>${blocks}` : "";
+  };
+
+  // --- Dominance conditions ---
+  // All are equal or nearly equal
+  if (allBalanced) {
+    let text = `Types under <strong>${supertypeObj.name}</strong> have nearly equal distribution.`;
+    if (lowList.length) text += `<br>Lower types: <b>${lowList.join(', ')}</b>.`;
     return text;
   }
 
-  if (top.pct >= 50 && pairs.length > 1) {
-    let text = `<strong>${top.name}</strong> dominates this category (${top.pct.toFixed(1)}%).`;
-    if (lowList.length) text += ` Low types: ${lowList.join(', ')}.`;
-    text += ` Other categories follow as: ${pairs.slice(1).map(p => `${p.name} (${p.pct.toFixed(1)}%)`).join(', ')}.`;
+  // One dominant
+  if (second && top.value >= second.value * 1.5) {
+    let text = `<strong>${top.name}</strong> dominates this category (${top.value.toFixed(1)} kg).`;
+    text += getRecommendation([top], supertypeObj.name);
+    if (lowList.length) text += `<br>Lower types: <b>${lowList.join(', ')}</b>.`;
     return text;
   }
 
-  if (pairs.length >= 2 && top.pct + second.pct > 50 && top.pct < 50) {
-    let text = `Two main types lead in <strong>${supertypeObj.name}</strong>: ${top.name} (${top.pct.toFixed(1)}%) and ${second.name} (${second.pct.toFixed(1)}%).`;
-    text += ` Remaining types contribute smaller shares: ${pairs.slice(2).map(p => `${p.name} (${p.pct.toFixed(1)}%)`).join(', ')}.`;
-    if (lowList.length) text += ` Lower types: ${lowList.join(', ')}.`;
+  // Two dominant
+  const topTwoAvg = (top.value + (second?.value || 0)) / 2;
+  if (
+    pairs.length >= 2 &&
+    top.value >= avgVal * 1.2 &&
+    second.value >= avgVal * 1.2 &&
+    top.value / second.value < 1.3
+  ) {
+    let text = `Two main types lead in ${supertypeObj.name}: <b>${top.name}</b> (${top.value.toFixed(1)} kg) and <b>${second.name}</b> (${second.value.toFixed(1)} kg).`;
+    text += getRecommendation([top, second], supertypeObj.name);
+    if (lowList.length) text += `<br>Lower types: <b>${lowList.join(', ')}</b>.`;
     return text;
   }
 
-  const highList = pairs.filter(p => p.pct >= 20);
-  if (highList.length >= 2 && highList.length < pairs.length) {
-    let text = `Several types stand out within <strong>${supertypeObj.name}</strong>: ${highList.map(p => p.name).join(', ')}.`;
-    if (lowList.length) text += ` Lower types: ${lowList.join(', ')}.`;
+  // Multiple dominant
+  if (highList.length >= 3 && highList.length < pairs.length) {
+    let text = `Several types stand out within ${supertypeObj.name}: <b>${highList.map(p => p.name).join(', ')}</b>.`;
+    text += getRecommendation(highList, supertypeObj.name);
+    if (lowList.length) text += `<br>Lower types: <b>${lowList.join(', ')}</b>.`;
     return text;
   }
 
-  const isGradual = pairs.every((p, i, arr) => !i || arr[i - 1].pct - p.pct < 8);
-  if (isGradual && !allBalanced && pairs.length > 3) {
-    let text = `A gradual decrease is observed in <strong>${supertypeObj.name}</strong>, where values decline smoothly from ${top.name} (${top.pct.toFixed(1)}%) to ${pairs[pairs.length - 1].name} (${pairs[pairs.length - 1].pct.toFixed(1)}%).`;
-    return text;
-  }
-
-  const hasSteps = pairs.some((p, i) => i && pairs[i - 1].pct - p.pct >= 10);
-  if (hasSteps && !isGradual) {
-    let text = `<strong>${supertypeObj.name}</strong> shows a stepped pattern (distinct groups of higher and lower types).`;
-    text += ` Major contributors: ${pairs.slice(0, 2).map(p => `${p.name} (${p.pct.toFixed(1)}%)`).join(', ')}; smaller groups follow at much lower percentages.`;
-    return text;
-  }
-
+  // All with low values
   if (lowList.length && lowList.length >= pairs.length - 1) {
     return `Most types under <strong>${supertypeObj.name}</strong> are minimal. This may be caused by low generation or incomplete entries (${lowList.join(', ')}).`;
   }
 
+  // Default
   return `The <strong>${supertypeObj.name}</strong> category shows varied distribution across its types.`;
 }
 
