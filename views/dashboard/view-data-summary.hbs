@@ -854,33 +854,46 @@ function getISOWeekNumber(date) {
 
 function parseFlexibleDate(input) {
   if (!input) return null;
-
-  // Convert numbers to string first
   const str = String(input).trim();
-
+  
   // Case 1: already a Date object
   if (input instanceof Date) return input;
-
-  // Case 2: string with dashes (e.g. "2024-01-02")
+  
+  // Case 2: ISO-style (e.g. "2024-01-02")
   if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
     return new Date(str);
   }
-
-  // Case 3: YYYYMM or YYYYMMDD compact formats
-  if (/^\d{6}$/.test(str)) {
-    const year = parseInt(str.slice(0, 4), 10);
-    const month = parseInt(str.slice(4, 6), 10) - 1;
-    return new Date(year, month, 1);
-  }
-
+  
+  // Case 3: YYYYMMDD
   if (/^\d{8}$/.test(str)) {
     const year = parseInt(str.slice(0, 4), 10);
     const month = parseInt(str.slice(4, 6), 10) - 1;
     const day = parseInt(str.slice(6, 8), 10);
     return new Date(year, month, day);
   }
-
-  // Case 4: fallback
+  
+  // Case 4: YYYYMM (year-month) or YYYYWW (year-week)
+  if (/^\d{6}$/.test(str)) {
+    const year = parseInt(str.slice(0, 4), 10);
+    const lastTwo = parseInt(str.slice(4, 6), 10);
+    
+    // Detect week or month format
+    if (lastTwo >= 1 && lastTwo <= 12) {
+      // Treat as YYYYMM (month)
+      return new Date(year, lastTwo - 1, 1);
+    } else if (lastTwo >= 1 && lastTwo <= 53) {
+      // Treat as YYYYWW (ISO week number)
+      const jan4 = new Date(year, 0, 4);
+      const jan4Day = jan4.getDay() || 7; // ISO: Monday = 1 ... Sunday = 7
+      const weekStart = new Date(jan4);
+      weekStart.setDate(jan4.getDate() - (jan4Day - 1) + (lastTwo - 1) * 7);
+      return weekStart;
+    } else {
+      return null; // Invalid week/month number
+    }
+  }
+  
+  // Fallback: try normal date parsing
   const parsed = new Date(str);
   return isNaN(parsed) ? null : parsed;
 }
@@ -917,19 +930,31 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   const aggregation = '{{query.aggregation}}' || 'daily';
-  const formatDate = (item, aggregation) => {
-    if (aggregation === 'daily') {
-      return new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    }
-    if (aggregation === 'weekly') {
-      return `Week ${item.week}, ${item.year}`;
-    }
-    if (aggregation === 'monthly') {
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      return `${months[item.month - 1]} ${item.year}`;
-    }
-    return item.date || `${item.year}-${item.month || item.week}`;
-  };
+const formatDate = (item, aggregation) => {
+  if (aggregation === 'daily') {
+    return new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+  if (aggregation === 'weekly') {
+    // Calculate which week of the month this is
+    const dateObj = parseFlexibleDate(item.date);
+    if (!dateObj || isNaN(dateObj)) return `W${item.week} ${item.year}`;
+    
+    const month = dateObj.getMonth();
+    const year = dateObj.getFullYear();
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    // Calculate week number within the month
+    const firstDayOfMonth = new Date(year, month, 1);
+    const weekOfMonth = Math.ceil((dateObj.getDate() + firstDayOfMonth.getDay()) / 7);
+    
+    return `${monthNames[month]} W${weekOfMonth} ${year}`;
+  }
+  if (aggregation === 'monthly') {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${months[item.month - 1]} ${item.year}`;
+  }
+  return item.date || `${item.year}-${item.month || item.week}`;
+};
 
   // Preprocess data to add week, month, year if missing
   dataToUse.forEach(item => {
@@ -1165,15 +1190,20 @@ window.addEventListener('DOMContentLoaded', function () {
           borderWidth: 3
         },
         {
-          label: 'Projected Waste',
-          data: projectionDataExpanded,
-          borderColor: '#FFC107',
-          borderDash: [10, 5],
-          fill: false,
-          tension: 0,
-          pointRadius: 0,
-          borderWidth: 2
-        }
+  label: 'Projected Waste',
+  data: projectionDataExpanded,
+  borderColor: '#FFA000',
+  backgroundColor: 'rgba(255, 193, 7, 0.2)',  // Yellow shaded area with 20% opacity
+  borderDash: [8, 4],
+  fill: 'origin', 
+  tension: 0.2,   
+  pointRadius: 5,
+  pointStyle: 'circle',
+  pointBackgroundColor: '#FFA000',
+  pointBorderColor: '#fff',
+  pointBorderWidth: 2,
+  borderWidth: 4
+}
       ]
     },
     options: {
