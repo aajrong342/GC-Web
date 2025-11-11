@@ -98,8 +98,8 @@ import {
 updateSectorQuotaForOrg,
 getTimeSeriesData,
 runHybridSimulation, getCompanyCounts,
-sql
 } from './database.js'
+import sql from './database.js'
 
 // File Upload
 import multer from 'multer'
