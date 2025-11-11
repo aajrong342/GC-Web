@@ -98,6 +98,7 @@ import {
 updateSectorQuotaForOrg,
 getTimeSeriesData,
 runHybridSimulation, getCompanyCounts,
+initDB
 } from './database.js'
 
 // File Upload
@@ -3797,3 +3798,7 @@ app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`)
 })
 
+// Connect to DB asynchronously
+initDB()
+  .then(() => console.log('✅ DB connected'))
+  .catch(err => console.error('❌ DB connection failed:', err));
