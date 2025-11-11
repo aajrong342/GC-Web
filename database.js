@@ -1,27 +1,22 @@
-// .env setup
 import 'dotenv/config'
-
-import fetch from 'node-fetch'
 import mysql from 'mysql2'
-import { PSGCResource } from 'psgc-areas';
-import bcrypt from 'bcrypt'
 
 let sql;
 
-// --- CLOUD RUN + CLOUD SQL CONNECTION --- 
-if (process.env.INSTANCE_CONNECTION_NAME) {
+if (process.env.DB_HOST) {
+  // --- CONNECT USING PUBLIC IP ---
   sql = mysql.createPool({
-  host: process.env.DB_HOST || '35.241.119.186', // your Cloud SQL public IP
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: 3306, // default MySQL port
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-}).promise();
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: 3306,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+  }).promise();
 
-console.log('✅ Connected to Cloud SQL via Public IP');
+  console.log('✅ Connected to Cloud SQL via Public IP');
 } else {
   // --- LOCAL DEVELOPMENT FALLBACK ---
   sql = mysql.createPool({
