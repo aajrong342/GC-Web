@@ -6,34 +6,38 @@ let pool;
 const isCloudRun = !!process.env.INSTANCE_CONNECTION_NAME;
 
 async function initDB() {
-  // If running locally (with .env specifying DB_HOST), use normal TCP connection
   if (isCloudRun) {
-    // --- CONNECT USING CLOUD SQL CONNECTOR ---
-    const connector = new Connector();
+    // --- Cloud SQL Connector branch ---
+    console.log('INSTANCE_CONNECTION_NAME:', process.env.INSTANCE_CONNECTION_NAME);
+    
+    try {
+      const connector = new Connector();
 
-    // The Cloud SQL instance connection name, e.g. "project:region:instance"
-    const instanceConnectionName = process.env.INSTANCE_CONNECTION_NAME;
+      const clientOpts = await connector.getOptions({
+        instanceConnectionName: process.env.INSTANCE_CONNECTION_NAME,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
+      });
 
-    // Use the connector to get secure connection options
-    const clientOpts = await connector.getOptions({
-      instanceConnectionName,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      // If using IAM DB authentication, add: iamAuth: true
-    });
+      pool = mysql.createPool({
+        ...clientOpts,
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0
+      });
 
-    pool = mysql.createPool({
-      ...clientOpts,
-      waitForConnections: true,
-      connectionLimit: 10,
-      queueLimit: 0
-    });
+      console.log('✅ Connected to Cloud SQL via Connector');
 
-    console.log('✅ Connected to Cloud SQL via Connector');
+    } catch (err) {
+      console.error('❌ Cloud SQL Connector failed:', err);
+      throw err;
+    }
+
   } else {
+    // --- Local development fallback ---
     pool = mysql.createPool({
-      host: process.env.DB_HOST,
+      host: process.env.DB_HOST || 'localhost',
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
@@ -42,13 +46,13 @@ async function initDB() {
       connectionLimit: 10,
       queueLimit: 0
     });
-    console.log('✅ Connected to database via Public IP (DB_HOST)');
+
+    console.log('✅ Connected locally (localhost / DB_HOST)');
   }
 
   return pool;
 }
 
-// Immediately initialize and export the pool
 const sql = await initDB();
 export default sql;
 
