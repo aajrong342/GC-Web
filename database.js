@@ -8,19 +8,20 @@ import bcrypt from 'bcrypt'
 
 let sql;
 
-// --- CLOUD RUN + CLOUD SQL CONNECTION ---
+// --- CLOUD RUN + CLOUD SQL CONNECTION --- 
 if (process.env.INSTANCE_CONNECTION_NAME) {
   sql = mysql.createPool({
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    socketPath: `/cloudsql/${process.env.INSTANCE_CONNECTION_NAME}`,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-  }).promise();
+  host: process.env.DB_HOST || '35.241.119.186', // your Cloud SQL public IP
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: 3306, // default MySQL port
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+}).promise();
 
-  console.log("✅ Connected to Cloud SQL via Unix socket");
+console.log('✅ Connected to Cloud SQL via Public IP');
 } else {
   // --- LOCAL DEVELOPMENT FALLBACK ---
   sql = mysql.createPool({
