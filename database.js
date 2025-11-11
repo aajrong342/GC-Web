@@ -8,31 +8,30 @@ import bcrypt from 'bcrypt'
 
 let sql;
 
-if (process.env.MYSQL_URL) {
-  // --- Railway or full URL connection ---
-  sql = mysql.createPool(process.env.MYSQL_URL).promise();
-  console.log('✅ Connected using MYSQL_URL');
-} else if (process.env.INSTANCE_CONNECTION_NAME) {
-  // --- Cloud Run → Cloud SQL (UNIX socket) ---
+// --- CLOUD RUN + CLOUD SQL CONNECTION ---
+if (process.env.INSTANCE_CONNECTION_NAME) {
   sql = mysql.createPool({
-    user: process.env.MYSQL_USER,
-    password: process.env.MYSQL_PASSWORD,
-    database: process.env.MYSQL_DB,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
     socketPath: `/cloudsql/${process.env.INSTANCE_CONNECTION_NAME}`,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
   }).promise();
 
-  console.log('✅ Connected to Cloud SQL using Unix socket');
+  console.log("✅ Connected to Cloud SQL via Unix socket");
 } else {
-  // --- Local development fallback ---
+  // --- LOCAL DEVELOPMENT FALLBACK ---
   sql = mysql.createPool({
-    host: process.env.MYSQL_HOST || "127.0.0.1",
-    user: process.env.MYSQL_USER,
-    password: process.env.MYSQL_PASSWORD,
-    database: process.env.MYSQL_DB,
-    port: process.env.MYSQL_PORT || 3306
+    host: 'localhost',
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: 3306
   }).promise();
 
-  console.log('✅ Connected using local .env config');
+  console.log("✅ Connected locally (localhost:3306)");
 }
 
 export default sql;
