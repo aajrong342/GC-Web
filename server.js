@@ -3792,8 +3792,8 @@ cron.schedule("0,0 * * * *", async () => {
     APP LISTENER AND APP LOCALS FUNCTIONS
 --------------------------------------- */
 
-const port = 3000
-app.listen(port, () => {
-  console.log(`App listening on port ${port}`)
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`App listening on port ${PORT}`)
 })
 
