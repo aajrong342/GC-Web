@@ -98,7 +98,7 @@ import {
 updateSectorQuotaForOrg,
 getTimeSeriesData,
 runHybridSimulation, getCompanyCounts,
-initDB
+sql
 } from './database.js'
 
 // File Upload
@@ -3799,6 +3799,12 @@ app.listen(PORT, () => {
 })
 
 // Connect to DB asynchronously
-initDB()
-  .then(() => console.log('✅ DB connected'))
-  .catch(err => console.error('❌ DB connection failed:', err));
+// Optionally, log DB connection success
+sql.getConnection()
+  .then(conn => {
+    console.log('✅ DB connected');
+    conn.release(); // release back to pool
+  })
+  .catch(err => {
+    console.error('❌ DB connection failed:', err);
+  });
