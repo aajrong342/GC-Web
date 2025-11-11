@@ -8,18 +8,6 @@ const isCloudRun = !!process.env.INSTANCE_CONNECTION_NAME;
 async function initDB() {
   // If running locally (with .env specifying DB_HOST), use normal TCP connection
   if (isCloudRun) {
-    pool = mysql.createPool({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      port: 3306,
-      waitForConnections: true,
-      connectionLimit: 10,
-      queueLimit: 0
-    });
-    console.log('✅ Connected to database via Public IP (DB_HOST)');
-  } else {
     // --- CONNECT USING CLOUD SQL CONNECTOR ---
     const connector = new Connector();
 
@@ -43,6 +31,18 @@ async function initDB() {
     });
 
     console.log('✅ Connected to Cloud SQL via Connector');
+  } else {
+    pool = mysql.createPool({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+      port: 3306,
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0
+    });
+    console.log('✅ Connected to database via Public IP (DB_HOST)');
   }
 
   return pool;
