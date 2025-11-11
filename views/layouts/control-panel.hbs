@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" type="text/css" href="/css/dashboard-style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/admin-style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/chart-style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/handlebars/dist/handlebars.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://kit.fontawesome.com/2fcb76e57d.js" crossorigin="anonymous"></script>
+    
+    <title>{{ title }}</title>
+</head>
+<body style="background-color: #f4fbf6;">
+    <!-- Header: Contains user menu -->
+    <header>
+        <img src="/pictures/Greencycle-Logo.png" class="header-logo">
+        <div class="header-logo-text">
+            GreenCycle <text style="color:#d4ffd0; font-weight: bold;">CONTROL PANEL</text>
+        </div>
+        
+        <!-- User Menu -->
+        <div class="header-user">
+            <!-- Display user menu (profile, settings, log out) -->           
+            <div class="user-menu">
+                <!-- User Menu Button -->
+                <button class="user-menu-button">
+                    <i class="fa-regular fa-circle-user header-user-icon"></i> {{uppercase user.lastname}}, {{user.firstname}}
+                    <span class="user-menu-caret"><i class="fa-solid fa-caret-down"></i></span>
+                </button>
+
+                <div class="user-menu-content">
+                    <a href="/dashboard/profile">
+                        <i class="fa-solid fa-user"></i> Profile
+                    </a>
+                    <a href="/dashboard">
+                        <i class="fa-solid fa-chart-simple"></i> Return to Dashboard
+                    </a>
+                    <a href="/">
+                        <i class="fa-solid fa-house"></i> Return to Main Site
+                    </a>
+                    <a href="#" id="logout">
+                        <i class="fa-solid fa-right-from-bracket"></i> Log Out
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Navigation bar -->
+    <div class="layout-wrapper">
+        <nav id="sidebar" class="sidebar open">
+            <div class="nav-btn-container">
+                <button id="collapse-sidebar-btn" class="collapse-sidebar-btn">
+                    <i class="fa-solid fa-angles-left"></i> Collapse Sidebar
+                </button>
+
+                <a href="/control-panel" class="{{#if current_home}}current{{/if}}">
+                    <i class="fa-solid fa-house nav-icon"></i> Home
+                </a>
+
+                <a href="/control-panel/entry-statistics" class="{{#if current_stats}}current{{/if}}">
+                    <i class="fa-solid fa-chart-line"></i>&nbsp; Data Entry Statistics
+                </a>
+                
+                <!-- Only show functions if current user is NOT a client -->
+                {{#ifNotEquals user.supertype 2}}
+                    <div class="nav-divider">STAFF FUNCTIONS</div>
+
+                    <a href="/control-panel/user-applications" class="{{#if current_userapp}}current{{/if}}">
+                        <i class="fa-solid fa-clipboard-list nav-icon"></i> User Applications
+                        {{#ifNotEquals pendingApplications 0}}
+                            <span class="notif-badge">{{pendingApplications}}</span>
+                        {{/ifNotEquals}}
+                    </a>
+
+                    <a href="/control-panel/partners" class="{{#if current_partners}}current{{/if}}">
+                        <i class="fa-solid fa-handshake nav-icon"></i> Partners
+                    </a>
+                {{/ifNotEquals}}
+
+                <!-- Only show functions if current user is admin -->
+                {{#ifEquals user.supertype 0}}
+                    <div class="nav-divider">ADMIN FUNCTIONS</div>
+                    
+                    <a href="/control-panel/quotas" class="{{#if current_quotas}}current{{/if}}">
+                        <i class="fa-solid fa-scale-balanced nav-icon"></i> Manage Target %
+                    </a>
+
+                    <a href="/control-panel/users" class="{{#if current_users}}current{{/if}}">
+                        <i class="fa-solid fa-users nav-icon"></i> Manage Users
+                    </a>
+
+                    <a href="/control-panel/roles" class="{{#if current_roles}}current{{/if}}">
+                        <i class="fa-solid fa-helmet-safety nav-icon"></i> Manage Roles
+                    </a>
+                    
+                {{/ifEquals}}
+
+                <a href="/dashboard" style="background: none !important;">
+                    <button id="collapse-sidebar-btn" class="collapse-sidebar-btn" style="margin-top: 5px !important;">
+                        <i class="fa-solid fa-chart-simple"></i> RETURN TO DASHBOARD
+                    </button>
+                </a>
+            </div>
+        </nav>
+        
+        <main id="main-content">
+            <button id="open-sidebar-btn">
+                <i class="fa-solid fa-bars"></i> Open Sidebar
+            </button>
+            {{{ body }}}
+        </main>
+    </div>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+    const sidebar = document.getElementById('sidebar');
+    const openBtn = document.getElementById('open-sidebar-btn');
+    const collapseBtn = document.getElementById('collapse-sidebar-btn');
+
+    // --- Restore sidebar state from localStorage ---
+    const savedState = localStorage.getItem('sidebarState');
+    if (savedState === 'closed') {
+        sidebar.classList.add('closed');
+        sidebar.classList.remove('open');
+        openBtn.style.display = 'flex';
+        setTimeout(() => {
+            openBtn.classList.add('visible');
+        }, 10);
+    } else {
+        sidebar.classList.add('open');
+    }
+
+    // --- Collapse sidebar ---
+    collapseBtn.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        sidebar.classList.add('closed');
+        localStorage.setItem('sidebarState', 'closed');
+
+        openBtn.style.display = 'flex';
+        setTimeout(() => {
+            openBtn.classList.remove('hidden');
+            openBtn.classList.add('visible');
+        }, 10);
+    });
+
+    // --- Open sidebar ---
+    openBtn.addEventListener('click', () => {
+        sidebar.classList.remove('closed');
+        sidebar.classList.add('open');
+        localStorage.setItem('sidebarState', 'open');
+
+        openBtn.classList.add('hidden');
+        openBtn.classList.remove('visible');
+        setTimeout(() => {
+            openBtn.style.display = 'none';
+        }, 300);
+    });
+
+    // Logout code
+    document.getElementById('logout').addEventListener('click', function (event) {
+        event.preventDefault(); // Prevent default navigation
+
+        fetch('/logout', { method: 'DELETE', credentials: 'include' })
+        .then(response => {
+            if (response.ok) {
+            window.location.href = "/"; // Redirect to login after logout
+            }
+        })
+        .catch(err => console.error("Logout failed", err));
+    })
+});
+
+</script>
+</body>
+</html>

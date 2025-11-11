@@ -1,0 +1,629 @@
+<!-- Show search form if current page is data search -->
+{{#if current_all}}
+<form id="data-search" method="GET" action="/dashboard/data/all"
+data-prefill-region="{{prefill.region}}" data-prefill-province="{{prefill.province}}" data-prefill-municipality="{{prefill.municipality}}" data-prefill-barangay="{{prefill.barangay}}">
+    <!-- Search Bar and Filter Toggle -->
+    <div class="search-bar-container">
+        <input type="text" name="title" value="{{query.title}}" class="search-input-main" placeholder="Search data entry title...">
+        
+        <button class="search-btn" type="submit">
+            <i class="fas fa-search"></i> Search
+        </button>
+
+        <span id="filter-toggle" class="filter-toggle" onclick="toggleFilters()">
+            <i class="fas fa-sliders-h"></i> Show Filters
+            </span>
+        </div>
+
+        <!-- Hidden Filters Section -->
+        <div id="filter-section" class="filter-section hidden">
+        <div class="filter-columns">
+            
+            <!-- Location Filters -->
+            <div class="filter-column">
+              <label for="region">Region</label>
+              <select name="region" id="regions">
+                  <option value="">Select a region</option>
+                  <!-- Populated by locations.js -->
+              </select>
+
+              <label for="province">Province</label>
+              <select name="province" id="provinces" disabled>
+                  <option value="">Select a province</option>
+                  <!-- Populated by locations.js -->
+              </select>
+
+              <label for="municipality">City/Municipality</label>
+              <select name="municipality" id="municipalities" disabled>
+                  <option value="">Select a city/municipality</option>
+                  <!-- Populated by locations.js -->
+              </select>
+
+              <label for="barangay">Barangay</label>
+              <select name="barangay" id="barangay" disabled>
+                <option value="">Select a barangay</option>
+                <!-- Populated by locations.js -->
+              </select>
+            </div>
+
+            <!-- Author & Date Filters -->
+            <div class="filter-column">
+              <label for="filter-author">Author</label>
+              <input type="text" id="filter-author" name="author" value="{{query.author}}" placeholder="Enter author's name">
+
+              <div class="input-wrapper">
+                <label for="filter-org">Organization Name</label>
+                <input 
+                  type="text" 
+                  id="filter-org" 
+                  name="company" 
+                  value="{{query.company}}" 
+                  placeholder="Enter organization name" 
+                  autocomplete="off"
+                >
+
+                <!-- Dropdown container -->
+                <ul id="company-dropdown" class="dropdown-list hidden"></ul>
+              </div>
+
+              <label>Collection Date Range</label>
+              <div class="date-range">
+                  <input type="date" id="filter-date-start" name="startDate" value="{{query.startDate}}"> to
+                  <input type="date" id="filter-date-end" name="endDate" value="{{query.endDate}}">
+              </div>
+
+              <div style="margin-left: auto;">
+                <!-- Apply filters -->
+                <button type="submit" class="apply-btn">
+                  <i class="fa-solid fa-filter"></i> Apply Filters
+                </button>
+
+                <!-- Reset button -->
+                <button type="button" id="reset-filters" class="reset-btn">
+                  <i class="fa-solid fa-rotate-left"></i> Reset Filters
+                </button>
+              </div>
+            </div>
+        </div>
+    </div>
+</form>
+{{/if}}
+
+<!-- Show tabs if current page is review list -->
+{{#if current_datasubs}}
+  <div class="tab">
+    <a href="/dashboard/data/submissions/pending">
+      <button class="tablinks {{#if pending}}active{{/if}}">
+        PENDING REVIEW
+        {{#ifNotEquals pendingCount 0}}
+          &nbsp;<span class="notif-badge">{{pendingCount}}</span>
+        {{/ifNotEquals}}
+      </button>
+    </a>
+    
+    <a href="/dashboard/data/submissions/revision">
+      <button class="tablinks {{#if revision}}active{{/if}}">
+        WAITING FOR REVISION
+        {{#ifNotEquals revisionCount 0}}
+          &nbsp;<span class="notif-badge">{{revisionCount}}</span>
+        {{/ifNotEquals}}
+      </button>
+    </a>
+  </div>
+<!-- Show tabs if current page is user list -->
+{{else current_in_progress}}
+  <div class="tab">
+    <a href="/dashboard/data/user/revision">
+      <button class="tablinks {{#if revision}}active{{/if}}">
+        FOR REVISION
+        {{#ifNotEquals revisionCount 0}}
+          &nbsp;<span class="notif-badge">{{revisionCount}}</span>
+        {{/ifNotEquals}}
+      </button>
+    </a>
+    
+    <a href="/dashboard/data/user/pending">
+      <button class="tablinks {{#if pending}}active{{/if}}">
+        WAITING FOR REVIEW
+        {{#ifNotEquals pendingCount 0}}
+          &nbsp;<span class="notif-badge">{{pendingCount}}</span>
+        {{/ifNotEquals}}
+      </button>
+    </a>
+  </div>
+{{/if}}
+
+<!-- Entry counter -->
+<div class="form-section">
+  <div style="display: flex;">
+    <p class="entry-count-text">
+      Showing <b>{{startEntry}}–{{endEntry}}</b> of <b>{{totalCount}}</b> entries
+    </p>
+
+    <!-- If current page is data search AND entries aren't zero -->
+    {{#if current_all}}
+      {{#ifNotEquals totalCount 0}}
+      <button class="summary-btn" id="summaryBtn">
+        <i class="fa-solid fa-chart-simple"></i> View Data Summary
+      </button>
+      {{/ifNotEquals}}
+    {{/if}}
+  </div>
+</div>
+
+{{#ifEquals data.length 0}}
+  <div class="form-section">
+    <span style="font-size: large;">No entries found.</span>
+  </div>
+{{/ifEquals}}
+
+{{#each data}}
+    <a href="/dashboard/data{{#if ../current_datasubs}}/review{{else ../current_in_progress}}/wip{{/if}}/{{data_entry_id}}
+      " class="waste-data-btn-link">
+        <div class="form-section waste-data-btn" style="cursor: pointer;">
+            
+            <!-- Header: Title and Status -->
+            <div class="data-entry-header">
+            <h2>{{title}}</h2>
+            <span class="data-status 
+                {{#ifEquals status 'Pending Review'}}stat-pending{{/ifEquals}} 
+                {{#ifEquals status 'Approved'}}stat-approved{{/ifEquals}} 
+                {{#ifEquals status 'Needs Revision'}}stat-revision{{/ifEquals}}
+                {{#ifEquals status 'Revised'}}stat-revised{{/ifEquals}}">
+                {{status}}
+            </span>
+            </div>
+
+            <!-- Main Info -->
+            <p>
+            <strong>Location:</strong> {{location_name}}<br>
+            <i>Submitted on {{textDate date_submitted}}</i>
+            </p>
+
+            <p>
+            <strong>Submitted by:</strong> {{uppercase lastname}}, {{firstname}}<br>
+            <i>{{company_name}}</i>
+            </p>
+
+            <p>
+            <strong>Collection Period:</strong> {{textDate collection_start}} – {{textDate collection_end}}</p>
+
+        </div>
+    </a>
+{{/each}}
+
+<!-- Page counter -->
+<div class="pagination">
+    {{#if totalPages}}
+        {{#unless (eq currentPage 1)}}
+            <a href="{{queryString query page=1}}" class="pagination-btn arrow">
+              <i class="fa-solid fa-angles-left"></i>
+            </a>
+        {{/unless}}
+
+        {{#if (gt currentPage 1)}}
+            <a href="{{queryString query page=(subtract currentPage 1)}}" class="pagination-btn arrow">
+              <i class="fa-solid fa-chevron-left"></i>
+            </a>
+        {{/if}}
+
+        {{#each (paginationRange currentPage totalPages)}}
+          <a href="{{queryString ../query page=this}}" class="pagination-btn {{#ifEquals this ../currentPage}}active{{/ifEquals}}">
+            {{this}}
+          </a>
+        {{/each}}
+
+        {{#if (lt currentPage totalPages)}}
+            <a href="{{queryString query page=(add currentPage 1)}}" class="pagination-btn arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </a>
+        {{/if}}
+
+        {{#unless (eq currentPage totalPages)}}
+            <a href="{{queryString query page=totalPages}}" class="pagination-btn arrow">
+              <i class="fa-solid fa-angles-right"></i>
+            </a>
+        {{/unless}}
+    {{/if}}
+</div>
+
+<!-- Location search script -->
+<script src="../../js/locations.js"></script>
+
+<!-- Javascript -->
+<script>
+
+// Toggle search filters
+function toggleFilters() {
+    const filterSection = document.getElementById('filter-section');
+    const toggleText = document.getElementById('filter-toggle');
+
+    const isHidden = filterSection.classList.toggle('hidden');
+
+    // Update toggle label text
+    toggleText.innerHTML = `
+      <i class="fas fa-sliders-h"></i> ${isHidden ? 'Show Filters' : 'Hide Filters'}
+    `;
+  }
+
+// Clean query when form is submitted
+document.getElementById('data-search').addEventListener('submit', function (e) {
+    const form = e.target;
+    const inputs = form.querySelectorAll('input, select');
+    inputs.forEach(input => {
+      if (!input.value) {
+        input.name = ''; // Remove name so it won't be submitted
+      }
+    });
+  });
+
+// Reset filters when reset button is clicked
+document.getElementById('reset-filters').addEventListener('click', () => {
+    window.location.href = window.location.pathname;
+  });
+
+document.getElementById('summaryBtn').addEventListener('click', function () {
+    // Get current URL's query string (e.g., ?author=thei&company=it)
+    const query = window.location.search;
+
+    // Construct the new URL
+    const summaryUrl = '/dashboard/data/summary' + query;
+
+    // Open the new URL in a new tab
+    window.open(summaryUrl, '_blank');
+  });
+
+</script>
+
+<!-- Search bar style -->
+<style>
+
+.search-bar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fdfdfd;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  margin-bottom: 1rem;
+}
+
+.search-input-main {
+  width: 100%;
+  max-width: 1000px;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 600px;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.filter-toggle {
+  margin-left: 1rem;
+  cursor: pointer;
+  color: #28a745;
+  font-weight: 600;
+  user-select: none;
+}
+
+.filter-toggle i {
+  margin-right: 0.4rem;
+}
+
+.filter-section {
+  background: #fafafa;
+  border: 1px solid #ccc;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+
+.filter-columns {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.filter-column {
+  flex: 1 1 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-column label {
+  font-weight: 600;
+  margin-top: 0.8rem;
+  margin-bottom: 0.3rem;
+}
+
+.filter-column input[type="text"],
+.filter-column select,
+.date-range input {
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+}
+
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+}
+
+.hidden {
+  display: none;
+}
+
+.search-btn {
+  margin-left: 0.75rem;
+  padding: 0.6rem 1rem;
+  background-color: #28a745;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: medium;
+}
+
+.search-btn:hover {
+  background-color: #34b452;
+}
+
+.form-section {
+  background-color: #fdfdfd;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  margin: 1rem auto;
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
+}
+
+.form-section h3 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+}
+
+.form-section h3 i {
+  margin-right: 0.6rem;
+  color: #127009;;
+}
+
+.form-section label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.reset-btn {
+  background-color: orange;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  width: fit-content;
+  transition: background-color 0.3s ease;
+  margin-top: 2rem;
+  margin-left: 5px;
+  font-size: medium;
+}
+
+.reset-btn:hover {
+  background-color: darkorange;
+}
+
+.apply-btn {
+  margin-left: 0.75rem;
+  padding: 0.6rem 1rem;
+  background-color: #28a745;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: medium;
+  width: fit-content;
+}
+
+.apply-btn:hover {
+  background-color: #34b452;
+}
+
+.entry-count-text {
+  color: #555;
+  margin: 0;
+  font-size: large;
+}
+
+.summary-btn {
+  margin-left: auto;
+  padding: 0.6rem 1rem;
+  background-color: #28a745;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: medium;
+}
+
+.summary-btn:hover {
+  background-color: #34b452;
+}
+
+</style>
+
+<!-- Organization dropdown script and style -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // List of companies
+  const companies = [
+    {{#each companies}}
+      "{{this.company_name}}"{{#unless @last}},{{/unless}}
+    {{/each}}
+  ];
+
+  const input = document.getElementById('filter-org');
+  const dropdown = document.getElementById('company-dropdown');
+  const wrapper = input.closest('.input-wrapper');
+  let currentIndex = -1; // track highlighted index
+  let filtered = [...companies]; // track current filtered list
+
+  function showDropdown(list) {
+    dropdown.innerHTML = '';
+    currentIndex = -1;
+
+    if (!list.length) {
+      dropdown.classList.add('hidden');
+      return;
+    }
+
+    list.forEach(company => {
+      const li = document.createElement('li');
+      li.textContent = company;
+      li.setAttribute('role', 'option');
+
+      li.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        input.value = company;
+        dropdown.classList.add('hidden');
+        input.focus();
+      });
+
+      dropdown.appendChild(li);
+    });
+
+    dropdown.classList.remove('hidden');
+  }
+
+  function highlightItem(index) {
+    const items = dropdown.querySelectorAll('li');
+    if (!items.length) return;
+
+    items.forEach(li => li.classList.remove('highlighted'));
+
+    // wrap-around
+    if (index < 0) index = items.length - 1;
+    if (index >= items.length) index = 0;
+
+    const item = items[index];
+    item.classList.add('highlighted');
+    item.scrollIntoView({ block: 'nearest' });
+
+    currentIndex = index;
+  }
+
+  // Input event: live filtering
+  input.addEventListener('input', function () {
+    const q = this.value.toLowerCase().trim();
+    filtered = q ? companies.filter(name => name.toLowerCase().includes(q)) : [...companies];
+    showDropdown(filtered);
+  });
+
+  // On focus: show dropdown if empty
+  input.addEventListener('focus', function () {
+    if (this.value.trim() === '') {
+      filtered = [...companies];
+      showDropdown(filtered);
+    }
+  });
+
+  // On blur: delay to allow pointerdown
+  input.addEventListener('blur', function () {
+    setTimeout(() => {
+      const val = input.value.trim();
+      if (!companies.includes(val)) {
+        this.value = '';
+      }
+      dropdown.classList.add('hidden');
+    }, 0);
+  });
+
+  // Hide dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!wrapper.contains(e.target)) dropdown.classList.add('hidden');
+  });
+
+  // Keyboard navigation
+  input.addEventListener('keydown', (e) => {
+    const items = dropdown.querySelectorAll('li');
+    if (!items.length) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        highlightItem(currentIndex + 1);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        highlightItem(currentIndex - 1);
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (currentIndex >= 0 && currentIndex < items.length) {
+          const selected = items[currentIndex];
+          input.value = selected.textContent;
+        } else if (items.length > 0) {
+          input.value = items[0].textContent;
+        }
+        dropdown.classList.add('hidden');
+        break;
+      case 'Escape':
+        dropdown.classList.add('hidden');
+        break;
+    }
+  });
+});
+</script>
+
+<style>
+.input-wrapper {
+  position: relative;
+  width: 100%;
+  margin-top: 15px;
+}
+#company-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-top: none;
+  max-height: 200px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  z-index: 1000;
+}
+#company-dropdown.hidden {
+  display: none;
+}
+#company-dropdown li {
+  padding: 8px 10px;
+  cursor: pointer;
+}
+#company-dropdown li:hover,
+#company-dropdown li.highlighted {
+  background: #f0f0f0;
+}
+</style>

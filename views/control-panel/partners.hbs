@@ -1,0 +1,35 @@
+<h2>Partner Organizations</h2>
+
+<div class="filter-bar">
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search by name...">
+        <button id="searchButton"><i class="fa-solid fa-search"></i></button>
+    </div>
+</div>
+
+<div class="tb-container">
+    <table>
+        <tr class="tb-header"> <!-- Column Headers -->
+            <td class="td-button-container"><!-- Blank column for user actions --></td>
+            <td>Org ID</td>
+            <td></td>
+            <td>Organization</td>
+            <td>Description</td>
+        </tr>
+
+        {{#each partners}}
+            <tr>
+                <td class="td-button-container">
+                    <button class="tb-button-action edit"><i class="fa-solid fa-pencil"></i></button>
+                    <button class="tb-button-action delete"><i class="fa-solid fa-trash"></i></button>
+                </td>
+                <td>{{org_id}}</td>
+                <td><img src="{{logo}}" height="50"></td>
+                <td>{{name}}</td>
+                <td>
+                    {{description}}<br><a href="{{website}}">{{website}}</a>
+                </td>
+            </tr>
+        {{/each}}
+    </table>
+</div>

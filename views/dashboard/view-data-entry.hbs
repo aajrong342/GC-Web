@@ -1,0 +1,1731 @@
+
+<!-- Actual Data Display -->
+
+<!-- Title Card -->
+<div data-section="data-title" class="form-section title-card" style="text-align: center;">
+  <h1 style="margin-bottom: 0.25rem;">{{wasteGen.title}}</h1>
+  <center>
+    <h3 style="margin: 0; font-weight: normal; color: #555;">
+        <i class="fa-solid fa-location-dot" style="color: #127009;"></i>&nbsp; {{wasteGen.location_name}}
+    </h3>
+  </center>
+</div>
+
+<div style="display: flex">
+  <!-- Div enclosing info blocks -->
+  <div data-section="data-info">
+    <!-- Info Blocks -->
+    <div class="info-grid">
+        <!-- Submission Info -->
+        <div class="form-section">
+          <h3><i class="fas fa-user"></i> Submission Info</h3>
+          <table class="user-profile">
+            <tr>
+              <td class="label">Submitted by</td>
+              <td>{{uppercase wasteGen.lastname}}, {{wasteGen.firstname}}</td>
+            </tr>
+            <tr>
+              <td class="label">Organization Name</td>
+              <td>{{wasteGen.company_name}}</td>
+            </tr>
+            <tr>
+              <td class="label">Date Submitted</td>
+              <td>{{textDate wasteGen.date_submitted}}</td>
+            </tr>
+          </table>
+        </div>
+        
+        <!-- Collection Info -->
+        <div class="form-section">
+          <h3><i class="fas fa-calendar-alt"></i> Collection Info</h3>
+          <table class="user-profile">
+            <tr>
+              <td class="label">Start Date</td>
+              <td>{{textDate wasteGen.collection_start}}</td>
+            </tr>
+            <tr>
+              <td class="label">End Date</td>
+              <td>{{textDate wasteGen.collection_end}}</td>
+            </tr>
+          </table>
+        </div>
+    </div>
+
+    <!-- Waste Generation Info -->
+    <div class="form-section">
+      <h3><i class="fas fa-dumpster"></i> Waste Generation</h3>
+      <table class="user-profile">
+        <tr>
+          <td class="label">Population (based on Census)</td>
+          <td>{{commaInt wasteGen.population}}</td>
+        </tr>
+        <tr>
+          <td class="label">Waste Generation per Capita (Kg/cap-day)</td>
+          <td>{{commaNumber wasteGen.per_capita}}</td>
+        </tr>
+        <tr>
+          <td class="label">Annual Waste Generation (kg/year)</td>
+          <td>{{commaNumber wasteGen.annual}}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Map Display -->
+  <div style="width: 50%;">
+    <div id="map" style="width: 100%; height: 450px; background-color: #f0f0f0;"></div>
+  </div>
+  </div>
+
+<!-- Compliance Overview -->
+<div class="form-section" style="background-color: rgb(240, 255, 240); padding: 10px 15px; border-left: 4px solid #4caf50; margin-bottom: 15px;">
+  <h2>About Diversion Rates and Compliance</h2>
+  <p>
+    <b>Diversion</b> refers to the portion of waste that is prevented from going to landfills or open dumps, whether before or after collection. This includes waste sent to <b>processing or recovery facilities</b> such as Materials Recovery Facilities (MRFs) where it can be reused, recycled, or converted for other uses.
+  </p>
+  <p>
+    Tracking and meeting <b>diversion targets</b> is essential for reducing landfill dependence, minimizing environmental pollution, and supporting sustainable waste management systems. Regular compliance tracking helps local governments and sectors assess their performance and optimize recovery operations.
+  </p>
+</div>
+
+
+<!-- Compliance -->
+<div style="display: flex; gap: 10px; flex-wrap: wrap;">
+  <!-- Waste Category Compliance -->
+  <div data-section="compliance-category" class="form-section" style="background-color: rgb(227, 255, 227); flex: 1 1 calc(50% - 5px);">
+    <h2>Waste Category Compliance Status</h2>
+
+    <!-- Insights -->
+    {{{wasteComplianceNarrative}}}
+
+    <table class="compliance-table">
+      <tr>
+        <th>Waste Category</th>
+        <th>Collected</th>
+        <th>Total Generated</th>
+        <th>Diversion %</th>
+        <th>Target %</th>
+        <th>Status</th>
+      </tr>
+      {{#each wasteCompliance}}
+        <tr>
+          <td>{{supertype_name}}</td>
+          <td>{{formatNumber total_collected_weight}} kg</td>
+          <td>{{formatNumber total_generation}} kg</td>
+          <td>{{diversion_pct}}%</td>
+          <td>{{target_rate}}%</td>
+          <td class="{{#if (eq compliance_status 'Non-Compliant')}}non-compliant{{/if}}">{{compliance_status}}</td>
+        </tr>
+      {{/each}}
+    </table>
+  </div>
+
+  <!-- Sector Compliance -->
+  <div data-section="compliance-sector" class="form-section" style="background-color: rgb(227, 255, 227); flex: 1 1 calc(50% - 5px);">
+    <h2>Waste Sector Compliance Status</h2>
+
+    <!-- Insights -->
+    {{{sectorComplianceNarrative}}}
+
+    <table class="compliance-table">
+      <tr>
+        <th>Sector</th>
+        <th>Collected</th>
+        <th>Total Generated</th>
+        <th>Diversion %</th>
+        <th>Target %</th>
+        <th>Status</th>
+      </tr>
+      {{#each sectorCompliance}}
+        <tr>
+          <td>{{sector_name}}</td>
+          <td>{{formatNumber total_collected_weight}} kg</td>
+          <td>{{formatNumber total_generation}} kg</td>
+          <td>{{diversion_pct}}%</td>
+          <td>{{target_rate}}%</td>
+          <td class="{{#if (eq compliance_status 'Non-Compliant')}}non-compliant{{/if}}">{{compliance_status}}</td>
+        </tr>
+      {{/each}}
+    </table>
+  </div>
+</div>
+
+
+  <!-- Insight -->
+  <hr>
+  <div data-section="insights" class="form-section insight-general" style="background-color: #eef8f2; padding: 1.5rem; border-radius: 12px; border-left: 6px solid #4CAF50; margin-top: 2rem;">
+    <h2 style="color: #2d613f;"><i class="fa-solid fa-lightbulb" style="margin-right: 8px;"></i>General Waste Category Insights & Recommendations</h2>
+    <ul style="font-size: 1.1rem; list-style-type: none; padding-left: 0;">
+      {{#each recommendations}}
+        <li style="margin-bottom: 1rem;">{{{this}}}</li>
+      {{/each}}
+    </ul>
+  </div>
+
+<!-- Data Tabs -->
+<div class="tab">
+  <button class="tablinks" onclick="openTab(event, 'Chart')" id="defaultOpen">CHART</button>
+  <button class="tablinks" onclick="openTab(event, 'Table')">RAW DATA</button>
+</div>
+
+<!-- Display A: Chart -->
+<div id="Chart" class="tabcontent">
+    <!-- Supertype summary pie chart -->
+    <div data-section="top-categories">
+      <div style="text-align: center;">
+        <h2>Top Waste Categories in This Area</h2>
+        <p style="font-size: large;" id="summary-description">This pie chart shows the distribution of waste by supertype. Each slice represents the total weight (in kilograms) of waste classified as Biodegradable, Recyclable, Residual, or Special/Hazardous. Hover over a slice to view its percentage and absolute weight.</p>
+      </div>
+
+      <div style="display: flex;">
+        <div class="pie-chart">
+            <canvas id="supertypePieChart">
+                <!-- Populated by JS -->
+            </canvas>
+        </div>
+
+        <div id="summary-legend">
+            <div id="summary-insight"></div>
+
+            {{#each legendData}}
+                {{#if (gt value 0)}}
+                <span class="legend-item" style="background-color: {{color}}">
+                    <span class="legend-name">
+                        {{label}}
+                        <span class="legend-perc">{{calcPercent value ../legendData}}%</span>
+                    </span>
+                    <span class="legend-kg">
+                        {{toFixed value 3}} kg
+                    </span>
+                </span>
+                {{/if}}
+            {{/each}}
+
+            <!-- Toggle showing summary or detailed pie -->
+            <button id="togglePieBtn" class="no-print"><i class="fa-solid fa-circle-info"></i>&nbsp; Show Detailed Pie Chart</button>
+        </div>
+      </div>
+    </div><br>
+
+    <hr>
+
+    <!-- Summary pie -->
+    <br>
+      <center data-section="top-cats">
+        <h2>Top Waste Types by Category</h2>
+        <p style="font-size: large;">Each bar chart below focuses on one waste category. The bars represent different types under that category, showing how much each contributed to the total weight.</p>
+      </center>
+      <div class="bar-tab">
+          <button class="bar-tablinks" onclick="openBarTab(event, 'Biodegradable')" id="firstBar">BIODEGRADABLE</button>
+          <button class="bar-tablinks" onclick="openBarTab(event, 'Recyclable')">RECYCLABLE</button>
+          <button class="bar-tablinks" onclick="openBarTab(event, 'Residual')">RESIDUAL</button>
+          <button class="bar-tablinks" onclick="openBarTab(event, 'Special/Hazardous')">SPECIAL/HAZARDOUS</button>
+      </div>
+
+      <!-- Subtypes bar charts -->
+      <div id="bar-charts-container"></div>
+
+    <!-- Top sectors producing waste -->
+    <br><hr><br>
+    <div data-section="top-sectors">
+      <center>
+        <h2>Top Sectors by Waste Output</h2>
+        <p style="font-size: large;">This chart shows which economic sectors contribute the most to total waste generation. Use this insight to target waste reduction initiatives by sector.</p>
+      </center>
+      <div id="sector-insight"></div>
+      <div id="sector-chart-container"></div>
+    </div>
+
+    <!-- Pie chart per sector -->
+    <br><hr><br>
+      <center data-section="cats-per-sector">
+        <h2>Top Waste Categories per Sector</h2>
+        <p style="font-size: large;">Each pie chart below shows the waste composition for a specific economic sector.</p>
+      </center>
+
+      <div class="sector-tab">
+          <button class="sector-tablinks" onclick="openPieTab(event, 'Residential')" id="firstSector">RESIDENTIAL</button>
+          <button class="sector-tablinks" onclick="openPieTab(event, 'Commercial')">COMMERCIAL</button>
+          <button class="sector-tablinks" onclick="openPieTab(event, 'Institutional')">INSTITUTIONAL</button>
+          <button class="sector-tablinks" onclick="openPieTab(event, 'Industrial')">INDUSTRIAL</button>
+          <button class="sector-tablinks" onclick="openPieTab(event, 'Health')">HEALTH</button>
+          <button class="sector-tablinks" onclick="openPieTab(event, 'AgricultureandLivestock')">AGRICULTURE AND LIVESTOCK</button>
+      </div>
+
+      <div id="sector-pies-container"></div>
+</div>
+
+<!-- Display B: Raw Data -->
+<div id="Table" class="tabcontent">
+    <div style="font-size: large; margin: 10px 0;" data-section="raw-desc">
+      This table shows the waste composition for <b>{{wasteGen.location_name}}</b> according to waste type. The waste types are further divided into <b>economic sectors</b> (e.g., Residential, Commercial). All raw amounts are in <b>kilograms (kg)</b>.
+    </div>
+
+    <div style="display: flex;">
+        <div id="data-table-container">
+            <div class="table-operations">
+                <div style="display: flex;">
+                    <!-- Search bar -->
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" class="tbl-search" id="tbl-search" placeholder="Enter keyword...">
+                    </div>&nbsp;
+                    
+                    <!-- Supertype filter -->
+                    <select id="supertype-filter">
+                        <option value="all">Select Category</option>
+                        <option value="Biodegradable">Biodegradable</option>
+                        <option value="Recyclable">Recyclable</option>
+                        <option value="Residual">Residual</option>
+                        <option value="Special/Hazardous">Special/Hazardous</option>
+                    </select>
+                    
+                    <!-- Export buttons -->
+                    <div style="margin-left: auto;">
+                        <button onclick="exportTableToCSV()" class="button tbl-export">
+                            <i class="fa-solid fa-file-csv"></i>&nbsp; Export as CSV
+                        </button>
+                        <button onclick="exportTableToExcel()" class="button tbl-export">
+                            <i class="fa-solid fa-file-excel"></i>&nbsp; Export as Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Waste Composition -->
+            <table class="data-table" id="waste-comp-table" data-section="raw-data">
+                <thead>
+                    <tr class="tb-header">
+                        <th>Waste Type</th>
+                        {{#each sectors}}
+                            <th style="width: 100px;">{{name}}</th>
+                        {{/each}}
+                        <th>Total (kg)</th>
+                        <th>Percentage (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each supertypes}}
+                        <tr supertype="{{name}}">
+                            <td colspan="{{add ../sectors.length 3}}" class="tb-supertype"><strong>{{uppercase name}}</strong></td>
+                        </tr>
+                        {{#each types}}
+                            <tr supertype="{{../name}}">
+                            <td>{{name}}</td>
+                            {{#with amounts as |a|}} <!-- Set alias for amounts -->
+                                {{#each ../../../sectors}}
+                                    <td style="text-align: center;">{{lookup a this.id}}</td>
+                                {{/each}}
+                                <td style="text-align: center;">{{../totalWeight}}</td>
+                                <td style="text-align: center;">{{../percentage}}%</td>
+                            {{/with}}
+                            </tr>
+                        {{/each}}
+                        <tr class="tb-subtotal" supertype="{{name}}">
+                            <td style="text-align: left;"><strong>{{name}} Subtotal</strong></td>
+                            {{#each ../sectors}}
+                                <td><strong>{{toFixed (lookup ../this.sectorTotals this.id) 3}}</strong></td>
+                            {{/each}}
+                            <td><strong>{{this.totalWeight}}</strong></td>
+                            <td><strong>{{this.percentage}}%</strong></td>
+                        </tr>
+                    {{/each}}
+                </tbody>
+                <tfoot>
+                    <tr class="tb-total">
+                      <td style="text-align:left">TOTAL</td>
+                      {{#each sectors}}
+                      <td>{{toFixed (lookup ../sectorTotals this.id) 3}}</td>
+                      {{/each}}
+                      <td>{{grandTotal}}</td>
+                      <td>100%</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Table filtering script -->
+<script>
+
+// Supertype filter
+const searchInput = document.getElementById('tbl-search');
+const dropdown = document.getElementById('supertype-filter');
+
+function filterTable() {
+  const keyword = searchInput.value.trim().toLowerCase();
+  const selectedSupertype = dropdown.value;
+  const allRows = document.querySelectorAll('tr[supertype]');
+
+  allRows.forEach(row => {
+    const rowSupertype = row.getAttribute('supertype');
+    const text = row.textContent.toLowerCase();
+    const matchesSupertype = selectedSupertype === 'all' || rowSupertype === selectedSupertype;
+    const matchesSearch = text.includes(keyword);
+
+    row.style.display = matchesSupertype && matchesSearch ? '' : 'none';
+  });
+}
+
+searchInput.addEventListener('input', filterTable);
+dropdown.addEventListener('change', filterTable);
+
+</script>
+
+<!-- Chart + insight script -->
+<script>
+
+// ========== PIE CHART SETUP ========== //
+const summaryData = {{{summaryPieData}}},
+      detailedData = {{{detailedPieData}}},
+      barChartData = {{{barChartData}}},
+      sectorBarData = {{{sectorBarData}}},
+      sectorPieData = {{{sectorPieData}}};
+
+const supertypeDemo = {{{supertypeDemo}}};
+const grandTotal = {{{grandTotal}}};
+
+/* ----------------------------
+  Insight generator (frontend)
+  - Uses existing variables:
+    summaryData, detailedData, barChartData, sectorPieData,
+    sectorBarData, legendData, supertypeDemo, grandTotal, sectorTotals
+  - Inserts text into DOM next to charts.
+-----------------------------*/
+
+// small helper utilities
+const rand = arr => arr[Math.floor(Math.random() * arr.length)];
+const pct = (value, total) => total ? (value / total * 100) : 0;
+const fmtKg = (n) => `${Number(n).toFixed(3)} kg`;
+
+// phrase banks for variation
+const overallPhrases = {
+  balanced:
+    "All major categories are nearly proportional, indicating a balanced waste composition with no single dominant source.<br><br>",
+  dominant:
+    "One category dominates the waste stream. Prioritize source reduction and targeted segregation for this category.<br><br>",
+  lowReported:
+    "Some categories show very low or missing volumes. This may be caused by underreporting, misclassification, gaps in reporting, or genuinely low output.<br><br>",
+  mixedDominant:
+    "Several categories contribute significant amounts. Consider combined campaigns (e.g., recycling + organics) rather than programs for a single type.<br><br>"
+};
+
+// quick recommendations per type
+const overallRecommendations = {
+  Biodegradable: "Enhance composting initiatives and promote household segregation of organics.",
+  Recyclable: "Expand recycling collection routes and promote local recycling markets.",
+  Residual: "Reduce single-use packaging as much as possible. Encourage proper containment of sanitary waste and explore recovery options (e.g., co-processing) for non-recyclables like wrappers, textiles, and ceramics.",
+  "Special/Hazardous": "Implement safe collection and disposal protocols, raise awareness on proper handling, and coordinate with authorized hazardous waste facilities."
+};
+
+// dynamic insight generators
+// ---------------- OVERALL INSIGHT ----------------
+function generateOverallInsight(supertypeMapObj, grandTotalVal) {
+  const supertypes = Object.values(supertypeMapObj);
+  const nonzero = supertypes.filter(s => Number(s.totalWeight) > 0);
+  const shares = supertypes.map(s => ({
+    name: s.name,
+    value: Number(s.totalWeight),
+    pct: pct(Number(s.totalWeight), grandTotalVal)
+  }));
+  shares.sort((a,b)=>b.pct-a.pct);
+
+  if (grandTotalVal === 0) {
+    return "No waste data recorded for this entry. Please verify and recheck data submissions.";
+  }
+
+  const top = shares[0];
+  const second = shares[1] || null;
+  const avgPct = shares.reduce((a,b)=>a+b.pct,0)/shares.length;
+  const deviations = shares.map(s => Math.abs(s.pct - avgPct));
+  const allBalanced = deviations.every(d => d < 5);
+
+  const lowList = shares.filter(s => s.pct < 2).map(s => s.name);
+  const tinyList = shares.filter(s => s.pct < 10).map(s => s.name);
+
+  const fullBreakdown = shares.map(s => `${s.name}: ${s.pct.toFixed(1)}%`).join(', ');
+
+  let insightText = ""; // main insight
+  let recHTML = ""; // recommendations HTML
+
+  // CASE 1: Evenly distributed (Condition 5)
+  if (allBalanced && nonzero.length > 2) {
+    insightText = overallPhrases.balanced;
+    if (lowList.length) insightText += ` However, some categories appear minimal: ${lowList.join(', ')}.`;
+    if (tinyList.length === 1) insightText += ` The category ${tinyList[0]} is noticeably small compared to others.`;
+  }
+
+  // CASE 2: One dominant (Conditions 1 and 2)
+  else if (top.pct >= 50) {
+    insightText = `${overallPhrases.dominant} Currently, <strong>${top.name}</strong> represents ${top.pct.toFixed(1)}% of the total.`;
+    if (lowList.length) insightText += ` Some low categories: ${lowList.join(', ')}.`;
+    if (tinyList.length === 1) insightText += ` The category ${tinyList[0]} is noticeably small compared to others.`;
+
+    // add recommendation box for dominant type
+    if (overallRecommendations[top.name]) {
+      recHTML = `
+        <div class="recommendation-box">
+        <span>
+          <i class="fas fa-lightbulb" style="color:#ffb300;margin-right:0.5rem;"></i>
+          <b style='color:#2d613f;'>${top.name.toUpperCase()}</b><br>
+          ${overallRecommendations[top.name]}
+        </span>
+        </div>
+      `;
+    }
+  }
+
+  // CASE 3: Two share dominance (Conditions 3a & 3b)
+  else if (shares.filter(s => s.pct >= 20).length >= 2 &&
+         shares.filter(s => s.pct >= 20).length <= 3) {
+    const strongList = shares.filter(s => s.pct >= 20);
+    insightText = `${overallPhrases.mixedDominant} <b>Major categories: ${strongList.map(s => s.name).join(', ')}</b>`;
+
+    recHTML = strongList
+      .filter(s => overallRecommendations[s.name])
+      .map(s => `
+        <div class="recommendation-box">
+          <i class="fas fa-lightbulb" style="color:#ffb300;margin-right:0.5rem;"></i>
+          <span>
+          <b style='color:#2d613f;'>${s.name.toUpperCase()}</b><br>
+          ${overallRecommendations[s.name]}
+          </span>
+        </div>
+      `)
+      .join('');
+  }
+
+  // CASE 4: Mainly low/underreported (Condition 4)
+  else if (lowList.length === shares.length) {
+    insightText = "All categories show minimal values; likely incomplete or unreported data.";
+  }
+
+  // CASE 5: Some low but not all
+  else if (lowList.length) {
+    insightText = `${overallPhrases.lowReported} Notably low: ${lowList.join(', ')}.`;
+  }
+
+  // CASE 6: Varied but not extreme (Condition 7)
+  else {
+    const uniquePattern = new Set(shares.map(s => Math.round(s.pct / 5) * 5)).size === shares.length;
+    if (uniquePattern && !allBalanced && top.pct < 50) {
+      insightText = "Each category has a distinct share, showing a varied waste composition with no single type dominating.";
+      if (tinyList.length) insightText += ` The category ${tinyList.join(', ')} has smaller proportions than others.`;
+    } else {
+      insightText = "The waste composition shows a mixed pattern without extreme concentrations. Continue tracking for shifts over time.";
+    }
+  }
+
+  return `${insightText}${recHTML}`;
+}
+
+// ---------------- SUPERTYPE DETAIL INSIGHT ----------------
+function generateSupertypeInsight(supertypeObj, grandTotalVal) {
+  const types = supertypeObj.types || [];
+  const total = Number(supertypeObj.totalWeight) || 0;
+  if (!total || !types.length) {
+    return `No data recorded for <strong>${supertypeObj.name}</strong>. Verify reporting for this category.`;
+  }
+
+  const pairs = types.map(t => ({
+    name: t.name,
+    value: Number(t.weight) || 0
+  })).sort((a, b) => b.value - a.value);
+
+  const top = pairs[0];
+  const second = pairs[1] || null;
+  const avgVal = pairs.reduce((a, b) => a + b.value, 0) / pairs.length;
+  const allBalanced = pairs.every(p => Math.abs(p.value - avgVal) < avgVal * 0.05); // within ±5%
+  const lowList = pairs.filter(p => p.value < avgVal * 0.2).map(p => p.name);
+  const highList = pairs.filter(p => p.value >= avgVal * 1.2);
+
+  // --- Recommendation dictionary ---
+  const recs = {
+    Biodegradable: {
+      "Food / Kitchen Waste": "Promote household and commercial composting, and encourage portion control to minimize food waste.",
+      "Agricultural Waste": "Encourage conversion into compost or animal feed.",
+      "Animal / Livestock Waste": "Implement safe manure management where feasible.",
+      "Garden / Park Waste": "Set up community composting areas or mulching programs.",
+      "Vegetable and Fruit Peelings": "Encourage home composting and segregation from residuals.",
+      "Other (Biodegradable)": "Ensure clear segregation and consider composting methods or biomass processing."
+    },
+    Recyclable: {
+      "Polyethylene Terephthalate (PET)": "Enhance PET bottle collection drives and link with recycling facilities.",
+      "Office Paper": "Encourage adoption of paperless systems.",
+      "Corrugated Cardboard": "Encourage reuse for packaging and bulk recycling in business establishments.",
+      "Glass": "Set up collection for glass containers and support bottle return programs.",
+      "Newspaper": "Encourage reuse or bulk recycling, especially from offices and stores.",
+      "Polyvinyl Chloride (PVC)": "Coordinate with accredited recyclers; discourage open burning.",
+      "Polypropylene (PP)": "Support sorting programs to recover PP plastics (e.g., bottle caps, containers).",
+      "Aluminum": "Promote aluminum recycling; used metals may be molten and reused for production of cans, car parts, or construction materials.",
+      "High-density polyethylene (HDPE)": "Facilitate recovery and proper cleaning for reuse or recycling.",
+      "Tin Cans": "Encourage collection through metal recyclers; avoid disposal with residual waste.",
+      "Low-density polyethylene (LDPE)": "Minimize single-use plastics; promote use of thicker, reusable alternatives.",
+      "Polystyrene (PS)": "Discourage styrofoam use and support recycling alternatives.",
+      "Other (Recyclable)": "Clarify labeling and strengthen material recovery facility (MRF) sorting."
+    },
+    Residual: {
+      "Wrappers / Sachets": "Advocate for reduction of single-use plastics.",
+      "Sanitary Napkins / Diapers": "Enforce proper segregation and explore biodegradable alternatives.",
+      "Textiles / Fabrics": "Encourage clothing donation or repurposing; reduce textile waste.",
+      "Rubber": "Coordinate with facilities that repurpose or process rubber materials.",
+      "Ceramics": "Promote reuse in construction filler applications or proper disposal.",
+      "Other (Residual)": "Focus on waste reduction at source and explore alternative disposal technologies."
+    },
+    "Special/Hazardous": {
+      "Healthcare Waste": "Ensure collection and treatment through accredited hazardous waste handlers.",
+      "Bulky Waste": "Coordinate scheduled pickup or reuse programs for furniture and appliances.",
+      "Tires": "Explore reuse for playground or construction materials; avoid open burning.",
+      "Paints / Thinners": "Handle as hazardous; ensure separate storage and disposal.",
+      "Oil": "Encourage oil recycling or proper collection by accredited facilities. Used oil can be re-refined into lubricants, fuel, and raw materials for petrochemical industries.",
+      "Consumer Electronics / Black Goods": "Establish e-waste collection drives and proper recycling channels.",
+      "Household Appliances / White Goods": "Coordinate with repair/reuse programs and e-waste recyclers.",
+      "Household Batteries": "Promote safe collection points for used batteries.",
+      "Other (Special / Hazardous)": "Promote segregation, labeling, and proper disposal."
+    }
+  };
+
+  // --- Helper to get recommendation HTML blocks ---
+  const getRecommendation = (dominantList, supertype) => {
+    const rset = recs[supertype] || {};
+    const blocks = dominantList
+      .map(t => {
+        const recText = rset[t.name];
+        if (!recText) return null;
+        return `
+          <div class="recommendation-box">
+            <span>
+              <i class="fas fa-lightbulb" style="color:#ffb300;margin-right:0.5rem;"></i>
+              <b style='color:#2d613f;'>${t.name.toUpperCase()}</b><br>
+              ${recText}
+            </span>
+          </div>
+        `;
+      })
+      .filter(Boolean)
+      .join("");
+    return blocks ? `<br>${blocks}` : "";
+  };
+
+  // --- Dominance conditions ---
+  // All are equal or nearly equal
+  if (allBalanced) {
+    let text = `Types under <strong>${supertypeObj.name}</strong> have nearly equal distribution.`;
+    if (lowList.length) text += `<br>Lower types: <b>${lowList.join(', ')}</b>.`;
+    return text;
+  }
+
+  // One dominant
+  if (second && top.value >= second.value * 1.5) {
+    let text = `<strong>${top.name}</strong> dominates this category (${top.value.toFixed(1)} kg).`;
+    text += getRecommendation([top], supertypeObj.name);
+    if (lowList.length) text += `<br>Lower types: <b>${lowList.join(', ')}</b>.`;
+    return text;
+  }
+
+  // Two dominant
+  const topTwoAvg = (top.value + (second?.value || 0)) / 2;
+  if (
+    pairs.length >= 2 &&
+    top.value >= avgVal * 1.2 &&
+    second.value >= avgVal * 1.2 &&
+    top.value / second.value < 1.3
+  ) {
+    let text = `Two main types lead in ${supertypeObj.name}: <b>${top.name}</b> (${top.value.toFixed(1)} kg) and <b>${second.name}</b> (${second.value.toFixed(1)} kg).`;
+    text += getRecommendation([top, second], supertypeObj.name);
+    if (lowList.length) text += `<br>Lower types: <b>${lowList.join(', ')}</b>.`;
+    return text;
+  }
+
+  // Multiple dominant
+  if (highList.length >= 3 && highList.length < pairs.length) {
+    let text = `Several types stand out within ${supertypeObj.name}: <b>${highList.map(p => p.name).join(', ')}</b>.`;
+    text += getRecommendation(highList, supertypeObj.name);
+    if (lowList.length) text += `<br>Lower types: <b>${lowList.join(', ')}</b>.`;
+    return text;
+  }
+
+  // All with low values
+  if (lowList.length && lowList.length >= pairs.length - 1) {
+    return `Most types under <strong>${supertypeObj.name}</strong> are minimal. This may be caused by low generation or incomplete entries (${lowList.join(', ')}).`;
+  }
+
+  // Default
+  return `The <strong>${supertypeObj.name}</strong> category shows varied distribution across its types.`;
+}
+
+// ---------------- SECTOR INSIGHT (per sector) ----------------
+function generateSectorInsight(sectorName, pieDataForSector, sectorTotalValue, grandTotalVal) {
+  const labels = pieDataForSector.labels || [];
+  const data = pieDataForSector.data || [];
+  const pairs = labels.map((l,i) => ({
+    label: l,
+    value: data[i],
+    pct: pct(data[i], sectorTotalValue)
+  }));
+  pairs.sort((a,b)=>b.pct-a.pct);
+
+  if (sectorTotalValue === 0) {
+    return `${sectorName} has no recorded waste. Please check reporting completeness.`;
+  }
+
+  // Helper to bold and format list with "and"
+  const formatList = arr => {
+    if (!arr.length) return '';
+    const bolded = arr.map(l => `<b>${l}</b>`);
+    if (bolded.length === 1) return bolded[0];
+    if (bolded.length === 2) return `${bolded[0]} and ${bolded[1]}`;
+    return `${bolded.slice(0, -1).join(', ')}, and ${bolded[bolded.length - 1]}`;
+  };
+
+  const avgPct = pairs.reduce((a,b)=>a+b.pct,0)/pairs.length;
+  const allBalanced = pairs.every(p => Math.abs(p.pct - avgPct) < 5);
+  const top = pairs[0];
+  const second = pairs[1] || null;
+  const lowList = pairs.filter(p => p.pct < 2).map(p => p.label);
+  const tinyList = pairs.filter(p => p.pct < 10).map(p => p.label); // Condition 6 helper
+
+  let insight = '';
+  let recHTML = '';
+
+  // CASE 1: Evenly distributed (Condition 5)
+  if (allBalanced && pairs.length > 2) {
+    insight = `Waste in the ${sectorName} sector is evenly distributed among all categories.`;
+    if (lowList.length) insight += ` However, some categories appear minimal: ${formatList(lowList)}.`;
+    if (tinyList.length === 1) insight += ` The ${formatList(tinyList)} category is noticeably small compared to others.`;
+  }
+
+  // CASE 2: One dominant (Conditions 1 and 2)
+  else if (top.pct >= 50) {
+    insight = `<b>${top.label}</b> dominates waste generation in the ${sectorName} sector (${top.pct.toFixed(1)}%).`;
+    if (lowList.length) insight += ` Other categories remain minimal: ${formatList(lowList)}.`;
+    if (tinyList.length === 1) insight += ` The category ${formatList(tinyList)} shows an especially small share.`;
+
+    // add recommendation box for dominant type
+    if (overallRecommendations[top.label]) {
+      recHTML = `
+        <div class="recommendation-box">
+          <i class="fas fa-lightbulb" style="color:#ffb300;margin-right:0.5rem;"></i>
+          <span>
+            <b style='color:#2d613f;'>${top.label.toUpperCase()}</b><br>
+            ${overallRecommendations[top.label]}
+          </span>
+        </div>
+      `;
+    }
+  }
+
+  // CASE 3: Two share dominance (Conditions 3a & 3b)
+  else if (pairs.filter(p => p.pct >= 20).length >= 2 && pairs.filter(p => p.pct >= 20).length < pairs.length) {
+    const majors = pairs.filter(p => p.pct >= 20).map(p => p.label);
+    insight = `Dominant waste types in the ${sectorName} sector are ${formatList(majors)}, sharing most of the total volume.`;
+    if (lowList.length) insight += ` Smaller portions are seen in ${formatList(lowList)}.`;
+    if (tinyList.length === 1) insight += ` The category ${formatList(tinyList)} has a noticeably small share.`;
+
+    // add multiple recommendation boxes for dominant types
+    recHTML = majors
+      .filter(l => overallRecommendations[l])
+      .map(l => `
+        <div class="recommendation-box">
+          <i class="fas fa-lightbulb" style="color:#ffb300;margin-right:0.5rem;"></i>
+          <span>
+            <b style='color:#2d613f;'>${l.toUpperCase()}</b><br>
+            ${overallRecommendations[l]}
+          </span>
+        </div>
+      `)
+      .join('');
+  }
+
+  // CASE 4: All/mostly low (Condition 4)
+  else if (lowList.length === pairs.length) {
+    insight = `All categories in the ${sectorName} sector show minimal proportions. This may indicate incomplete or underreported data.`;
+  } else if (lowList.length) {
+    insight = `Most waste types in the ${sectorName} sector have relatively low proportions. Notably low: ${formatList(lowList)}.`;
+  }
+
+  // CASE 7: All different (varied but not extreme)
+  else {
+    const uniquePattern = new Set(pairs.map(p => Math.round(p.pct / 5) * 5)).size === pairs.length;
+    if (uniquePattern && !allBalanced && top.pct < 50) {
+      insight = `Waste distribution in the ${sectorName} sector varies across all categories with no clear dominant type.`;
+      if (tinyList.length) insight += ` The category ${formatList(tinyList)} appears smaller in comparison.`;
+    } else {
+      insight = `The ${sectorName} sector shows a mixed pattern across categories without clear extremes.`;
+      if (tinyList.length) insight += ` ${formatList(tinyList)} remains relatively small.`;
+    }
+  }
+
+  return `${insight}${recHTML}`;
+}
+
+// sector overview (for the "Waste by Sector" horizontal bar chart)
+function generateSectorOverviewInsight(sectorBarArr, grandTotalVal) {
+  const validSectors = (sectorBarArr || []).filter(s => Number(s.value) > 0);
+  if (!validSectors.length || grandTotalVal === 0) {
+    return "No sector data recorded. Please verify that sector totals were generated correctly.";
+  }
+
+  const pct = (v, t) => (t ? (v / t) * 100 : 0);
+
+  const shares = validSectors.map(s => ({
+    name: s.label,
+    value: Number(s.value),
+    pct: pct(Number(s.value), grandTotalVal)
+  })).sort((a, b) => b.pct - a.pct);
+
+  const top = shares[0];
+  const second = shares[1] || null;
+  const topPct = top ? top.pct : 0;
+  const lowList = shares.filter(s => s.pct < 2).map(s => s.name);
+  const avgPct = shares.reduce((a, b) => a + b.pct, 0) / shares.length;
+  const allBalanced = shares.every(s => Math.abs(s.pct - avgPct) < 5);
+
+  let insight = "";
+  let recHTML = "";
+
+  // Recommendation text for sectors
+  const sectorRecommendations = {
+    Residential: "Focus on household waste segregation, composting, and localized recycling programs.",
+    Commercial: "Promote waste audits for establishments and enforce segregation-at-source policies in markets, restaurants, and shops.",
+    Institutional: "Integrate waste reduction and segregation practices in offices, schools, and government facilities.",
+    Industrial: "Encourage waste minimization and proper handling of industrial by-products.",
+    "Agriculture and Livestock": "Support composting, manure management, and proper segregation of agricultural residue.",
+    Health: "Ensure proper segregation of biomedical waste and coordinate with authorized hazardous waste treatment facilities."
+  };
+
+  // Case 1: No data
+  if (grandTotalVal === 0) {
+    return "No waste totals found. Cannot determine sector distribution.";
+  }
+
+  // Case 2: Even / balanced spread
+  if (allBalanced && shares.length >= 3) {
+    return "Waste generation is fairly balanced across sectors; no single area stands out as dominant.";
+  }
+
+  // Case 3: One sector overwhelmingly dominant
+  if (topPct >= 50) {
+    insight = `<strong>${top.name}</strong> is the largest contributor, producing ${top.pct.toFixed(1)}% of all recorded waste.`;
+    if (lowList.length) insight += ` Sectors with low generation include <b>${lowList.join(', ')}</b>.`;
+
+    // add recommendation block (only one sector)
+    if (sectorRecommendations[top.name]) {
+      recHTML = `
+        <div class="recommendation-box">
+          <i class="fas fa-lightbulb" style="color:#ffb300;margin-right:0.5rem;"></i>
+          <span>
+            <b style="color:#2d613f;">${top.name.toUpperCase()}</b><br>
+            ${sectorRecommendations[top.name]}
+          </span>
+        </div>
+      `;
+    }
+
+    return `${insight}${recHTML}`;
+  }
+
+  // Case 4: Two or more sectors are high and close
+  if (topPct >= 30 && topPct < 50 && second && Math.abs(top.pct - second.pct) < 10) {
+    const majorSectors = shares.filter(s => s.pct >= 30);
+    insight = `Waste generation is shared across multiple sectors, led by ${majorSectors.map(s => `<strong>${s.name}</strong>`).join(' and ')}.`;
+    if (lowList.length) insight += ` Some smaller sectors include <b>${lowList.join(', ')}</b>.`;
+
+    // recommendation boxes for dominant sectors
+    recHTML = majorSectors
+      .filter(s => sectorRecommendations[s.name])
+      .map(s => `
+        <div class="recommendation-box">
+          <i class="fas fa-lightbulb" style="color:#ffb300;margin-right:0.5rem;"></i>
+          <span>
+            <b style="color:#2d613f;">${s.name.toUpperCase()}</b><br>
+            ${sectorRecommendations[s.name]}
+          </span>
+        </div>
+      `)
+      .join('');
+
+    return `${insight}${recHTML}`;
+  }
+
+  // Case 5: Gradual decrease (smooth slope)
+  const isGradual = shares.every((s, i, arr) => !i || arr[i - 1].pct - s.pct < 8);
+  if (isGradual && !allBalanced && shares.length > 3) {
+    insight = `A gradual decline in waste generation is observed across sectors, with <b>${top.name}</b> contributing the most and <b>${shares[shares.length - 1].name}</b> the least.`;
+    if (lowList.length) insight += ` Some sectors have minimal values such as <b>${lowList.join(', ')}</b>.`;
+    
+    // add recommendation block (only one sector)
+    if (sectorRecommendations[top.name]) {
+      recHTML = `
+        <div class="recommendation-box">
+          <i class="fas fa-lightbulb" style="color:#ffb300;margin-right:0.5rem;"></i>
+          <span>
+            <b style="color:#2d613f;">${top.name.toUpperCase()}</b><br>
+            ${sectorRecommendations[top.name]}
+          </span>
+        </div>
+      `;
+    }
+
+    return `${insight}${recHTML}`;
+  }
+
+  // Case 6: Stepped decrease (clear drops)
+  const hasSteps = shares.some((s, i) => i && shares[i - 1].pct - s.pct >= 10);
+  if (hasSteps && !isGradual) {
+    insight = `Waste generation by sector follows a stepped pattern where certain sectors contribute significantly more than others.`;
+    if (lowList.length) insight += ` The smallest contributors are <b>${lowList.join(', ')}</b>.`;
+    return insight;
+  }
+
+  // Case 7: Some sectors appear low or missing
+  if (lowList.length) {
+    return `Some sectors show minimal contribution (below 2%): <b>${lowList.join(', ')}</b>.`;
+  }
+
+  // Default / fallback
+  return "Sector contributions appear proportionate. Continue monitoring to identify future trends.";
+}
+
+/* --------------------
+  Insert generated insights into DOM near chart areas.
+  - For the main pie: insert under #summary-legend (you already have that div)
+  - For each supertype bar tab: insert into the tab's wrapper (we create .insight-box)
+  - For each sector pie: insert into the sector wrapper
+--------------------*/
+
+function insertOverallInsight() {
+  try {
+    const overallText = generateOverallInsight(supertypeDemo || {}, Number(grandTotal || 0));
+    const container = document.getElementById('summary-insight');
+
+    if (container) {
+      let box = container.querySelector('.insight-box.overall');
+      if (!box) {
+        box = document.createElement('div');
+        box.className = 'insight-box overall';
+        box.style = 'margin-top:1rem; padding:1rem; border-left:4px solid #2e7d32;background:#f7fff8; border-radius:6px;';
+        container.appendChild(box);
+      }
+      box.innerHTML = `<h3 style="margin:0 0 0.25rem 0;color:#2d613f">Quick Recommendation</h3><div>${overallText}</div>`;
+    }
+  } catch (err) {
+    console.error('Overall insight generation failed', err);
+  }
+}
+
+// call after page loads and charts generated
+function insertPerSupertypeInsights() {
+  try {
+    const superMap = supertypeDemo || {};
+    for (const sv of Object.values(superMap)) {
+      const id = sv.name.replace(/\s+/g, '');
+      const wrapper = document.getElementById(id); // matches how you set tabDiv.id earlier
+
+      if (!wrapper) continue;
+
+      let box = wrapper.querySelector('.bar-description');
+      if (!box) {
+        box = document.createElement('div');
+        wrapper.appendChild(box);
+      }
+      box.innerHTML = `<h3 style="margin:0 0 0.25rem 0;color:#2d613f">${sv.name}</h3><div>${generateSupertypeInsight(sv, Number(grandTotal || 0))}</div>`;
+    }
+  } catch (err) { console.error(err); }
+}
+
+function insertSectorInsights() {
+  try {
+    for (const [sectorName, pieData] of Object.entries(sectorPieData || {})) {
+      const id = sectorName.replace(/\s+/g, '');
+      const wrapper = document.getElementById(id);
+
+      if (!wrapper) continue;
+      let box = wrapper.querySelector('.sector-pie-desc');
+
+      if (!box) {
+        box = document.createElement('div');
+        wrapper.appendChild(box);
+      }
+      const sectorTotalVal = (sectorBarData || []).find(s=>s.label===sectorName)?.value || 0;
+      box.innerHTML = `<h3 style="margin:0 0 0.25rem 0;color:#2d613f">Sector Insights</h3><div>${generateSectorInsight(sectorName, pieData, Number(sectorTotalVal || 0), Number(grandTotal || 0))}</div>`;
+    }
+  } catch (err) { console.error(err); }
+}
+
+function insertSectorOverviewInsight() {
+  try {
+    const container = document.getElementById('sector-insight');
+    if (!container) return;
+
+    const insightText = generateSectorOverviewInsight(sectorBarData || [], Number(grandTotal || 0));
+    
+    let box = container.querySelector('.sector-overview');
+    if (!box) {
+      box = document.createElement('div');
+      box.className = 'sector-overview';
+      box.style = 'margin-top:1rem; padding:1rem; border-left:4px solid #2e7d32;background:#f7fff8; border-radius:6px;';
+      container.appendChild(box);
+    }
+
+    box.innerHTML = `
+      <h3 style="margin:0 0 0.25rem 0;color:#2d613f">Sector Overview</h3>
+      <div>${insightText}</div>
+    `;
+  } catch (err) {
+    console.error('Sector overview insight generation failed', err);
+  }
+}
+
+// Build charts for visualization
+let currentMode = 'summary';
+const ctx = document.getElementById('supertypePieChart').getContext('2d');
+
+const baseWidth = 600;
+const baseHeight = 600;
+const detailedExtraHeight = 250; // space *below* for legend
+
+const createPieChart = (data, mode) => {
+  const canvas = document.getElementById('supertypePieChart');
+  canvas.width = baseWidth;
+  canvas.height = mode === 'detailed'
+    ? baseHeight + detailedExtraHeight
+    : baseHeight;
+
+  return new Chart(canvas.getContext('2d'), {
+    type: 'pie',
+    data: {
+      labels: data.labels,
+      datasets: [{
+        data: data.data,
+        backgroundColor: data.backgroundColor,
+        hoverOffset: 20
+      }]
+    },
+    options: {
+      responsive: false,
+      maintainAspectRatio: false,
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: ({ raw, label, chart }) => {
+              const total = chart._metasets[0].total || 1;
+              const percent = ((raw / total) * 100).toFixed(3);
+              return `${label}: ${Number(raw).toFixed(3)} kg (${percent}%)`;
+            }
+          }
+        },
+        legend: {
+          display: mode === 'detailed',
+          position: 'bottom',
+          labels: {
+            boxWidth: 20,
+            padding: 10
+          }
+        },
+        title: { display: false }
+      },
+      layout: {
+        padding: {
+          bottom: mode === 'detailed' ? detailedExtraHeight - 100 : 0
+        }
+      },
+      cutout: 0,
+      radius: mode === 'summary' ? '80%' : '100%'
+    },
+    plugins: [{
+      id: 'multiColumnLegend',
+      afterUpdate(chart) {
+        // 🟢 Force pie to re-center horizontally after layout adjustments
+        const chartArea = chart.chartArea;
+        const centerX = (chartArea.left + chartArea.right) / 2;
+        const centerY = (chartArea.top + chartArea.bottom) / 2 - (mode === 'detailed' ? 60 : 0); 
+        chart._metasets.forEach(meta => {
+          meta.controller.outerRadius = meta.controller.chart.radius;
+          meta.controller.chartArea = chartArea;
+          meta.controller.xCenter = centerX;
+          meta.controller.yCenter = centerY;
+        });
+
+        // Skip legend override unless detailed
+        if (mode !== 'detailed') return;
+
+        const legend = chart.legend;
+        if (!legend) return;
+
+        const items = legend.legendItems;
+        const mid = Math.ceil(items.length / 2);
+        const firstCol = items.slice(0, mid);
+        const secondCol = items.slice(mid);
+
+        // Override draw to render legend in two columns BELOW the pie
+        legend.draw = function() {
+          const ctx = chart.ctx;
+          const font = Chart.helpers.toFont(legend.options.labels.font);
+          ctx.font = font.string;
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+
+          const lineHeight = font.lineHeight + 6;
+          const colSpacing = chart.width / 2.5;
+          const startY = chart.chartArea.bottom + 30;
+          const legendLeftMargin = 60;
+
+          const drawColumn = (col, x) => {
+            col.forEach((item, i) => {
+              const y = startY + i * lineHeight;
+              ctx.fillStyle = item.fillStyle;
+              ctx.fillRect(x, y - 5, 12, 12);
+              ctx.fillStyle = item.textColor;
+              ctx.fillText(item.text, x + 18, y + 2);
+            });
+          };
+
+          // Apply the left margin to both columns
+          drawColumn(firstCol, chart.chartArea.left + legendLeftMargin);
+          drawColumn(secondCol, chart.chartArea.left + colSpacing + legendLeftMargin);
+        };
+      }
+    }]
+  });
+};
+
+let chart = createPieChart(summaryData, 'summary');
+
+document.getElementById('togglePieBtn').addEventListener('click', () => {
+  chart.destroy();
+  currentMode = currentMode === 'summary' ? 'detailed' : 'summary';
+  chart = createPieChart(
+    currentMode === 'summary' ? summaryData : detailedData,
+    currentMode
+  );
+  togglePieBtn.innerHTML = currentMode === 'summary'
+    ? '<i class="fa-solid fa-circle-info"></i>&nbsp; Show Detailed Pie Chart'
+    : '<i class="fa-solid fa-chart-pie"></i>&nbsp; Back to Summary Pie Chart';
+});
+
+
+// ========== SHARED BAR CHART LEGEND FUNCTION ========== //
+const createLegendHTML = (legendData, dataset) => {
+  const total = dataset.reduce((a, b) => a + b, 0);
+  return legendData
+    .filter(item => item.value > 0)
+    .map(item => {
+      const pct = total ? ((item.value / total) * 100).toFixed(3).replace(/\.0+$/, '') : '0';
+      return `<span class="legend-item" style="background-color: ${item.color}">
+        <span class="bar-legend-name">
+          ${item.label}
+          <span class="bar-legend-perc">${pct}%</span>
+        </span>
+        <span class="bar-legend-kg">
+          ${item.value.toFixed(3)} kg
+        </span>
+      </span>`;
+    }).join('');
+};
+
+
+// ========== BAR CHARTS BY WASTE TYPE ========== //
+const container = document.getElementById('bar-charts-container');
+
+for (const [supertype, chartData] of Object.entries(barChartData)) {
+  const tabDiv = document.createElement('div');
+  tabDiv.id = supertype.replace(/\s+/g, '');
+  tabDiv.classList.add('bar-tabcontent');
+  tabDiv.setAttribute('data-section', `types-${supertype.toLowerCase()}`);
+
+  // Header + description
+  const headerDiv = document.createElement('div');
+  headerDiv.classList.add('bar-header');
+  headerDiv.innerHTML = `
+    <h2 class="bar-legend-title">Top ${supertype} Waste Types</h2>
+    <div class="bar-description" 
+         style="background-color: #eef8f2; padding: 1rem; border-radius: 12px;
+                border-left: 6px solid #4CAF50; margin-bottom: 1rem; width: 100%;
+                box-sizing: border-box;">
+    </div>
+  `;
+
+  // Bar chart
+  const chartDiv = document.createElement('div');
+  chartDiv.classList.add('bar-chart-wrapper');
+  chartDiv.style.cssText = 'display: flex; justify-content: center; align-items: center; margin-bottom: 1.5rem;';
+
+  const canvas = document.createElement('canvas');
+  canvas.id = `barChart-${supertype.replace(/\s+/g, '-')}`;
+  canvas.classList.add('bar-canvas');
+  canvas.style.marginBottom = '0';
+
+  chartDiv.appendChild(canvas);
+
+  // Legend
+  const legendDiv = document.createElement('div');
+  legendDiv.classList.add('bar-legend-container');
+  legendDiv.style.cssText = `
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-start;
+    justify-content: center;
+  `;
+  legendDiv.innerHTML = createLegendHTML(chartData.legend, chartData.data);
+
+  // Put sections together
+  tabDiv.append(headerDiv, chartDiv, legendDiv);
+  container.appendChild(tabDiv);
+
+  // Chart.js building
+  new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: chartData.labels,
+      datasets: [{
+        label: `${supertype} Waste Types`,
+        data: chartData.data,
+        backgroundColor: chartData.legend.map(i => i.color)
+      }]
+    },
+    options: {
+      animation: { duration: 0 },
+      responsive: true,
+      indexAxis: 'x',
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: ({ parsed }) => `${parsed.y.toFixed(3)} kg`
+          }
+        },
+        title: { display: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Weight (kg)' }
+        },
+        x: {
+          ticks: { autoSkip: false, maxRotation: 45, minRotation: 20 }
+        }
+      }
+    }
+  });
+}
+
+// ========== SECTOR BAR CHART ========== //
+const tsContainer = document.getElementById('sector-chart-container');
+
+const tsCanvas = document.createElement('canvas');
+tsCanvas.id = 'sectorBarChart';
+tsCanvas.classList.add('bar-chart');
+tsCanvas.style.marginBottom = '20px';
+
+const tsWrapper = document.createElement('div');
+tsWrapper.classList.add('chart-wrapper');
+tsWrapper.style.cssText = 'display:flex; gap:24px; align-items:flex-start';
+tsWrapper.appendChild(tsCanvas);
+tsContainer.appendChild(tsWrapper);
+
+const sectorLabels = sectorBarData.map(i => i.label),
+      sectorValues = sectorBarData.map(i => i.value),
+      sectorColors = sectorBarData.map(i => i.color);
+
+new Chart(tsCanvas.getContext('2d'), {
+  type: 'bar',
+  data: {
+    labels: sectorLabels,
+    datasets: [{
+      label: 'Waste by Sector',
+      data: sectorValues,
+      backgroundColor: sectorColors
+    }]
+  },
+  options: {
+    responsive: true,
+    indexAxis: 'y',
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: ({ parsed }) => `${parsed.x.toFixed(3)} kg`
+        }
+      },
+      title: { display: false }
+    },
+    scales: {
+      y: { beginAtZero: true, title: { display: true, text: 'Weight (kg)' } },
+      x: { ticks: { autoSkip: false, maxRotation: 45, minRotation: 20 } }
+    }
+  }
+});
+
+const tsLegendDiv = document.createElement('div');
+tsLegendDiv.classList.add('bar-legend');
+tsLegendDiv.innerHTML = createLegendHTML(sectorBarData, sectorValues);
+
+const tsLegendWrapper = document.createElement('div');
+tsLegendWrapper.appendChild(tsLegendDiv);
+tsWrapper.appendChild(tsLegendWrapper);
+
+// ========== SECTOR PIE CHARTS ========== //
+const sectorContainer = document.getElementById('sector-pies-container');
+
+for (const [sectorName, pieData] of Object.entries(sectorPieData)) {
+  const tabDiv = document.createElement('div');
+  tabDiv.id = sectorName.replace(/\s+/g, '');
+  tabDiv.classList.add('sector-tabcontent');
+  tabDiv.setAttribute('data-section', `top-${sectorName.toLowerCase()}`);
+
+  // Header + description
+  const headerDiv = document.createElement('div');
+  headerDiv.classList.add('sector-header');
+  headerDiv.innerHTML = `
+    <h2 class="bar-legend-title">${sectorName} Sector</h2>
+    <div class="sector-pie-desc" 
+         style="background-color: #eef8f2; padding: 1rem; border-radius: 12px; 
+                border-left: 6px solid #4CAF50; margin-bottom: 1rem;
+                box-sizing: border-box;">
+    </div>
+  `;
+
+  // Chart + legend wrapper
+  const flexWrapper = document.createElement('div');
+  flexWrapper.classList.add('sector-flex-wrapper');
+  flexWrapper.style.cssText = `
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin: 0 auto;
+    width: fit-content;
+  `;
+
+  // Pie chart
+  const canvas = document.createElement('canvas');
+  canvas.id = `pieChart-${sectorName.replace(/\s+/g, '-')}`;
+  canvas.style.cssText = `
+    max-width: 425px; 
+    max-height: 400px; 
+    margin-bottom: 20px;
+  `;
+
+  // Legend
+  const legendDiv = document.createElement('div');
+  legendDiv.classList.add('bar-legend');
+  legendDiv.style.cssText = `
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    flex: 1 1 300px;
+  `;
+  legendDiv.innerHTML = createLegendHTML(
+    pieData.labels.map((label, i) => ({
+      label,
+      value: pieData.data[i],
+      color: pieData.backgroundColor[i]
+    })), 
+    pieData.data
+  );
+
+  // Assemble structure
+  flexWrapper.append(canvas, legendDiv);
+  tabDiv.append(headerDiv, flexWrapper);
+  sectorContainer.appendChild(tabDiv);
+
+  // Chart.js building
+  new Chart(canvas.getContext('2d'), {
+    type: 'pie',
+    data: {
+      labels: pieData.labels,
+      datasets: [{
+        data: pieData.data,
+        backgroundColor: pieData.backgroundColor,
+        hoverOffset: 20
+      }]
+    },
+    options: {
+      animation: { duration: 0 },
+      responsive: true,
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: ({ raw }) => {
+              const total = pieData.data.reduce((a, b) => a + b, 0);
+              const pct = total ? ((raw / total) * 100).toFixed(3).replace(/\.0+$/, '') : '0';
+              return `${raw.toFixed(3)} kg (${pct}%)`;
+            }
+          }
+        },
+        legend: false,
+        title: { display: false }
+      }
+    }
+  });
+}
+
+// call these after charts are rendered
+insertOverallInsight();
+insertPerSupertypeInsights();
+insertSectorInsights();
+insertSectorOverviewInsight();
+
+</script>
+
+<!-- File export script -->
+<script>
+
+const dataTitle = "{{wasteGen.title}}"
+const table = document.getElementById("waste-comp-table");
+
+function exportTableToCSV() {
+    let csv = [];
+    for (let row of table.rows) {
+    let rowData = [];
+    for (let cell of row.cells) {
+        rowData.push(`"${cell.textContent.trim()}"`);
+    }
+    csv.push(rowData.join(","));
+    }
+    const blob = new Blob([csv.join("\n")], { type: "text/csv" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${dataTitle}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function exportTableToExcel() {
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.table_to_sheet(table);
+    XLSX.utils.book_append_sheet(wb, ws, "WasteData");
+    XLSX.writeFile(wb, `${dataTitle}.xlsx`);
+}
+
+</script>
+
+<!-- Map view script-->
+<script>
+  const coords = {{{coords}}}; // Assumes JSON.stringify was used in server
+  const lat = coords?.latitude;
+  const lng = coords?.longitude;
+
+  if (coords !== undefined) {
+    const map = L.map('map').setView([lat, lng], 6);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    L.marker([lat, lng]).addTo(map);
+  }
+</script>
+
+<!-- Access to chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- SheetsJS (for Excel export) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- Leaflet.js (for map view) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<!-- JS behind the tabs -->
+<script src="/js/tabs.js"></script>
+<script src="/js/tabs-bar.js"></script>
+<script src="/js/tabs-sector-pie.js"></script>
+
+<style>
+
+.recommendation-box {
+  background: #fff;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.bar-legend-title {
+  color: #2d613f;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.bar-canvas {
+  max-width: 700px;
+}
+
+[data-section="top-categories"] {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap; /* ensures stacking on smaller screens */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#summary-legend {
+  flex: 1 1 400px;       /* takes remaining space */
+  min-width: 300px;
+  max-width: 600px;
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+}
+
+#summary-legend h2 {
+  color: #2d613f;
+  margin-bottom: 0.5rem;
+}
+
+#summary-legend p {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.pie-chart {
+  flex: 1 1 350px;       /* can shrink/grow, min width of 350px */
+  max-width: 500px;      /* keeps it from hogging the whole row */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bar-chart {
+  flex: 1 1 350px;       /* can shrink/grow, min width of 350px */
+  max-width: 550px;      /* keeps it from hogging the whole row */
+}
+
+.insight-general {
+  background-color: #eef8f2;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border-left: 6px solid #4CAF50;
+  margin-top: 2rem;
+}
+
+.insight-compliance {
+  background: white;
+  border: 1px solid #b5e0b5;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin: 14px 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  color: #1e4620;
+  font-size: 0.95rem;
+}
+.insight-compliance h3 {
+  color: #2e7d32;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.compliance-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 0.95rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* Header styling */
+.compliance-table th {
+  background-color: #c8e6c9; /* soft green */
+  color: #1b5e20;
+  text-align: left;
+  padding: 10px 12px;
+  font-weight: 600;
+  border-bottom: 2px solid #a5d6a7;
+}
+
+/* Body rows */
+.compliance-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #e0f2e0;
+  color: #2e4630;
+}
+
+/* Alternate row shading */
+.compliance-table tr:nth-child(even) {
+  background-color: #f9fff9;
+}
+
+/* Hover highlight */
+.compliance-table tr:hover {
+  background-color: #eef9ee;
+  transition: background-color 0.15s ease-in-out;
+}
+
+/* Numeric alignment for percentage/weight columns */
+.compliance-table td:nth-child(2),
+.compliance-table td:nth-child(3),
+.compliance-table td:nth-child(4),
+.compliance-table td:nth-child(5) {
+  text-align: right;
+}
+
+/* Status column styling */
+.compliance-table td:nth-child(6) {
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Optional: color code the compliance status */
+.non-compliant {
+  color: #c62828 !important;
+}
+
+.info-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.info-grid .form-section {
+  flex: 1 1 280px;
+  min-width: 280px;
+  overflow-x: auto;
+}
+
+.user-profile {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+.user-profile td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #eee;
+}
+
+.user-profile .label {
+  font-weight: 600;
+  color: #444;
+  width: 50%;
+}
+
+.title-card h1 {
+  font-size: 1.75rem;
+}
+
+.btn-submit {
+  background-color: #28a745;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  color: white;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.btn-submit:hover {
+  background-color: #28a745;
+}
+
+.tab-new {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.tab-new button {
+  background-color: #f1f1f1;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  margin: 0 5px;
+  cursor: pointer;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.tab-new button:hover,
+.tab-new button.active {
+  background-color: #d0e6ff;
+}
+
+.form-section {
+  background-color: #fdfdfd;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  margin: 1.5rem auto;
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
+}
+
+.form-section h3 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+  align-items: center;
+}
+
+.form-section h3 i {
+  margin-right: 0.6rem;
+  color: #127009;;
+}
+
+.form-section label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.form-section input[type="text"],
+.form-section input[type="date"],
+.form-section input[type="number"],
+.form-section select {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.3rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.pie-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.high-priority {
+  color: #127009;
+  background-color: #c2f3ce;
+  padding: 0.75rem;
+  border-left: 4px solid #127009;
+  border-radius: 6px;
+  display: block;
+}
+
+.mid-priority {
+  color: #cc7a00;
+  background-color: #fff4e0;
+  padding: 0.75rem;
+  border-left: 4px solid #cc7a00;
+  border-radius: 6px;
+  display: block;
+}
+
+.low-priority {
+  color: #b30000;
+  background-color: #ffe6e6;
+  padding: 0.75rem;
+  border-left: 4px solid #b30000;
+  border-radius: 6px;
+  display: block;
+}
+</style>

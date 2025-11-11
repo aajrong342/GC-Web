@@ -3,49 +3,843 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    
     <!-- Stylesheets -->
     <link rel="stylesheet" type="text/css" href="/css/dashboard-style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/admin-style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/chart-style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/handlebars/dist/handlebars.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://kit.fontawesome.com/2fcb76e57d.js" crossorigin="anonymous"></script>
-
+    
     <title>{{ title }}</title>
 </head>
 <body>
     <!-- Header: Contains user menu -->
     <header>
-        <div class="header-logo-container">
-            (LOGO)
-            <div class="header-logo-text">
-                GreenCycle DASHBOARD
-            </div>
+        <img src="/pictures/Greencycle-Logo.png" class="header-logo">
+        <div class="header-logo-text">
+            GreenCycle <text style="color:#d4ffd0; font-weight: bold;">DASHBOARD</text>
         </div>
-
+{{#ifEquals user.supertype 2}}
+<div id="deadline-timer" class="deadline-timer">    
+  📅 Submission Deadline Loading...
+</div>
+{{/ifEquals}}
         <!-- User Menu -->
         <div class="header-user">
-            <!-- Go back to main site -->
-            <button class="btn-back-site">
-                BACK TO MAIN SITE
-            </button>
+            <!-- Display user menu (profile, settings, log out) -->           
+            <div class="user-menu">
+                <!-- User Menu Button -->
+                <button class="user-menu-button">
+                    <i class="fa-regular fa-circle-user header-user-icon"></i> {{uppercase user.lastname}}, {{user.firstname}}
+                    <span class="user-menu-caret"><i class="fa-solid fa-caret-down"></i></span>
+                </button>
 
-            <!-- User Menu Button -->
-            <button class="user-menu-button">
-                <i class="fa-regular fa-circle-user header-user-icon"></i> LASTNAME, First Name&nbsp;&nbsp;&nbsp;<i class="fa-solid fa-caret-down nav-icon"></i>
-            </button>
-            <!-- Display user menu (profile, settings, log out) -->
+                <div class="user-menu-content">
+                    <a href="/dashboard/profile">
+                        <i class="fa-solid fa-user"></i> Profile
+                    </a>
+
+                    {{#ifNotEquals user.supertype 2}}
+                    <a href="/control-panel">
+                        <i class="fa-solid fa-screwdriver-wrench"></i> Control Panel
+                    </a>
+                    {{/ifNotEquals}}
+                    <a href="/">
+                        <i class="fa-solid fa-house"></i> Return to Main Site
+                    </a>
+                    <a href="#" id="logout">
+                        <i class="fa-solid fa-right-from-bracket"></i> Log Out
+                    </a>
+                </div>
+            </div>
         </div>
     </header>
-
+    
     <!-- Navigation bar -->
-    <nav>
-        <div class="nav-btn-container">
-            <a><i class="fa-solid fa-chart-simple nav-icon"></i> Statistics</a>
-            <a><i class="fa-solid fa-users nav-icon"></i> Manage Users</a>
-            <a><i class="fa-solid fa-handshake nav-icon"></i> Manage Partners</a>
-        </div>
-    </nav>
+    <div class="layout-wrapper">
+        <nav id="sidebar" class="sidebar open">
+            <div class="nav-btn-container">
+                <button id="collapse-sidebar-btn" class="collapse-sidebar-btn">
+                    <i class="fa-solid fa-angles-left"></i> Collapse Sidebar
+                </button>
 
-    <main>
-        {{{ body }}}
-    </main>
+                <a href="/dashboard" class="{{#if current_home}}current{{/if}}">
+                    <i class="fa-solid fa-house nav-icon"></i> Home
+                </a>
+
+                <a href="/dashboard/notifications" class="{{#if current_notifs}}current{{/if}}">
+                    <i class="fa-solid fa-bell {{#ifNotEquals notifCount 0}}fa-shake{{/ifNotEquals}} nav-icon"></i> Notifications&nbsp;
+                    <span class="notif-badge" id="notif-badge" style="{{#ifEquals notifCount 0}}display:none;{{/ifEquals}}">
+                        {{notifCount}}
+                    </span>
+                </a>
+
+                <a href="/dashboard/data/all" class="{{#if current_all}}current{{/if}}">
+                    <i class="fa-solid fa-table nav-icon"></i> Data Entries
+                </a>
+
+                <a href="/dashboard/guide" class="{{#if current_guide}}current{{/if}}">
+                    <i class="fa-solid fa-book-open nav-icon"></i></i> Waste Type Guide
+                </a>
+                <a href="/dashboard/noncompliance" class="{{#if current_noncompliance}}current{{/if}}">
+                <i class="fa-solid fa-triangle-exclamation nav-icon"></i>&nbsp;Client Compliance Warning
+                {{#ifNotEquals cmpTotalCount 0}}
+                    <span class="notif-badge"> {{cmpTotalCount}}</span>
+                {{/ifNotEquals}}
+            </a>
+
+            <a href="/dashboard/deadline" class="{{#if current_deadline}}current{{/if}}">
+                <i class="fa-solid fa-hourglass-end nav-icon"></i> Submission Deadline
+            </a>
+
+
+                <!-- Report Functions -->
+                <div class="nav-divider">YOUR REPORTS</div>
+                <a href="/dashboard/submit-report" class="{{#if current_report}}current{{/if}}">
+                    <i class="fa-solid fa-file-upload nav-icon"></i>&nbsp; Submit Data Entry
+                </a>
+
+                <a href="/dashboard/data/user/revision" class="{{#if current_in_progress}}current{{/if}}">
+                    <i class="fa-solid fa-file-pen nav-icon"></i> Submissions in Progress
+                    <span class="notif-badge" id="notif-badge" style="{{#ifEquals revisionCount 0}}display:none;{{/ifEquals}}">
+                        {{revisionCount}}
+                    </span>
+                </a>
+
+                <a href="/dashboard/data/user/approved" class="{{#if current_user_report}}current{{/if}}">
+                    <i class="fa-solid fa-clipboard-check nav-icon"></i> Approved Submissions
+                </a>
+                <!-- Only show functions if current user is NOT a client -->
+                {{#ifNotEquals user.supertype 2}}
+                    <div class="nav-divider">STAFF FUNCTIONS</div>
+
+                    <a href="/dashboard/data/submissions/pending" class="{{#if current_datasubs}}current{{/if}}">
+                        <i class="fa-solid fa-file-pen"></i>&nbsp; Review Data Submissions
+                        {{#ifNotEquals pendingData 0}}
+                            <span class="notif-badge">{{pendingData}}</span>
+                        {{/ifNotEquals}}
+                    </a>
+
+                    <a href="/control-panel" style="background: none !important;">
+                        <button id="collapse-sidebar-btn" class="collapse-sidebar-btn" style="margin-top: 5px !important;">
+                            <i class="fa-solid fa-screwdriver-wrench"></i> CONTROL PANEL
+                        </button>
+                    </a>
+                {{/ifNotEquals}}
+            </div>
+        </nav>
+        
+        <main id="main-content">
+            <button id="open-sidebar-btn">
+                <i class="fa-solid fa-bars"></i> Open Sidebar
+            </button>
+
+            {{#if show_generate_btn}}
+            <button id="generate-btn">
+                <i class="fa-solid fa-file-pdf"></i>&nbsp; Generate PDF Report
+            </button>
+            {{/if}}
+
+            {{{ body }}}
+        </main>
+    </div>
+
+<!-- PDF Generation Modal -->
+<div id="pdfModal" class="modal" style="overflow: hidden;">
+  <div class="modal-content">
+    <div class="pdf-modal-header">
+      <h2 style="color: #fff;"><i class="fa-solid fa-chart-line"></i> Generate PDF Report</h2>
+      <span class="close">&times;</span>
+    </div>
+
+    <!-- Current Filters -->
+    {{#ifNotEquals data_entry true}}
+      <div style="margin-bottom: 1.5rem;">
+          <h3 style="color: #2d613f; margin-bottom: 0.5rem;"><i class="fa-solid fa-filter"></i> Current Filters Applied:</h3>
+          <div class="filter-tags">
+              {{#if regionName}}<span class="filter-tag">Region: {{regionName}}</span>{{/if}}
+              {{#if provinceName}}<span class="filter-tag">Province: {{provinceName}}</span>{{/if}}
+              {{#if municipalityName}}<span class="filter-tag">City: {{municipalityName}}</span>{{/if}}
+              {{#if query.startDate}}<span class="filter-tag">From: {{query.startDate}}</span>{{/if}}
+              {{#if query.endDate}}<span class="filter-tag">To: {{query.endDate}}</span>{{/if}}
+              {{#if query.aggregation}}<span class="filter-tag">Aggregation: {{query.aggregation}}</span>{{/if}}
+          </div>
+      </div>
+      <hr>
+    {{/ifNotEquals}}
+
+    <!-- Metrics to Include -->
+    <h3 style="color: #2d613f; margin-bottom: 1rem;"><i class="fa-solid fa-list-check"></i> Sections to Include in PDF Report:</h3>
+
+    <!-- Select All / Deselect All -->
+    <button id="toggle-select">Select All</button>
+
+    <!-- Checklist -->
+    <ul class="checklist">
+      <!-- Participants -->
+      {{#ifNotEquals data_entry true}}
+      <li>
+        <label>
+          <input type="checkbox" class="super-item" data-group="participants" value="participants" checked>
+          <span><i class="fa-solid fa-users"></i> List of Participants</span>
+        </label>
+      </li>
+      {{/ifNotEquals}}
+
+      <!-- Compliance Status -->
+      <li>
+          <label>
+            <input type="checkbox" class="super-item" data-group="compliance" checked>
+            <span><i class="fa-solid fa-clipboard-check"></i> Compliance Status</span>
+          </label>
+          <ul>
+            <li>
+              <label>
+                <input type="checkbox" class="sub-item" data-group="compliance" value="compliance-category" checked>
+                <span>Waste Category Compliance Status</span>
+              </label>
+            </li>
+            <li>
+              <label>
+                <input type="checkbox" class="sub-item" data-group="compliance" value="compliance-sector" checked>
+                <span>Waste Sector Compliance Status</span>
+              </label>
+            </li>
+          </ul>
+      </li>
+
+      <!-- Trends -->
+      {{#ifNotEquals data_entry true}}
+      <li>
+        <label>
+          <input type="checkbox" class="super-item" data-group="trends" value="trends" checked>
+          <span><i class="fa-solid fa-chart-line"></i> Trends Over Time</span>
+        </label>
+        <ul>
+          <li><label><input type="checkbox" class="sub-item" data-group="trends" value="trends-wastegen" checked><span>Total Waste Generation Trend with Projection</span></label></li>
+          <li><label><input type="checkbox" class="sub-item" data-group="trends" value="trends-percapita" checked><span>Per Capita Waste Trend</span></label></li>
+          <li><label><input type="checkbox" class="sub-item" data-group="trends" value="trends-category" checked><span>Waste by Category Over Time</span></label></li>
+          <li><label><input type="checkbox" class="sub-item" data-group="trends" value="trends-compliance" checked><span>Compliance Rate Trend</span></label></li>
+        </ul>
+      </li>
+      {{/ifNotEquals}}
+
+      <!-- Waste Category Insights -->
+      <li>
+        <label>
+          <input type="checkbox" class="super-item" data-group="insights" value="insights" checked>
+          <span><i class="fa-solid fa-lightbulb"></i> Waste Category Insights & Recommendations</span>
+        </label>
+      </li>
+
+      <li>
+        <label>
+          <input type="checkbox" class="super-item" data-group="insights" value="top-categories" checked>
+          <span><i class="fa-solid fa-pie-chart"></i> Top Waste Categories in this Area</span>
+        </label>
+      </li>
+
+      <!-- Top Waste Categories -->
+      <li>
+        <label>
+          <input type="checkbox" class="super-item" data-group="top-cats" value="top-cats" checked>
+          <span><i class="fa-solid fa-recycle"></i> Top Waste Types by Category</span>
+        </label>
+        <ul>
+          <li><label><input type="checkbox" class="sub-item" data-group="top-cats" value="types-biodegradable" checked><span>Biodegradable</span></label></li>
+          <li><label><input type="checkbox" class="sub-item" data-group="top-cats" value="types-recyclable" checked><span>Recyclable</span></label></li>
+          <li><label><input type="checkbox" class="sub-item" data-group="top-cats" value="types-residual" checked><span>Residual</span></label></li>
+          <li><label><input type="checkbox" class="sub-item" data-group="top-cats" value="types-special/hazardous" checked><span>Special/Hazardous</span></label></li>
+        </ul>
+      </li>
+
+      <!-- Top Sectors -->
+      <li>
+        <label>
+          <input type="checkbox" class="super-item" data-group="sectors" value="top-sectors" checked>
+          <span><i class="fa-solid fa-building"></i> Top Sectors by Waste Output</span>
+        </label>
+      </li>
+
+      <!-- Top Waste Categories per Sector -->
+      <li>
+        <label>
+          <input type="checkbox" class="super-item" data-group="cats-per-sector" value="cats-per-sector" checked>
+          <span><i class="fa-solid fa-truck"></i> Top Waste Categories per Sector</span>
+        </label>
+        <ul>
+          <li><label><input type="checkbox" class="sub-item" data-group="cats-per-sector" value="top-residential" checked><span>Residential</span></label></li>
+          <li><label><input type="checkbox" class="sub-item" data-group="cats-per-sector" value="top-commercial" checked><span>Commercial</span></label></li>
+          <li><label><input type="checkbox" class="sub-item" data-group="cats-per-sector" value="top-institutional" checked><span>Institutional</span></label></li>
+          <li><label><input type="checkbox" class="sub-item" data-group="cats-per-sector" value="top-industrial" checked><span>Industrial</span></label></li>
+          <li><label><input type="checkbox" class="sub-item" data-group="cats-per-sector" value="top-health" checked><span>Health</span></label></li>
+          <li><label><input type="checkbox" class="sub-item" data-group="cats-per-sector" value="top-agriculture and livestock" checked><span>Agriculture and Livestock</span></label></li>
+        </ul>
+      </li>
+
+      <!-- Raw Data -->
+      {{#if data_entry}}
+      <li>
+        <label>
+          <input type="checkbox" class="super-item" data-group="raw" value="raw-data" checked>
+          <span>Raw Data</span>
+        </label>
+      </li>
+      {{/if}}
+
+      <!-- Simulation -->
+      {{#ifNotEquals data_entry true}}
+      <li>
+        <label>
+          <input type="checkbox" class="super-item" data-group="simulation" value="simulation" checked>
+          <span>Waste Simulation Forecast</span>
+        </label>
+      </li>
+      {{/ifNotEquals}}
+    </ul>
+
+    <!-- Simulation Settings (hidden by default) -->
+    <div id="pdfSimSettings" style="display: none; margin-top: 1.5rem; background: #e8f5e9; padding: 1rem; border-radius: 8px;">
+      <h3 style="color: #2d613f; margin-bottom: 1rem;">
+        <i class="fa-solid fa-flask"></i> Simulation Settings for PDF
+      </h3>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+        <div style="flex: 1 1 200px;">
+          <label for="pdfForecastMonths">Forecast Horizon (months)</label>
+          <input type="number" id="pdfForecastMonths" class="form-control" value="12" min="1" max="60">
+        </div>
+
+        <div style="flex: 1 1 200px;">
+          <label for="pdfModelSelect">Model Type</label>
+          <select id="pdfModelSelect" class="form-control">
+            <option value="hybrid">Hybrid (All)</option>
+            <option value="arima">ARIMA</option>
+            <option value="sd">System Dynamics</option>
+            <option value="mc">Monte Carlo</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top: 0.5rem;">
+        <label><input type="checkbox" id="pdfDeterministic"> Deterministic Mode</label><br>
+        <label><input type="checkbox" id="pdfInterpolate" checked> Interpolate Missing</label>
+      </div>
+    </div>
+
+    <!-- Modal Actions -->
+    <br>
+    <div class="modal-actions">
+      <button id="cancel-generate" class="btn-cancel">
+        <i class="fa-solid fa-xmark"></i> Cancel
+      </button>
+      <button id="confirm-generate" class="btn-confirm">
+        <i class="fa-solid fa-file-pdf"></i> Generate PDF
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Modal -->
+<div id="loadingModal" class="modal" style="display:none;">
+  <div class="modal-content" style="text-align:center; padding:40px;">
+    <div class="spinner"></div>
+    <p>Generating your PDF report...</p>
+    <p style="font-size: small; color: gray;">(This may take a while as charts are being rendered.)</p>
+  </div>
+</div>
+
+<style>
+
+#generate-btn {
+    background: linear-gradient(135deg, #4CAF50 0%, #2d613f 100%);
+    color: white;
+    border: none;
+    padding: 15px 25px;
+    border-radius: 5px;
+    font-size: 23px;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    transition: all 0.3s;
+    position: fixed;
+    bottom: 25px;   /* distance from bottom */
+    right: 25px;    /* distance from right */
+    align-items: center;
+    gap: 10px;
+    z-index: 9999;
+}
+
+#generate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
+.btn-confirm {
+    background: linear-gradient(135deg, #4CAF50 0%, #2d613f 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-confirm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.btn-cancel {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-cancel:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+.pdf-modal-header {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #4CAF50 0%, #2d613f 100%);
+    color: white;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pdf-modal-header h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.checklist label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 0.2rem;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+  width: 100%;
+}
+
+.checklist label:hover {
+  background-color: #f5f5f5;
+}
+
+.checklist label i {
+  color: #4CAF50;
+  margin-right: 2px;
+}
+
+input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #4CAF50;
+}
+
+/* Modal box */
+.modal-content {
+  background: #fff;
+  margin: 5% auto;              /* lower top margin so it's more centered */
+  padding: 20px;
+  border-radius: 12px;
+  width: 600px;                 /* wider modal */
+  max-height: 80vh;             /* prevent it from overflowing screen */
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  overflow-y: auto;             /* scroll modal if content is very tall */
+}
+.deadline-timer {
+  width: 70%;
+  background:#2C3927; /* green banner */
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.2rem;
+  text-align: center;
+  padding: 8px 0;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Checklist container */
+.checklist {
+  text-align: left;
+  margin: 20px 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+/* Each list item */
+.checklist > li {
+  margin: 10px 0;
+}
+
+/* Super-item labels */
+.checklist > li > label {
+  font-weight: bold;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Sub-items (nested list) */
+.checklist ul {
+  margin: 6px 0 6px 20px;
+  padding-left: 0;
+  list-style: none;
+  border-left: 2px solid #eee;
+}
+
+.checklist ul li {
+  margin: 4px 0;
+}
+
+.checklist input[type="checkbox"] {
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+/* Default label text */
+.checklist label {
+  color: #000; /* normal black text */
+}
+
+/* If checkbox is unchecked → gray text */
+.checklist input[type="checkbox"]:not(:checked) + span {
+  color: #bbb;  /* lighter gray but still readable */
+}
+
+/* Select All / Deselect All button */
+#toggle-select {
+  background: #1976d2;
+  color: #fff;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+#toggle-select:hover {
+  background: #125a9c;
+}
+
+/* Reuse your modal styles */
+.spinner {
+  margin: 50px auto;
+  width: 50px;
+  height: 50px;
+  border: 6px solid #ddd;
+  border-top: 6px solid #4CAF50; /* green accent */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+</style>
+
+<!-- Sidebar button script -->
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+    const sidebar = document.getElementById('sidebar');
+    const openBtn = document.getElementById('open-sidebar-btn');
+    const collapseBtn = document.getElementById('collapse-sidebar-btn');
+
+    // --- Restore sidebar state from localStorage ---
+    const savedState = localStorage.getItem('sidebarState');
+    if (savedState === 'closed') {
+        sidebar.classList.add('closed');
+        sidebar.classList.remove('open');
+        openBtn.style.display = 'flex';
+        setTimeout(() => {
+            openBtn.classList.add('visible');
+        }, 10);
+    } else {
+        sidebar.classList.add('open');
+    }
+
+    // --- Collapse sidebar ---
+    collapseBtn.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        sidebar.classList.add('closed');
+        localStorage.setItem('sidebarState', 'closed');
+
+        openBtn.style.display = 'flex';
+        setTimeout(() => {
+            openBtn.classList.remove('hidden');
+            openBtn.classList.add('visible');
+        }, 10);
+    });
+
+    // --- Open sidebar ---
+    openBtn.addEventListener('click', () => {
+        sidebar.classList.remove('closed');
+        sidebar.classList.add('open');
+        localStorage.setItem('sidebarState', 'open');
+
+        openBtn.classList.add('hidden');
+        openBtn.classList.remove('visible');
+        setTimeout(() => {
+            openBtn.style.display = 'none';
+        }, 300);
+    });
+
+    // Logout code
+    document.getElementById('logout').addEventListener('click', function (event) {
+        event.preventDefault(); // Prevent default navigation
+
+        fetch('/logout', { method: 'DELETE', credentials: 'include' })
+        .then(response => {
+            if (response.ok) {
+            window.location.href = "/"; // Redirect to login after logout
+            }
+        })
+        .catch(err => console.error("Logout failed", err));
+    })
+});
+
+</script>
+
+<!-- Deadline script -->
+<script>
+async function startDeadlineTimer(userId) {
+  const el = document.getElementById("deadline-timer");
+  if (!el) {
+    console.log("⏳ No timer element found (probably not a client).");
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/deadline/${userId}`);
+    if (!res.ok) {
+      throw new Error("API returned " + res.status);
+    }
+
+    const data = await res.json();
+    console.log("Deadline API response:", data); // 👀 debug
+
+    if (data.exempt) {
+      el.style.display = "none"; 
+      return;
+    }
+
+    if (data.submitted) {
+      el.textContent = "✅ You’ve already submitted this month!";
+      return;
+    }
+
+    const deadline = new Date(data.deadline);
+    function updateDisplay() {
+      const now = new Date();
+      const msRemaining = deadline - now;
+
+      if (msRemaining <= 0) {
+        el.textContent = "⚠️ Deadline passed!";
+        return;
+      }
+
+      const days = Math.floor(msRemaining / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((msRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((msRemaining % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((msRemaining % (1000 * 60)) / 1000);
+
+      el.textContent = `⏳ Deadline: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+    }
+
+    updateDisplay();
+    setInterval(updateDisplay, 1000);
+  } catch (err) {
+    console.error("Failed to load deadline:", err);
+    el.textContent = "⚠️ Error loading deadline.";
+  }
+}
+
+    // Inject the logged-in user ID from the server
+    startDeadlineTimer({{#if user}}{{user.id}}{{else}}0{{/if}});
+</script>
+
+<!-- Modal script -->
+<script>
+
+// Toggle Simulation Settings visibility
+const simCheckbox = document.querySelector('#pdfModal input.super-item[value="simulation"]');
+const pdfSimSettings = document.getElementById("pdfSimSettings");
+
+if (simCheckbox) {
+  const toggleSimSettings = () => {
+    pdfSimSettings.style.display = simCheckbox.checked ? "block" : "none";
+  };
+  simCheckbox.addEventListener("change", toggleSimSettings);
+  toggleSimSettings(); // initial state
+}
+
+// Modal elements
+const pdfModal = document.getElementById("pdfModal");
+const generateBtn = document.getElementById("generate-btn");
+const pdfCloseBtn = document.querySelector(".close");
+const pdfCancelBtn = document.getElementById("cancel-generate");
+const pdfConfirmBtn = document.getElementById("confirm-generate");
+
+// API route
+const isSummary = {{#if isSummary}}{{isSummary}}{{else}}false{{/if}};
+const apiUrl = isSummary ? "/api/data/summary/pdf" : `/api/data/{{entryId}}/pdf`;
+
+// Query (for data summary version)
+const query = {{#if query}} {{{json query}}} {{else}} null {{/if}};
+
+// Extra elements for checklists
+const toggleBtn = document.getElementById("toggle-select");
+let allSelected = false;
+
+// Show modal when clicking generate
+generateBtn.addEventListener("click", () => {
+  pdfModal.style.display = "block";
+  
+  // Reset all checkboxes to checked when opening
+  document.querySelectorAll("#pdfModal input[type=checkbox]").forEach(cb => {
+    cb.checked = true;
+  });
+  
+  // Reset toggle button state
+  allSelected = true;
+  toggleBtn.textContent = "Deselect All";
+});
+
+// Close modal on X or cancel
+pdfCloseBtn.addEventListener("click", () => pdfModal.style.display = "none");
+pdfCancelBtn.addEventListener("click", () => pdfModal.style.display = "none");
+
+// Close modal if clicking outside the box
+window.addEventListener("click", (e) => {
+  if (e.target === pdfModal) pdfModal.style.display = "none";
+});
+
+// Toggle Select All / Deselect All
+toggleBtn.addEventListener("click", () => {
+  allSelected = !allSelected;
+  document.querySelectorAll("#pdfModal input[type=checkbox]").forEach(cb => {
+    cb.checked = allSelected;
+    cb.indeterminate = false;
+  });
+  toggleBtn.textContent = allSelected ? "Deselect All" : "Select All";
+});
+
+// Super-item behavior
+document.querySelectorAll("#pdfModal .super-item").forEach(superItem => {
+  superItem.addEventListener("change", () => {
+    const group = superItem.dataset.group;
+    document.querySelectorAll(`#pdfModal .sub-item[data-group="${group}"]`)
+      .forEach(sub => sub.checked = superItem.checked);
+  });
+});
+
+// Sub-item behavior
+document.querySelectorAll("#pdfModal .sub-item").forEach(subItem => {
+  subItem.addEventListener("change", () => {
+    const group = subItem.dataset.group;
+    const superItem = document.querySelector(`#pdfModal .super-item[data-group="${group}"]`);
+    const subs = document.querySelectorAll(`#pdfModal .sub-item[data-group="${group}"]`);
+    const allChecked = Array.from(subs).every(s => s.checked);
+    const noneChecked = Array.from(subs).every(s => !s.checked);
+
+    if (allChecked) {
+      superItem.checked = true;
+      superItem.indeterminate = false;
+    } else if (noneChecked) {
+      superItem.checked = false;
+      superItem.indeterminate = false;
+    } else {
+      superItem.indeterminate = true; // dash state
+    }
+  });
+});
+
+// Confirm generate
+pdfConfirmBtn.addEventListener("click", async () => {
+  // Close the section selection modal
+  pdfModal.style.display = "none";
+
+  // Show loading modal
+  const loadingModal = document.getElementById("loadingModal");
+  loadingModal.style.display = "block";
+
+  try {
+    // Collect selected items
+    const selected = Array.from(
+      document.querySelectorAll("#pdfModal input[type=checkbox]:checked")
+    ).map(cb => cb.value);
+
+    // Always prepend non-optional
+    selected.unshift("filters");
+    selected.unshift("data-title");
+    selected.unshift("data-info");
+
+    // Collect simulation settings if visible
+    let simSettings = null;
+    if (pdfSimSettings.style.display === "block") {
+      simSettings = {
+        forecastMonths: Number(document.getElementById("pdfForecastMonths").value),
+        modelType: document.getElementById("pdfModelSelect").value,
+        deterministic: document.getElementById("pdfDeterministic").checked,
+        interpolate: document.getElementById("pdfInterpolate").checked
+      };
+    }
+
+    // Send POST request
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sections: selected, query, simSettings })
+    });
+
+    if (!response.ok) throw new Error("Failed to generate PDF");
+
+    // Get PDF as blob
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+
+    // Download
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "{{title}}.pdf" || "Data Summary.pdf";
+    a.click();
+
+    // Optional: revoke object URL after a bit
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+  } catch (err) {
+    console.error("PDF generation failed:", err);
+    alert("Failed to generate PDF. Please try again.");
+  } finally {
+    // Always hide loading modal
+    loadingModal.style.display = "none";
+  }
+});
+
+</script>
+
 </body>
 </html>

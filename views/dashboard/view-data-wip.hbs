@@ -1,0 +1,363 @@
+<!-- Window if data is for revision -->
+{{#ifEquals wasteGen.status 'Needs Revision'}}
+<div class="form-section">
+  <a href="/dashboard/edit-report/{{wasteGen.data_entry_id}}">
+    <center>
+      <button class="review-reject">
+        <i class="fa-solid fa-pencil"></i>&nbsp; Edit Report
+      </button>
+    </center>
+  </a>
+
+  <!-- If revision entry counts exist, then show revision log -->
+  {{#if (gt revisionCount 0)}}
+  <br><br><center><h3>EDIT HISTORY</h3></center>
+      <div class="form-section revision-window">
+          <table>
+              {{#each revisionLogs}}
+              <tr>
+                  <td>{{uppercase lastname}}, {{firstname}} </td>
+                  <td>{{textDateTime created_at}} </td>
+                  <td>{{action}} </td>
+                  <td>{{comment}} </td>
+              </tr>
+              {{/each}}
+          </table>
+      </div>
+  {{/if}}
+</div>
+{{/ifEquals}}
+
+<!-- Window if data is waiting for review -->
+{{#ifEquals wasteGen.status 'Pending Review'}}
+  <div class="form-section waiting-card">
+      This entry was submitted on <b>{{textDate wasteGen.date_submitted}}</b>.<br>
+      Staff is currently reviewing your entry.
+  </div>
+{{/ifEquals}}
+
+<!-- Actual Data Display -->
+<!-- Title Card -->
+<div class="form-section title-card" style="text-align: center;">
+  <h1 style="margin-bottom: 0.25rem;">{{wasteGen.title}}</h1>
+  <center>
+    <h3 style="margin: 0; font-weight: normal; color: #555;">
+        <i class="fa-solid fa-location-dot" style="color: #127009;"></i>&nbsp; {{wasteGen.location_name}}
+    </h3>
+  </center>
+</div>
+
+<!-- Info Blocks -->
+<div class="info-grid">
+  <!-- Submission Info -->
+  <div class="form-section">
+    <h3><i class="fas fa-user"></i> Submission Info</h3>
+    <table class="user-profile">
+      <tr>
+        <td class="label">Submitted by</td>
+        <td>{{uppercase wasteGen.lastname}}, {{wasteGen.firstname}}</td>
+      </tr>
+      <tr>
+        <td class="label">Organization Name</td>
+        <td>{{wasteGen.company_name}}</td>
+      </tr>
+      <tr>
+        <td class="label">Date Submitted</td>
+        <td>{{textDate wasteGen.date_submitted}}</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Collection Info -->
+  <div class="form-section">
+    <h3><i class="fas fa-calendar-alt"></i> Collection Info</h3>
+    <table class="user-profile">
+      <tr>
+        <td class="label">Start Date</td>
+        <td>{{textDate wasteGen.collection_start}}</td>
+      </tr>
+      <tr>
+        <td class="label">End Date</td>
+        <td>{{textDate wasteGen.collection_end}}</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Waste Generation Info -->
+  <div class="form-section">
+    <h3><i class="fas fa-dumpster"></i> Waste Generation</h3>
+    <table class="user-profile">
+      <tr>
+        <td class="label">Population (based on Census)</td>
+        <td>{{commaInt wasteGen.population}}</td>
+      </tr>
+      <tr>
+        <td class="label">Waste Generation per Capita (Kg/cap-day)</td>
+        <td>{{commaNumber wasteGen.per_capita}}</td>
+      </tr>
+      <tr>
+        <td class="label">Annual Waste Generation (kg/year)</td>
+        <td>{{commaNumber wasteGen.annual}}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<!-- Data tabs -->
+<div class="tab">
+  <button class="tablinks" onclick="openTab(event, 'Table')" id="defaultOpen">RAW DATA</button>
+</div>
+
+<div id="Table" class="tabcontent">
+    <p style="font-size: large;">This table shows the waste composition for <b>{{wasteGen.location_name}}</b> according to waste type. The waste types are further divided into <b>economic sectors</b> (e.g., Residential, Commercial). All raw amounts are in <b>kilograms (kg)</b>.</p>
+
+    <div style="display: flex;">
+        <div id="data-table-container">
+            <div class="table-operations">
+                <div style="display: flex;">
+                    <!-- Search bar -->
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" class="tbl-search" id="tbl-search" placeholder="Enter keyword...">
+                    </div>&nbsp;
+                    
+                    <!-- Supertype filter -->
+                    <select id="supertype-filter">
+                        <option value="all">Select Category</option>
+                        <option value="Biodegradable">Biodegradable</option>
+                        <option value="Recyclable">Recyclable</option>
+                        <option value="Residual">Residual</option>
+                        <option value="Special/Hazardous">Special/Hazardous</option>
+                    </select>
+                    
+                    <!-- Export buttons -->
+                    <div style="margin-left: auto;">
+                        <button onclick="exportTableToCSV()" class="button tbl-export">
+                            <i class="fa-solid fa-file-csv"></i>&nbsp; Export as CSV
+                        </button>
+                        <button onclick="exportTableToExcel()" class="button tbl-export">
+                            <i class="fa-solid fa-file-excel"></i>&nbsp; Export as Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Waste Composition -->
+            <table class="data-table" id="waste-comp-table">
+                <thead>
+                    <tr class="tb-header">
+                        <th>Waste Type</th>
+                        {{#each sectors}}
+                            <th style="width: 100px;">{{name}}</th>
+                        {{/each}}
+                        <th>Total (kg)</th>
+                        <th>Percentage (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each supertypes}}
+                        <tr supertype="{{name}}">
+                            <td colspan="{{add ../sectors.length 3}}" class="tb-supertype"><strong>{{uppercase name}}</strong></td>
+                        </tr>
+                        {{#each types}}
+                            <tr supertype="{{../name}}">
+                            <td>{{name}}</td>
+                            {{#with amounts as |a|}} <!-- Set alias for amounts -->
+                                {{#each ../../../sectors}}
+                                    <td style="text-align: center;">{{lookup a this.id}}</td>
+                                {{/each}}
+                                <td style="text-align: center;">{{../totalWeight}}</td>
+                                <td style="text-align: center;">{{../percentage}}%</td>
+                            {{/with}}
+                            </tr>
+                        {{/each}}
+                        <tr class="tb-subtotal" supertype="{{name}}">
+                            <td style="text-align: left;"><strong>{{name}} Subtotal</strong></td>
+                            {{#each ../sectors}}
+                                <td><strong>{{toFixed (lookup ../this.sectorTotals this.id) 3}}</strong></td>
+                            {{/each}}
+                            <td><strong>{{this.totalWeight}}</strong></td>
+                            <td><strong>{{this.percentage}}%</strong></td>
+                        </tr>
+                    {{/each}}
+                </tbody>
+                <tfoot>
+                    <tr class="tb-total">
+                        <td style="text-align:left">TOTAL</td>
+                        {{#each sectors}}
+                        <td>{{toFixed (lookup ../sectorTotals this.id) 3}}</td>
+                        {{/each}}
+                        <td>{{grandTotal}}</td>
+                        <td>100%</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Table filtering script -->
+<script>
+
+// Supertype filter
+const searchInput = document.getElementById('tbl-search');
+const dropdown = document.getElementById('supertype-filter');
+
+function filterTable() {
+  const keyword = searchInput.value.trim().toLowerCase();
+  const selectedSupertype = dropdown.value;
+  const allRows = document.querySelectorAll('tr[supertype]');
+
+  allRows.forEach(row => {
+    const rowSupertype = row.getAttribute('supertype');
+    const text = row.textContent.toLowerCase();
+    const matchesSupertype = selectedSupertype === 'all' || rowSupertype === selectedSupertype;
+    const matchesSearch = text.includes(keyword);
+
+    row.style.display = matchesSupertype && matchesSearch ? '' : 'none';
+  });
+}
+
+searchInput.addEventListener('input', filterTable);
+dropdown.addEventListener('change', filterTable);
+
+</script>
+
+<!-- General style -->
+<style>
+
+.waiting-card {
+    background-color: #d4edda !important;
+    font-size: large;
+    font-style: italic;
+    text-align: center;
+}
+
+.revision-window {
+    background-color: lightgoldenrodyellow !important;
+    max-height: 150px;
+    overflow: auto;
+}
+
+.info-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.info-grid .form-section {
+  flex: 1 1 280px;
+  min-width: 280px;
+}
+
+.user-profile {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+.user-profile td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #eee;
+}
+
+.user-profile .label {
+  font-weight: 600;
+  color: #444;
+  width: 50%;
+}
+
+.title-card h1 {
+  font-size: 1.75rem;
+}
+
+.btn-submit {
+  background-color: #28a745;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  color: white;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.btn-submit:hover {
+  background-color: #28a745;
+}
+
+.tab-new {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.tab-new button {
+  background-color: #f1f1f1;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  margin: 0 5px;
+  cursor: pointer;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.tab-new button:hover,
+.tab-new button.active {
+  background-color: #d0e6ff;
+}
+
+.form-section {
+  background-color: #fdfdfd;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  margin: 1.5rem auto;
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
+}
+
+.form-section h3 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+  align-items: center;
+}
+
+.form-section h3 i {
+  margin-right: 0.6rem;
+  color: #127009;;
+}
+
+.form-section label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.form-section input[type="text"],
+.form-section input[type="date"],
+.form-section input[type="number"],
+.form-section select {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.3rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.pie-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+</style>
+
+<!-- JS behind the tabs -->
+<script src="/js/tabs.js"></script>

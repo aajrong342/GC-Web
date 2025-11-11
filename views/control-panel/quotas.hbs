@@ -1,0 +1,203 @@
+<h2 style="margin-bottom: 20px;">Waste Management Targets</h2>
+
+<div class="form-section">
+  <label for="quota-org">Select Organization:</label>
+  <select id="quota-org" onchange="fetchQuotasForOrg()">
+    {{#each orgList}}
+      <option value="{{this}}" {{#ifEquals this ../selectedOrg}}selected{{/ifEquals}}>
+        {{this}}
+      </option>
+    {{/each}}
+  </select>
+</div>
+
+<div class="form-section">
+  <h3><i class="fas fa-recycle"></i> Waste Category Targets</h3>
+  <table class="user-profile">
+    <thead>
+      <tr>
+        <th class="label">Waste Categories</th>
+        <th class="label">Target (%)</th>
+        <th class="label">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#if wasteQuotas.length}}
+        {{#each wasteQuotas}}
+        <tr>
+          <td>{{this.waste_supertype_name}}</td>
+          <td>
+            <form method="POST" action="/control-panel/quotas/update-waste?org={{../selectedOrg}}" 
+      class="inline-form" 
+      onsubmit="return confirmUpdate('waste category', '{{this.waste_supertype_name}}')">
+  <input type="hidden" name="quota_id" value="{{this.quota_id}}">
+  <input type="hidden" name="waste_name" value="{{this.waste_supertype_name}}">
+  <input type="number" name="quota_weight" value="{{this.quota_weight}}" step="0.01" min="0" max="100" required> %
+
+          </td>
+          <td>
+              <button type="submit" class="btn-submit">Update</button>
+            </form>
+          </td>
+        </tr>
+        {{/each}}
+      {{else}}
+        <tr>
+          <td colspan="3" style="text-align:center; color:#777;">No waste category quotas found for this organization.</td>
+        </tr>
+      {{/if}}
+    </tbody>
+  </table>
+  <p style="font-size:0.9rem; color:#555;">Set the mandated collection/diversion rate targets for each waste category.</p>
+</div>
+
+<div class="form-section">
+  <h3><i class="fas fa-industry"></i> Sector Targets</h3>
+  <table class="user-profile">
+    <thead>
+      <tr>
+        <th class="label">Sector</th>
+        <th class="label">Target (%)</th>
+        <th class="label">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#if sectorQuotas.length}}
+        {{#each sectorQuotas}}
+        <tr>
+          <td>{{this.sector_name}}</td>
+          <td>
+            <form method="POST" action="/control-panel/quotas/update-sector?org={{../selectedOrg}}" 
+      class="inline-form" 
+      onsubmit="return confirmUpdate('sector', '{{this.sector_name}}')">
+  <input type="hidden" name="quota_id" value="{{this.quota_id}}">
+  <input type="hidden" name="sector_name" value="{{this.sector_name}}">
+  <input type="number" name="quota_weight" value="{{this.quota_weight}}" step="0.01" min="0" max="100" required> %
+
+          </td>
+          <td>
+              <button type="submit" class="btn-submit">Update</button>
+            </form>
+          </td>
+        </tr>
+        {{/each}}
+      {{else}}
+        <tr>
+          <td colspan="3" style="text-align:center; color:#777;">No sector quotas found for this organization.</td>
+        </tr>
+      {{/if}}
+    </tbody>
+  </table>
+  <p style="font-size:0.9rem; color:#555;">Set the mandated collection/diversion rate targets for each sector.</p>
+</div>
+
+<script>
+  function confirmUpdate(type, name) {
+    return confirm(`Are you sure you want to update the quota for the ${type} "${name}"?`);
+  }
+
+  function fetchQuotasForOrg() {
+    const org = document.getElementById('quota-org').value;
+    window.location.href = `/control-panel/quotas?org=${encodeURIComponent(org)}`;
+  }
+</script>
+
+<style>
+/* Enhance table layout */
+.user-profile {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 0.95rem;
+}
+
+.user-profile th, .user-profile td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+}
+
+.user-profile thead {
+  background-color: #e9f7ef; /* light green tint */
+}
+
+.user-profile th.label {
+  font-weight: bold;
+  color: #145a32; /* dark green text */
+}
+
+.user-profile input[type="number"] {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  border: 1px solid #bbb;
+  background-color: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.user-profile input[type="number"]:focus {
+  outline: none;
+  border-color: #28a745;
+  box-shadow: 0 0 5px rgba(40, 167, 69, 0.4);
+}
+
+/* Form section background and padding */
+.form-section {
+  background-color: #fdfdfd;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  margin: 2rem auto;
+  max-width: 900px;
+  color: #333;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.form-section h3 {
+  font-size: 1.4rem;
+  margin-bottom: 1.2rem;
+  color: #127009; /* strong green */
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.btn-submit {
+  background-color: #28a745;
+  border: none;
+  padding: 0.5rem 1rem;
+  color: white;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-submit:hover {
+  background-color: #23963b;
+  transform: translateY(-1px);
+}
+
+.btn-submit:active {
+  background-color: #1e7e34;
+  transform: translateY(0);
+}
+
+/* Inline form to align input and button in same row inside cell */
+.inline-form {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.inline-form input[type="number"] {
+  flex: 1;
+}
+
+.user-profile tbody tr:hover {
+  background-color: #f6fdf8; /* subtle green hover */
+}
+</style>

@@ -1,0 +1,575 @@
+/* General Styles */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+body {
+    font-family: "Open Sans", Arial, sans-serif;
+    background-color: white; 
+    margin: 0;
+    align-items: center;
+}
+
+section {
+    background-color: white; 
+    margin: 20px 0; 
+    padding: 20px; 
+    border-radius: 10px; 
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); 
+}
+
+main {
+    margin-top: 110px;
+    width: 100%;
+}
+
+/* Login Page Styles */
+.login-content {
+    margin-top: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.login-container {
+    background-color: #7fc96c;
+    padding: 30px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 350px;
+}
+
+.login-page {
+    background-color: #D3DABE; 
+}
+
+
+/* Register Page Styles */
+.register-container {
+    background-color: #7fc96c;
+    padding: 30px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 350px;
+}
+
+.register-page {
+    background-color: #D3DABE; 
+}
+
+
+.header {
+    width: 100%;
+    background-color: #283619;
+    color: white;
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000; /* Increased from 10 */
+    align-items: center;
+}
+
+.header-logo {
+    background-color: white;
+    border-radius: 25%;
+    height: 40px;
+    background-color: white;
+    padding: 5px;
+    margin-left: 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.header-logo-text {
+    font-size: x-large;
+    margin-left: 16px;
+}
+.taskbar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #5DAE3D;
+    padding: 5px 0;
+    width: 100%;
+    position: fixed;
+    top: 60px; 
+    left: 0;
+    z-index: 900; /* Changed from 11 */
+}
+
+.taskbar ul {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    margin: 0;
+}
+
+.taskbar a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 10px 20px;
+    margin: 0px 25px;
+}
+
+.taskbar a:hover {
+    background-color: #2f3816;
+    border-radius: 5px;
+}
+
+/* same as hover setting but for current page */
+.current {
+    background-color: #2f3816;
+    border-radius: 5px;
+}
+
+/* Content Layout */
+
+/* Home Page Styles */
+.home-container {
+    width: 100%;
+    /* display: flex;
+    flex-direction: column; */
+    align-items: center;
+}
+
+/* Banner */
+.banner {
+    width: 100%;
+    background-image: url('/pictures/trash-bin-nature.png');
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 350px; 
+}
+
+.banner-contents {
+    display: flex;
+    background-color: rgba(0,0,0,0.5);
+    height: 86%;
+    padding-top: 50px;
+}
+
+.banner-contents img {
+    height: 150px;
+    margin-left: auto;
+    margin-bottom: auto;
+    margin-top: 50px;
+    margin-right: 20px;
+}
+
+.banner button {
+    margin-top: 15px;
+    background-color: #64b052;
+    color: white;
+    padding: 10px 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+.banner-text {
+    color: white;
+    margin-right: auto;
+    width: 800px;
+}
+
+.banner button:hover {
+    background-color: #7fc96c;
+}
+
+.banner button a {
+    text-decoration: none;
+    color: white;
+}
+
+/* Intro Section */
+.intro-section {
+    background-color: #D1D6B8;
+    padding: 30px;
+    margin: 20px auto;
+    width: 80%;
+    max-width: 900px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.intro-section h2 {
+    color: #2e3719;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.intro-section img {
+    width: 400px;
+    display: block;
+    margin: 20px auto;
+    border-radius: 10px;
+}
+
+.intro-section p {
+    font-size: 16px;
+    color: #333;
+}
+
+/* Footer */
+.footer {
+    margin-top: 30px; 
+    width: 100%;
+    background-color: #283619;
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    text-align: center;
+}
+
+.footer div {
+    max-width: 300px;
+}
+
+.footer h3 {
+    font-size: 18px;
+    border-bottom: 2px solid #74b566;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.footer p {
+    font-size: 14px;
+}
+
+.footer img {
+    height: 20px;
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+/* Social Media Icons */
+.social-buttons img {
+    width: 40px;
+    height: 40px;
+    margin: 5px;
+    transition: 0.3s ease-in-out;
+}
+
+.social-buttons img:hover {
+    opacity: 0.8;
+    transform: scale(1.3);
+}
+
+.social-buttons a {
+    text-decoration: none;
+}
+
+/* Phone Icon */
+.icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    transition: 0.3s ease-in-out;
+}
+
+.icon:hover {
+    opacity: 0.8;
+    transform: scale(1.3);
+}
+
+/* Footer Links */
+.footer-link {
+    color: white;
+    text-decoration: none;
+    transition: 0.3s ease-in-out;
+}
+
+.footer-link:hover {
+    color: black;
+    text-decoration: underline;
+}
+.footer-bottom {
+    margin-top: 20px;
+    border-top: 1px solid #ccc;
+    padding-top: 10px;
+}
+
+/* Forms and Inputs */
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    background-color: #2f3816;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #243015;
+}
+
+.links p {
+    margin: 10px 0 0;
+    font-size: 14px;
+}
+
+.links a {
+    text-decoration: none;
+    color: #003366;
+    font-weight: bold;
+}
+
+.roles p {
+    margin-top: 20px;
+}
+
+.contact-banner {
+    width: 100%;
+    background-color: #688E2E; 
+    color: white;
+    text-align: center;
+    padding: 20px;
+    margin-top: 80px; 
+    font-size: 16px;
+}
+
+/* Contact Form Container */
+.contact-form-container {
+    width: 50%;
+    max-width: 1000px;
+    background-color: #D1D6B8;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    margin: 20px auto;
+}
+
+/* Form Inputs */
+.contact-form-container input, 
+.contact-form-container textarea {
+    width: 80%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Submit Button */
+.contact-form-container button {
+    width: 75%;
+    padding: 10px;
+    background-color: #2f3816;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.contact-form-container button:hover {
+    background-color: #243015;
+}
+
+.login-menu {
+    color: white;
+    font-size: 18px;
+    margin-left: auto;
+    margin-top: 10px;
+    margin-right: 10px;
+}
+
+.login-menu a {
+    text-decoration: none;
+    color: #c8febc;
+    margin-left: 5px;
+    margin-right: 5px;
+    font-weight: bold;
+}
+
+.container {
+    min-height: 60vh; /* Keep it at least as tall as wide */
+    padding: 20px;
+    left: 175px;
+    border: 1px solid #ddd;
+    background-color: #68972D;
+    color: white;
+    position: relative;
+    bottom: -30px;
+    width: 75%;
+    margin-bottom: 80px;
+}
+
+.container h1 {
+    color:white;
+    text-align: center;
+    font-size: 60px;
+    font-weight: bolder;
+}
+
+.container p {
+    text-align: left;
+    font-size: 25px;
+    padding: 30px;
+}
+
+.partners-container {
+    text-align: center;
+    padding: 40px;
+}
+
+.partners-grid {
+    display: grid;
+    grid-template-columns: 455px 455px 455px;
+    gap: 20px;
+    padding: 20px;
+}
+
+.partner-card {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.2s;
+    max-width: 500px;
+}
+
+.partner-card:hover {
+    transform: scale(1.05);
+}
+
+.partner-logo {
+    max-width: 200px;
+    height: auto;
+    margin-bottom: 15px;
+}
+
+.partner-link {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 15px;
+    background: #2d6a4f;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.partner-link:hover {
+    background: #1b4332;
+}
+
+/* generic error message */
+.error-message {
+    color: #e53935;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* error msg specifically for login */
+.login-error-message {
+    color: #e53935;
+    font-size: 12px;
+    margin-top: 5px;
+    text-align: center;
+}
+
+.hidden {
+    display: none;
+}
+
+/* 404 page style */
+.not-found {
+    text-align: center;
+    height: 500px;
+}
+
+.not-found button {
+    width: 50%;
+    padding: 20px;
+    background-color: #2f3816;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 18px;
+  }
+
+/* user menu (for logged in user) */
+.user-menu {
+    position: relative;
+    display: inline-block;
+    height: 100%;
+    margin-left: auto;
+    margin-top: 0;
+    padding-top: 0;
+    z-index: 1100 !important; /* Higher z-index than header and taskbar */
+}
+
+.user-menu-button {
+    font-family: 'Segoe UI';
+    font-size: 16px;
+    background-color: #283619;
+    border: none;
+    color: white;
+    height: 100%;
+    top: 0;
+    padding-bottom: 20px;
+    padding-left: 20px;
+    text-align: left;
+    min-width: 225px;
+    margin-left: auto;
+    border-radius: 0% !important;
+    margin-top: 0 !important;
+    cursor: pointer;
+}
+  
+.user-menu-content {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    width: 100%;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1200 !important; /* Even higher z-index for dropdown content */
+}
+
+.user-menu-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.user-menu-content a:hover {
+    background-color: #ddd;
+}
+
+/* Using hover behavior to display dropdown */
+.user-menu:hover .user-menu-content {
+    display: block;
+}
+
+.user-menu:hover .user-menu-button {
+    background-color: #3e8e41;
+}
+
+.user-menu-caret {
+    margin-left: 10px;
+    margin-right: 10px;
+}
