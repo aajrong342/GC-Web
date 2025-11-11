@@ -1,35 +1,54 @@
-import 'dotenv/config'
-import mysql from 'mysql2'
+import 'dotenv/config';
+import mysql from 'mysql2';
+import { Connector } from '@google-cloud/cloud-sql-connector';
 
-let sql;
+let pool;
 
-if (process.env.DB_HOST) {
-  // --- CONNECT USING PUBLIC IP ---
-  sql = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: 3306,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-  }).promise();
+async function initDB() {
+  // If running locally (with .env specifying DB_HOST), use normal TCP connection
+  if (process.env.DB_HOST) {
+    pool = mysql.createPool({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+      port: 3306,
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0
+    });
+    console.log('✅ Connected to database via Public IP (DB_HOST)');
+  } else {
+    // --- CONNECT USING CLOUD SQL CONNECTOR ---
+    const connector = new Connector();
 
-  console.log('✅ Connected to Cloud SQL via Public IP');
-} else {
-  // --- LOCAL DEVELOPMENT FALLBACK ---
-  sql = mysql.createPool({
-    host: 'localhost',
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: 3306
-  }).promise();
+    // The Cloud SQL instance connection name, e.g. "project:region:instance"
+    const instanceConnectionName = process.env.INSTANCE_CONNECTION_NAME;
 
-  console.log("✅ Connected locally (localhost:3306)");
+    // Use the connector to get secure connection options
+    const clientOpts = await connector.getOptions({
+      instanceConnectionName,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+      // If using IAM DB authentication, add: iamAuth: true
+    });
+
+    pool = mysql.createPool({
+      ...clientOpts,
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0
+    });
+
+    console.log('✅ Connected to Cloud SQL via Connector');
+  }
+
+  return pool;
 }
 
+// Immediately initialize and export the pool
+const sql = await initDB();
 export default sql;
 
 /* ---------------------------------------
