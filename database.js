@@ -3,10 +3,11 @@ import mysql from 'mysql2';
 import { Connector } from '@google-cloud/cloud-sql-connector';
 
 let pool;
+const isCloudRun = !!process.env.INSTANCE_CONNECTION_NAME;
 
 async function initDB() {
   // If running locally (with .env specifying DB_HOST), use normal TCP connection
-  if (process.env.DB_HOST) {
+  if (isCloudRun) {
     pool = mysql.createPool({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
